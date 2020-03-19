@@ -1,0 +1,20 @@
+{
+  "name": "NoMames",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "François Baldassari",
+  "license": "MIT",
+  "dependencies": {
+    "phaser": "3.22.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.7",
+    "@babel/preset-env": "^7.8.7",
+    "babel-loader": "^8.0.6",
+    "babel-preset-env": "^1.7.0",
+    "copy-webpack-plugin": "^5.1.1",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  }
+}
