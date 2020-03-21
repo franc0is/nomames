@@ -5,7 +5,9 @@
   "author": "François Baldassari",
   "license": "MIT",
   "dependencies": {
-    "phaser": "3.22.0"
+    "@azerion/phaser-input": "^2.0.5",
+    "phaser": "3.22.0",
+    "pubnub": "^4.27.4"
   },
   "devDependencies": {
     "@babel/core": "^7.8.7",

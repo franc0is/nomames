@@ -1,8 +1,17 @@
+import PubNub from 'pubnub';
 import { Dice } from '../dice';
 import { DiceZone } from '../dice-zone';
 import { TextButton } from '../text-button';
 
-export class SimpleScene extends Phaser.Scene {
+export class DiceScene extends Phaser.Scene {
+    constructor() {
+        super({ key: 'diceScene' });
+    }
+
+    init(data) {
+        this.server = data.server;
+    }
+
     preload() {
         this.load.spritesheet('dice', 'assets/diceRed.png', { frameWidth: 64, frameHeight: 64});
     }

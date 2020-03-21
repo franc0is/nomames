@@ -1,11 +1,17 @@
 import 'phaser';
 
-import { SimpleScene } from './scenes/simple-scene';
+import { DiceScene } from './scenes/dice-scene';
+import { JoinScene } from './scenes/join-scene';
 
 const gameConfig = {
+    type: Phaser.AUTO,
     width: 680,
-    height: 400,
-    scene: SimpleScene
+    height: 480,
+    parent: 'no-mames',
+    dom: {
+        createContainer: true
+    },
+    scene: [ JoinScene, DiceScene ]
 };
 
 var game = new Phaser.Game(gameConfig);
