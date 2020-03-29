@@ -3,6 +3,7 @@ import { Dice } from '../dice';
 import { DiceZone } from '../dice-zone';
 import { TextButton } from '../text-button';
 import { DiceUpdateMessage } from '../message';
+import { PlayersLabel } from '../playerslabel';
 
 export class DiceScene extends Phaser.Scene {
     /*
@@ -91,6 +92,10 @@ export class DiceScene extends Phaser.Scene {
             }
         });
 
+        let players = this.server.getPlayers();
+        this.playersLabel = new PlayersLabel(this, 20, 400, players);
+        this.add.existing(this.playersLabel);
+
         this.cup.setOnUpdateCb(() => {
             this.updateDice()
         });
@@ -116,6 +121,7 @@ export class DiceScene extends Phaser.Scene {
 
     onPlayersUpdate(players) {
         console.log("Players update!");
+        this.playersLabel.updateWithPlayers(players);
     }
 
     onDiceUpdate(msg) {

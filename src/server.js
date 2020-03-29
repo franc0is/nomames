@@ -6,6 +6,7 @@ class Player {
         this.uuid = uuid;
         this.name = name;
         this.timestamp = timestamp;
+        this.isActive = false;
     }
 
     static fromState(uuid, state) {
@@ -24,6 +25,34 @@ class Player {
         this.name = state['name'];
         this.timestamp = state['timestamp'];
     }
+
+    setActive(active) {
+        this.isActive = active;
+    }
+
+    getPlayers() {
+        return this.players;
+    }
+}
+
+class PlayersList {
+    constructor() {
+        this.players = {}
+    }
+
+    getPlayers() {
+        return this.players;
+    }
+
+    addPlayer(player) {
+        // FIXME if player updated its state in the middle of the game
+        // this would risk losing the "active" marker
+        this.players[player.uuid] = player;
+    }
+
+    removePlayerByUUID(uuid) {
+        delete this.players[uuid];
+    }
 }
 
 /*
@@ -33,7 +62,7 @@ class Player {
 export class Server {
     constructor(callbacks) {
         // TODO change this to a map uuid => player
-        this.players = {};
+        this.playersList = new PlayersList();
         this.setCallbacks(callbacks);
     }
 
@@ -91,6 +120,10 @@ export class Server {
         );
     }
 
+    getPlayers() {
+        return this.playersList.getPlayers();
+    }
+
     refreshPlayersList() {
         this.pubnub.hereNow(
             {
@@ -102,11 +135,11 @@ export class Server {
                 for (var occupant of occupants) {
                     let state = occupant['state'];
                     let uuid = occupant['uuid'];
-                    this.players[uuid] = Player.fromState(uuid, state);
+                    this.playersList.addPlayer(Player.fromState(uuid, state));
                 }
             }
         );
-        this.callbacks.onPlayersUpdate(this.players);
+        this.callbacks.onPlayersUpdate(this.playersList.getPlayers());
     }
 
     publish(msg) {
@@ -154,20 +187,16 @@ export class Server {
         switch (presenceEvent['action']) {
             case 'state-change':
                 let state = presenceEvent['state'];
-                if (this.players[uuid]) {
-                    this.players[uuid].setState(state);
-                } else {
-                    this.players[uuid] = Player.fromState(state);
-                }
+                this.playersList.addPlayer(Player.fromState(uuid, state));
                 break;
             case 'join':
-                this.players[uuid] = new Player(uuid);
+                this.playersList.addPlayer(new Player(uuid));
                 break;
             case 'timeout':
             case 'leave':
-                delete this.players[uuid];
+                this.playersList.removePlayerByUUID(uuid);
                 break;
         }
-        this.callbacks.onPlayersUpdate(this.players);
+        this.callbacks.onPlayersUpdate(this.playersList.getPlayers());
     }
 }

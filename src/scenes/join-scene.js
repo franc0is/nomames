@@ -1,5 +1,6 @@
 import { Server } from '../server';
 import { TextButton } from '../text-button';
+import { PlayersLabel } from '../playerslabel';
 
 export class JoinScene extends Phaser.Scene {
     constructor() {
@@ -70,17 +71,13 @@ export class JoinScene extends Phaser.Scene {
         this.add.existing(this.startButton);
         this.startButton.setVisible(false);
 
-
-        this.players_text = this.add.text(300, 300, 'Players: ', { color: 'white' });
+        let players = this.server.getPlayers();
+        this.playersLabel = new PlayersLabel(this, 20, 400, players);
+        this.add.existing(this.playersLabel);
     }
 
     onPlayersUpdate(players) {
-        let txt = 'Players:\n';
-        for (let [uuid, player] of Object.entries(players)) {
-            if (player.name !== '') {
-                txt = txt.concat(' - ' + player.name + '\n');
-            }
-        }
-        this.players_text.setText(txt);
+        console.log("Players update!");
+        this.playersLabel.updateWithPlayers(players);
     }
 }
