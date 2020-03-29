@@ -16,10 +16,11 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         this.graphics.lineStyle(2, 0xffff00);
         this.graphics.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width - 20, this.height - 20);
         this.individualRoll = true
+        this.onUpdateCb = () => {};
     }
 
     reorder() {
-        var objs = this.container.getAll('visible', true);
+        var objs = this.container.getAll();
         var i = 1;
         for (var obj of objs) {
             obj.x = this.x - this.width / 2 + 96 * i++;
@@ -27,36 +28,58 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         }
     }
 
+    getVisible(value) {
+        return this.container.visible;
+    }
+
+    getDice() {
+        return this.container.getAll();
+    }
+
+    setOnUpdateCb(onUpdateCb) {
+        this.onUpdateCb = onUpdateCb;
+    }
+
     setVisible(value) {
         this.container.setVisible(value);
+        this.onUpdateCb();
     }
 
     roll() {
-        var dice = this.container.getAll('visible', true);
+        var dice = this.container.getAll();
         for (var die of dice) {
             die.roll();
         }
         this.setVisible(false);
+        this.onUpdateCb();
     }
 
     setIndividualRoll(enabled) {
-        var dice = this.container.getAll('visible', true);
+        var dice = this.container.getAll();
         for (var die of dice) {
             die.setIndividualRoll(enabled);
         }
         this.individualRoll = enabled;
     }
 
-    add(gameObject) {
-        gameObject.x = this.x;
-        gameObject.y = this.y;
-        gameObject.setIndividualRoll(this.individualRoll);
-        this.container.add(gameObject);
+    add(die) {
+        die.x = this.x;
+        die.y = this.y;
+        die.setIndividualRoll(this.individualRoll);
+        if (this.individualRoll) {
+            die.setOnRoll((d) => {
+                this.onDieRoll(d);
+            });
+        } else {
+            die.setOnRoll(() => {});
+        }
+        this.container.add(die);
         this.reorder();
+        this.onUpdateCb();
     }
 
-    remove(gameObject) {
-        this.container.remove(gameObject);
+    remove(die) {
+        this.container.remove(die);
         this.reorder();
     }
 
@@ -68,5 +91,10 @@ export class DiceZone extends Phaser.GameObjects.Zone {
             this.graphics.lineStyle(2, 0xffff00);
         }
         this.graphics.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width - 20, this.height - 20);
+    }
+
+    onDieRoll(die) {
+        console.log('ondieroll');
+        this.onUpdateCb();
     }
 }

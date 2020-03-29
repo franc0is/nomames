@@ -12,8 +12,13 @@ export class JoinScene extends Phaser.Scene {
     }
 
     create() {
-        this.server = new Server( (players) => {
-            this.onPlayersUpdate(players);
+        this.server = new Server({
+            onPlayersUpdate: (players) => {
+                this.onPlayersUpdate(players);
+            },
+            onGameStart: (msg) => {
+                this.scene.start('diceScene', { server: this.server });
+            }
         });
 
 
@@ -60,7 +65,7 @@ export class JoinScene extends Phaser.Scene {
         });
 
         this.startButton = new TextButton(this, 100, 300, '[ START ]', () => {
-            this.scene.start('diceScene', { server: this.server });
+            this.server.startGame();
         });
         this.add.existing(this.startButton);
         this.startButton.setVisible(false);

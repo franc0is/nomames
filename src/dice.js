@@ -2,7 +2,6 @@ export class Dice extends Phaser.GameObjects.Sprite {
 
     constructor(scene, x, y) {
         super(scene, x, y);
-        console.log("hello!");
 
         this.lastClickTime = 0;
 
@@ -14,15 +13,35 @@ export class Dice extends Phaser.GameObjects.Sprite {
         this.individualRoll = true;
         this.on('pointerdown', this.onClick, this);
 
-        this.setFrame(1);
+        this.setValue(1);
+        this.onRollCb = () => {};
     }
 
     setIndividualRoll(enabled) {
         this.individualRoll = enabled;
     }
 
-    onClick()
-    {
+    setOnRoll(onRollCb) {
+        this.onRollCb = onRollCb;
+    }
+
+    setValue(value) {
+        // FIXME frames do not match neatly to values
+        this.value = value;
+        this.setFrame(value);
+    }
+
+    getValue() {
+        return this.value;
+    }
+
+    serialize() {
+        return {
+            'frame': this.getValue()
+        }
+    }
+
+    onClick() {
         if (!this.individualRoll) {
             return;
         }
@@ -34,9 +53,9 @@ export class Dice extends Phaser.GameObjects.Sprite {
         }
     }
 
-    roll()
-    {
+    roll() {
         let n = Phaser.Math.RND.pick([0,1,2,4,5,6]);
-        this.setFrame(n);
+        this.setValue(n);
+        this.onRollCb(this);
     }
 }

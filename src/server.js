@@ -1,4 +1,5 @@
 import PubNub from 'pubnub';
+import { Message, StartGameMessage, DiceUpdateMessage } from './message';
 
 class Player {
     constructor(uuid, name = '', timestamp = '') {
@@ -25,21 +26,31 @@ class Player {
     }
 }
 
+/*
+ * callbacks: onPlayersUpdate, onGameStart
+ */
+
 export class Server {
-    constructor(onPlayersUpdateCb) {
+    constructor(callbacks) {
         // TODO change this to a map uuid => player
         this.players = {};
-        this.onPlayersUpdateCb = onPlayersUpdateCb;
+        this.setCallbacks(callbacks);
+    }
+
+    setCallbacks(callbacks) {
+        this.callbacks = callbacks;
     }
 
     connect(channel) {
         this.channel = channel;
 
+        this.myUUID = PubNub.generateUUID();
+
         this.pubnub = new PubNub({
             subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',
             publishKey: 'pub-c-759cd5e9-128d-44d4-b7e7-925bc983f3f4',
             // FIXME UUID ideally more stable
-            uuid: PubNub.generateUUID(),
+            uuid: this.myUUID,
             ssl: true,
             heartbeatInterval: 30,
             presenceTimeout: 60
@@ -52,6 +63,10 @@ export class Server {
             },
             presence: (presenceEvent) => {
                 this.handlePresence(presenceEvent);
+            },
+            message: (msg) => {
+                let fromMe = (msg.publisher === this.myUUID);
+                this.handleMessage(msg.message, fromMe);
             }
         })
 
@@ -91,7 +106,46 @@ export class Server {
                 }
             }
         );
-        this.onPlayersUpdateCb(this.players);
+        this.callbacks.onPlayersUpdate(this.players);
+    }
+
+    publish(msg) {
+        this.pubnub.publish(
+            {
+                message: msg,
+                channel: this.channel
+            },
+            function (status) {
+                if (status.error) {
+                    // handle error
+                    console.log("Publish error with status: ", status);
+                }
+            }
+        );
+    }
+
+    startGame() {
+        let msg = new StartGameMessage();
+        this.publish(msg);
+    }
+
+    updateDice(update) {
+        let msg = new DiceUpdateMessage(update);
+        this.publish(msg);
+    }
+
+    handleMessage(msg, fromMe) {
+        let deserialized = Message.deserialize(msg);
+        switch (deserialized.type) {
+            case StartGameMessage.getType():
+                this.callbacks.onGameStart(deserialized);
+                break;
+            case DiceUpdateMessage.getType():
+                if (!fromMe) {
+                    this.callbacks.onDiceUpdate(deserialized);
+                }
+                break;
+        }
     }
 
     handlePresence(presenceEvent) {
@@ -114,6 +168,6 @@ export class Server {
                 delete this.players[uuid];
                 break;
         }
-        this.onPlayersUpdateCb(this.players);
+        this.callbacks.onPlayersUpdate(this.players);
     }
 }

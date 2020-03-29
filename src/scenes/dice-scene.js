@@ -2,14 +2,31 @@ import PubNub from 'pubnub';
 import { Dice } from '../dice';
 import { DiceZone } from '../dice-zone';
 import { TextButton } from '../text-button';
+import { DiceUpdateMessage } from '../message';
 
 export class DiceScene extends Phaser.Scene {
+    /*
+     * XXX
+     *
+     * I royally fucked separation of concerns here.
+     * MVC would be a much better idea, with th scene as the view and
+     * an internal data structure representing the dice state as the model
+     *
+     */
     constructor() {
         super({ key: 'diceScene' });
     }
 
     init(data) {
         this.server = data.server;
+        this.server.setCallbacks({
+            onPlayersUpdate: () => {
+                this.onPlayersUpdate();
+            },
+            onDiceUpdate: (msg) => {
+                this.onDiceUpdate(msg);
+            }
+        });
     }
 
     preload() {
@@ -18,17 +35,17 @@ export class DiceScene extends Phaser.Scene {
 
     create() {
         let container = this.add.container();
-        let cup = new DiceZone(this, 305, 100, 600, 150, 'Cup');
-        cup.setIndividualRoll(false);
-        let table = new DiceZone(this, 305, 300, 600, 150, 'Table');
+        this.cup = new DiceZone(this, 305, 100, 600, 150, 'Cup');
+        this.cup.setIndividualRoll(false);
+        this.table = new DiceZone(this, 305, 300, 600, 150, 'Table');
 
         let cupRollButton = new TextButton(this, 610, 50, 'Roll', () => {
-            cup.roll();
+            this.cup.roll();
         });
         this.add.existing(cupRollButton);
 
         let cupLookButton = new TextButton(this, 610, 80, 'Look', () => {
-            cup.setVisible(true);
+            this.cup.setVisible(true);
         });
         this.add.existing(cupLookButton);
 
@@ -37,11 +54,13 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(cupLiftButton);
 
+        this.dice = [];
         for (let i=0; i<5; i++) {
             let d = new Dice(this, 0, 0);
             this.add.existing(d);
             this.input.setDraggable(d);
-            cup.add(d);
+            this.cup.add(d);
+            this.dice.push(d);
         }
 
         this.input.on('drag', function(pointer, gameObject, dragX, dragY) {
@@ -71,5 +90,64 @@ export class DiceScene extends Phaser.Scene {
                 gameObject.y = gameObject.input.dragStartY;
             }
         });
+
+        this.cup.setOnUpdateCb(() => {
+            this.updateDice()
+        });
+
+        this.table.setOnUpdateCb(() => {
+            this.updateDice();
+        });
     }
+
+    updateDice() {
+        let update = {
+            'cup': {
+                'visible': this.cup.getVisible(),
+                'dice': this.cup.getDice().map(d => d.getValue())
+            },
+            'table': {
+                'dice': this.table.getDice().map(d => d.getValue())
+            }
+        };
+
+        this.server.updateDice(update);
+    }
+
+    onPlayersUpdate(players) {
+        console.log("Players update!");
+    }
+
+    onDiceUpdate(msg) {
+        // FIXME have concept of "active" player instead
+        this.cup.setOnUpdateCb( () => {} );
+        this.table.setOnUpdateCb( () => {} );
+
+        console.log("Dice update! ", msg);
+        let i = 0;
+        msg.cup.dice.forEach(die => {
+            console.log('cup die ', i, ' to ', die);
+            this.dice[i].setValue(die);
+            this.cup.add(this.dice[i]);
+            i++
+        });
+        msg.table.dice.forEach(die => {
+            console.log('table die ', i, ' to ', die);
+            this.dice[i].setValue(die);
+            this.table.add(this.dice[i]);
+            i++
+        });
+        console.log('setting cup visibility to ', msg.cup.visible);
+        this.cup.setVisible(msg.cup.visible);
+        console.assert(i === 5);
+
+        this.cup.setOnUpdateCb(() => {
+            this.updateDice()
+        });
+
+        this.table.setOnUpdateCb(() => {
+            this.updateDice();
+        });
+    }
+
 }
