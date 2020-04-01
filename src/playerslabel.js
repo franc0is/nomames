@@ -17,13 +17,14 @@ export class PlayersLabel extends Phaser.GameObjects.Container {
         });
         // Recreate a label for each player
         let i = 0;
-        for (let [uuid, player] of Object.entries(players)) {
+        this.players.forEach(player => {
             if (player.name !== '') {
-                let t = this.scene.add.text(100*i, 40, player.name, { color: 'white' })
+                let c = player.isActive ? 'red' : 'white';
+                let t = this.scene.add.text(100*i, 40, player.name, { 'color': c })
                 this.add(t);
                 this.playerLabels.push(t);
                 i++;
             }
-        }
+        });
     }
 }

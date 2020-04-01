@@ -21,8 +21,8 @@ export class DiceScene extends Phaser.Scene {
     init(data) {
         this.server = data.server;
         this.server.setCallbacks({
-            onPlayersUpdate: () => {
-                this.onPlayersUpdate();
+            onPlayersUpdate: (players) => {
+                this.onPlayersUpdate(players);
             },
             onDiceUpdate: (msg) => {
                 this.onDiceUpdate(msg);
@@ -50,10 +50,10 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(cupLookButton);
 
-        let cupLiftButton = new TextButton(this, 610, 110, 'Lift', () => {
-            // TODO
+        let nextPlayerButton = new TextButton(this, 610, 110, 'Pass', () => {
+            this.server.passCup();
         });
-        this.add.existing(cupLiftButton);
+        this.add.existing(nextPlayerButton);
 
         this.dice = [];
         for (let i=0; i<5; i++) {

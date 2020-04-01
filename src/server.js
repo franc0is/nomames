@@ -1,43 +1,10 @@
 import PubNub from 'pubnub';
-import { Message, StartGameMessage, DiceUpdateMessage } from './message';
-
-class Player {
-    constructor(uuid, name = '', timestamp = '') {
-        this.uuid = uuid;
-        this.name = name;
-        this.timestamp = timestamp;
-        this.isActive = false;
-    }
-
-    static fromState(uuid, state) {
-        // TODO should create a class for the state
-        let p =  new this(uuid);
-        if (state && 'name' in state) {
-            p.name = state['name'];
-        }
-        if (state && 'timestamp' in state) {
-            p.timestamp = state['timestamp'];
-        }
-        return p;
-    }
-
-    setState(state) {
-        this.name = state['name'];
-        this.timestamp = state['timestamp'];
-    }
-
-    setActive(active) {
-        this.isActive = active;
-    }
-
-    getPlayers() {
-        return this.players;
-    }
-}
+import { Message, StartGameMessage, DiceUpdateMessage, PassCupMessage } from './message';
+import { Player } from './player'
 
 class PlayersList {
     constructor() {
-        this.players = {}
+        this.players = []
     }
 
     getPlayers() {
@@ -45,13 +12,58 @@ class PlayersList {
     }
 
     addPlayer(player) {
-        // FIXME if player updated its state in the middle of the game
-        // this would risk losing the "active" marker
-        this.players[player.uuid] = player;
+        for (let p of this.players) {
+            if (p.uuid === player.uuid) {
+                p.name = player.name;
+                return;
+            }
+        }
+        // else
+        this.players.push(player);
+    }
+
+    getPlayerByUUID(uuid) {
+        for (let player of this.players) {
+            if (player.uuid === uuid) {
+                return player;
+            }
+        }
+    }
+
+    getActivePlayer() {
+        for (let player of this.players) {
+            if (player.isActive) {
+                return player;
+            }
+        }
     }
 
     removePlayerByUUID(uuid) {
-        delete this.players[uuid];
+        let removeIdx = undefined;
+        for (const [idx, player] of this.players.entries()) {
+            if (player.uuid === uuid) {
+                removeIdx = idx;
+                break;
+            }
+        }
+        if (removeIdx !== undefined) {
+            if (this.players[removeIdx].isActive) {
+                this.players[(removeIdx + 1) % this.players.length].isActive = true;
+            }
+            delete this.players[removeIdx];
+        }
+    }
+
+    setNextPlayerActive() {
+        for (const [idx, player] of this.players.entries()) {
+            if (player.isActive) {
+                player.isActive = false;
+                this.players[(idx + 1) % this.players.length].isActive = true;
+                return;
+            }
+        }
+        // else
+        this.players[0].isActive = true;
     }
 }
 
@@ -158,7 +170,16 @@ export class Server {
     }
 
     startGame() {
-        let msg = new StartGameMessage();
+        this.playersList.setNextPlayerActive();
+        let activePlayer = this.playersList.getActivePlayer();
+        let msg = new StartGameMessage(activePlayer.uuid);
+        this.publish(msg);
+    }
+
+    passCup() {
+        this.playersList.setNextPlayerActive();
+        let activePlayer = this.playersList.getActivePlayer();
+        let msg = new PassCupMessage(activePlayer.uuid);
         this.publish(msg);
     }
 
@@ -170,14 +191,26 @@ export class Server {
     handleMessage(msg, fromMe) {
         let deserialized = Message.deserialize(msg);
         switch (deserialized.type) {
-            case StartGameMessage.getType():
+            case StartGameMessage.getType(): {
+                let uuid = deserialized.activePlayerUUID;
+                let player = this.playersList.getPlayerByUUID(uuid);
+                player.isActive = true;
                 this.callbacks.onGameStart(deserialized);
                 break;
-            case DiceUpdateMessage.getType():
+            }
+            case DiceUpdateMessage.getType(): {
                 if (!fromMe) {
                     this.callbacks.onDiceUpdate(deserialized);
                 }
                 break;
+            }
+            case PassCupMessage.getType(): {
+                let uuid = deserialized.activePlayerUUID;
+                this.playersList.getActivePlayer().isActive = false;
+                this.playersList.getPlayerByUUID(uuid).isActive = true;
+                this.callbacks.onPlayersUpdate(this.playersList.getPlayers());
+                break;
+            }
         }
     }
 

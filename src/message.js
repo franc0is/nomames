@@ -6,7 +6,8 @@ export class Message {
     static getTypeMap() {
         return {
             [StartGameMessage.getType()]: StartGameMessage,
-            [DiceUpdateMessage.getType()]: DiceUpdateMessage
+            [DiceUpdateMessage.getType()]: DiceUpdateMessage,
+            [PassCupMessage.getType()]: PassCupMessage
         };
     }
 
@@ -16,9 +17,10 @@ export class Message {
 }
 
 export class StartGameMessage extends Message {
-    constructor() {
+    constructor(activePlayerUUID) {
         // I was not able to void the duplicate 'startGame' :-(
         super('startGame');
+        this.activePlayerUUID = activePlayerUUID;
     }
 
     static getType() {
@@ -26,8 +28,23 @@ export class StartGameMessage extends Message {
         return 'startGame';
     }
 
-    static deserialize(data) {
-        return new this();
+    static deserialize(msg) {
+        return new this(msg['activePlayerUUID']);
+    }
+}
+
+export class PassCupMessage extends Message {
+    constructor(activePlayerUUID) {
+        super('passCup');
+        this.activePlayerUUID = activePlayerUUID;
+    }
+
+    static getType() {
+        return 'passCup';
+    }
+
+    static deserialize(msg) {
+        return new this(msg['activePlayerUUID']);
     }
 }
 
