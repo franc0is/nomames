@@ -26,7 +26,7 @@ export class JoinScene extends Phaser.Scene {
         let text = this.add.text(
             50,
             30,
-            'Welcome! \n\nTo start, select "Host" or \nenter an existing game ID',
+            'Welcome! \n\nTo start, enter a game ID\nThis will create or join a game.',
             { color: 'white', fontSize: '20px '}
         );
 
