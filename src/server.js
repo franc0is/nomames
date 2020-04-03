@@ -188,7 +188,6 @@ export class Server {
     }
 
     handlePresence(presenceEvent) {
-        console.log(presenceEvent);
         let uuid = presenceEvent['uuid'];
         switch (presenceEvent['action']) {
             case 'state-change':
