@@ -60,7 +60,7 @@ export class Dice extends Phaser.GameObjects.Sprite {
     }
 
     roll() {
-        let n = Phaser.Math.RND.pick([0,1,2,3,4,5]);
+        let n = Phaser.Math.RND.between(0, 5);
         this.setValue(n);
         this.onRollCb(this);
     }
