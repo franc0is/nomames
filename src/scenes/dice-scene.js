@@ -41,6 +41,7 @@ export class DiceScene extends Phaser.Scene {
     }
 
     create() {
+        this.nomames = false;
         let container = this.add.container();
         this.cup = new DiceZone(this, 305, 100, 600, 150, 'Cup');
         this.cup.setIndividualRoll(false);
@@ -164,6 +165,9 @@ export class DiceScene extends Phaser.Scene {
         this.playersList = playersList;
         this.setPlayable(playersList.getActivePlayer().isMe);
         this.playersLabel.updateWithPlayers(playersList);
+        if (this.nomames) {
+            this.onNoMames();
+        }
     }
 
     onDiceUpdate(msg) {
@@ -193,6 +197,7 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onNoMames() {
+        this.nomames = true;
         this.setPlayable(true);
         this.cup.setVisible(true);
         this.noMamesText.setVisible(true);
