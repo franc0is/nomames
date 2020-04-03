@@ -8,6 +8,23 @@ export class PlayersList {
         return this.players;
     }
 
+    getUUIDList() {
+        let uuidList = []
+        this.players.forEach(player => {
+            uuidList.push(player.uuid);
+        });
+        return uuidList;
+    }
+
+    orderByUUIDList(uuidList) {
+        let orderedPlayers = []
+        uuidList.forEach(uuid => {
+            let p = this.getPlayerByUUID(uuid);
+            orderedPlayers.push(p);
+        });
+        this.players = orderedPlayers;
+    }
+
     addPlayer(player) {
         if (player.uuid === this.myUUID) {
             player.isMe = true;

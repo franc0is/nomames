@@ -20,10 +20,11 @@ export class Message {
 }
 
 export class StartGameMessage extends Message {
-    constructor(activePlayerUUID) {
+    constructor(activePlayerUUID, uuidList) {
         // I was not able to void the duplicate 'startGame' :-(
         super('startGame');
         this.activePlayerUUID = activePlayerUUID;
+        this.uuidList = uuidList;
     }
 
     static getType() {
@@ -32,7 +33,7 @@ export class StartGameMessage extends Message {
     }
 
     static deserialize(msg) {
-        return new this(msg['activePlayerUUID']);
+        return new this(msg['activePlayerUUID'], msg['uuidList']);
     }
 }
 

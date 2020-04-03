@@ -110,7 +110,8 @@ export class Server {
     startGame() {
         this.playersList.setNextPlayerActive();
         let activePlayer = this.playersList.getActivePlayer();
-        let msg = new StartGameMessage(activePlayer.uuid);
+        let uuidList = this.playersList.getUUIDList();
+        let msg = new StartGameMessage(activePlayer.uuid, uuidList);
         this.publish(msg);
     }
 
@@ -148,6 +149,7 @@ export class Server {
                 let uuid = deserialized.activePlayerUUID;
                 let player = this.playersList.getPlayerByUUID(uuid);
                 player.isActive = true;
+                this.playersList.orderByUUIDList(deserialized.uuidList);
                 this.callbacks.onGameStart(deserialized);
                 break;
             }
