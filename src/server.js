@@ -130,8 +130,8 @@ export class Server {
     killPlayer(player) {
         if (player.lives > 1){
             player.lives = player.lives - 1;
-        }else if (widow = 1){
-            widow = 0;
+        }else if (this.widow === 1){
+            this.widow = 0;
         }else{
             let msg = new KillPlayerMessage(player.uuid);
             this.publish(msg);
