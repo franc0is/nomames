@@ -52,6 +52,9 @@ export class DiceScene extends Phaser.Scene {
         this.cupRollButton = new TextButton(this, 610, 30, 'Roll', () => {
             this.cup.roll();
             this.cupRollButton.setEnabled(false);
+            if (this.nomames) {
+                this.onNoMames();
+            }
         });
         this.add.existing(this.cupRollButton);
 
