@@ -16,6 +16,7 @@ export class Server {
         this.setCallbacks(callbacks);
         this.myUUID = PubNub.generateUUID();
         this.playersList = new PlayersList(this.myUUID);
+        this.widow = 1;
     }
 
     setCallbacks(callbacks) {
@@ -127,8 +128,14 @@ export class Server {
     }
 
     killPlayer(player) {
-        let msg = new KillPlayerMessage(player.uuid);
-        this.publish(msg);
+        if (player.lives > 1){
+            player.lives = player.lives - 1;
+        }else if (widow = 1){
+            widow = 0;
+        }else{
+            let msg = new KillPlayerMessage(player.uuid);
+            this.publish(msg);
+        }
     }
 
     noMames() {
