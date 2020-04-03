@@ -7,7 +7,10 @@ export class Message {
         return {
             [StartGameMessage.getType()]: StartGameMessage,
             [DiceUpdateMessage.getType()]: DiceUpdateMessage,
-            [PassCupMessage.getType()]: PassCupMessage
+            [PassCupMessage.getType()]: PassCupMessage,
+            [KillPlayerMessage.getType()]: KillPlayerMessage,
+            [NoMamesMessage.getType()]: NoMamesMessage,
+            [ResetMessage.getType()]: ResetMessage
         };
     }
 
@@ -61,5 +64,48 @@ export class DiceUpdateMessage extends Message {
 
     static deserialize(msg) {
         return new this(msg);
+    }
+}
+
+export class KillPlayerMessage extends Message {
+    constructor(uuid) {
+        super('killPlayer');
+        this.uuid = uuid;
+    }
+
+    static getType() {
+        return 'killPlayer';
+    }
+
+    static deserialize(msg) {
+        return new this(msg['uuid']);
+    }
+}
+
+export class NoMamesMessage extends Message {
+    constructor() {
+        super('noMames');
+    }
+
+    static getType() {
+        return 'noMames';
+    }
+
+    static deserialize(msg) {
+        return new this();
+    }
+}
+
+export class ResetMessage extends Message {
+    constructor() {
+        super('reset');
+    }
+
+    static getType() {
+        return 'reset';
+    }
+
+    static deserialize(msg) {
+        return new this();
     }
 }

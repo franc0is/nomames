@@ -26,6 +26,12 @@ export class DiceScene extends Phaser.Scene {
             },
             onDiceUpdate: (msg) => {
                 this.onDiceUpdate(msg);
+            },
+            onNoMames: () => {
+                this.onNoMames();
+            },
+            onReset: () => {
+                this.onReset();
             }
         });
     }
@@ -40,10 +46,14 @@ export class DiceScene extends Phaser.Scene {
         this.cup.setIndividualRoll(false);
         this.table = new DiceZone(this, 305, 300, 600, 150, 'Table');
 
-        let cupRollButton = new TextButton(this, 610, 50, 'Roll', () => {
+        this.noMamesText = this.add.text(200, 180, "🚨🚨 NO MAMES 🚨🚨", { fill: 'red' });
+        this.noMamesText.setVisible(false);
+
+        this.cupRollButton = new TextButton(this, 610, 50, 'Roll', () => {
             this.cup.roll();
+            this.cupRollButton.setEnabled(false);
         });
-        this.add.existing(cupRollButton);
+        this.add.existing(this.cupRollButton);
 
         let cupLookButton = new TextButton(this, 610, 80, 'Look', () => {
             this.cup.setVisible(true);
@@ -54,6 +64,22 @@ export class DiceScene extends Phaser.Scene {
             this.server.passCup();
         });
         this.add.existing(nextPlayerButton);
+
+        let makeDeadButton = new TextButton(this, 610, 140, 'Die ☠️  ', () => {
+            // FIXME needs to send this to server & other players
+            this.server.killPlayer(this.playersList.getMe());
+        });
+        this.add.existing(makeDeadButton);
+
+        let noMamesButton = new TextButton(this, 610, 170, 'No Mames 💥', () => {
+            this.server.noMames();
+        });
+        this.add.existing(noMamesButton);
+
+        let resetButton = new TextButton(this, 610, 200, 'Reset', () => {
+            this.server.reset()
+        });
+        this.add.existing(resetButton);
 
         this.dice = [];
         for (let i=0; i<5; i++) {
@@ -92,9 +118,13 @@ export class DiceScene extends Phaser.Scene {
             }
         });
 
-        let players = this.server.getPlayers();
-        this.playersLabel = new PlayersLabel(this, 20, 400, players);
+        this.playersList = this.server.getPlayersList();
+        this.playersLabel = new PlayersLabel(this, 20, 400, this.playersList);
         this.add.existing(this.playersLabel);
+
+        if (!this.playersList.getActivePlayer().isMe) {
+            this.setPlayable(false);
+        }
 
         this.cup.setOnUpdateCb(() => {
             this.updateDice()
@@ -102,6 +132,15 @@ export class DiceScene extends Phaser.Scene {
 
         this.table.setOnUpdateCb(() => {
             this.updateDice();
+        });
+    }
+
+    setPlayable(playable) {
+        this.input.enabled = playable;
+        this.cup.setVisible(false);
+        this.cupRollButton.setEnabled(true);
+        this.table.getDice().forEach(dice => {
+            dice.resetRoll(true);
         });
     }
 
@@ -119,32 +158,28 @@ export class DiceScene extends Phaser.Scene {
         this.server.updateDice(update);
     }
 
-    onPlayersUpdate(players) {
+    onPlayersUpdate(playersList) {
+        this.playersList = playersList;
         console.log("Players update!");
-        this.playersLabel.updateWithPlayers(players);
+        this.setPlayable(playersList.getActivePlayer().isMe);
+        this.playersLabel.updateWithPlayers(playersList);
     }
 
     onDiceUpdate(msg) {
-        // FIXME have concept of "active" player instead
-        this.cup.setOnUpdateCb( () => {} );
-        this.table.setOnUpdateCb( () => {} );
+        this.cup.setOnUpdateCb(() => {});
+        this.table.setOnUpdateCb(() => {});
 
-        console.log("Dice update! ", msg);
         let i = 0;
         msg.cup.dice.forEach(die => {
-            console.log('cup die ', i, ' to ', die);
             this.dice[i].setValue(die);
             this.cup.add(this.dice[i]);
             i++
         });
         msg.table.dice.forEach(die => {
-            console.log('table die ', i, ' to ', die);
             this.dice[i].setValue(die);
             this.table.add(this.dice[i]);
             i++
         });
-        console.log('setting cup visibility to ', msg.cup.visible);
-        this.cup.setVisible(msg.cup.visible);
         console.assert(i === 5);
 
         this.cup.setOnUpdateCb(() => {
@@ -156,4 +191,12 @@ export class DiceScene extends Phaser.Scene {
         });
     }
 
+    onNoMames() {
+        this.cup.setVisible(true);
+        this.noMamesText.setVisible(true);
+    }
+
+    onReset() {
+        this.scene.restart();
+    }
 }

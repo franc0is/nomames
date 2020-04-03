@@ -71,13 +71,13 @@ export class JoinScene extends Phaser.Scene {
         this.add.existing(this.startButton);
         this.startButton.setVisible(false);
 
-        let players = this.server.getPlayers();
-        this.playersLabel = new PlayersLabel(this, 20, 400, players);
+        let playersList = this.server.getPlayersList();
+        this.playersLabel = new PlayersLabel(this, 20, 400, playersList);
         this.add.existing(this.playersLabel);
     }
 
-    onPlayersUpdate(players) {
+    onPlayersUpdate(playersList) {
         console.log("Players update!");
-        this.playersLabel.updateWithPlayers(players);
+        this.playersLabel.updateWithPlayers(playersList);
     }
 }

@@ -15,6 +15,7 @@ export class Dice extends Phaser.GameObjects.Sprite {
 
         this.setValue(1);
         this.onRollCb = () => {};
+        this.didRoll = false;
     }
 
     setIndividualRoll(enabled) {
@@ -41,8 +42,12 @@ export class Dice extends Phaser.GameObjects.Sprite {
         }
     }
 
+    resetRoll() {
+        this.didRoll = false;
+    }
+
     onClick() {
-        if (!this.individualRoll) {
+        if (!this.individualRoll || this.didRoll) {
             return;
         }
         // 350ms double click for rolling
@@ -50,6 +55,7 @@ export class Dice extends Phaser.GameObjects.Sprite {
         this.lastClickTime = this.scene.time.now;
         if (clickDelay < 350) {
             this.roll();
+            this.didRoll = true;
         }
     }
 

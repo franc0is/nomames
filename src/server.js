@@ -1,81 +1,21 @@
 import PubNub from 'pubnub';
-import { Message, StartGameMessage, DiceUpdateMessage, PassCupMessage } from './message';
+import { Message, StartGameMessage, DiceUpdateMessage,
+         PassCupMessage, KillPlayerMessage, NoMamesMessage,
+         ResetMessage } from './message';
+import { PlayersList } from './playerslist'
 import { Player } from './player'
 
-class PlayersList {
-    constructor() {
-        this.players = []
-    }
-
-    getPlayers() {
-        return this.players;
-    }
-
-    addPlayer(player) {
-        for (let p of this.players) {
-            if (p.uuid === player.uuid) {
-                p.name = player.name;
-                return;
-            }
-        }
-        // else
-        this.players.push(player);
-    }
-
-    getPlayerByUUID(uuid) {
-        for (let player of this.players) {
-            if (player.uuid === uuid) {
-                return player;
-            }
-        }
-    }
-
-    getActivePlayer() {
-        for (let player of this.players) {
-            if (player.isActive) {
-                return player;
-            }
-        }
-    }
-
-    removePlayerByUUID(uuid) {
-        let removeIdx = undefined;
-        for (const [idx, player] of this.players.entries()) {
-            if (player.uuid === uuid) {
-                removeIdx = idx;
-                break;
-            }
-        }
-        if (removeIdx !== undefined) {
-            if (this.players[removeIdx].isActive) {
-                this.players[(removeIdx + 1) % this.players.length].isActive = true;
-            }
-            delete this.players[removeIdx];
-        }
-    }
-
-    setNextPlayerActive() {
-        for (const [idx, player] of this.players.entries()) {
-            if (player.isActive) {
-                player.isActive = false;
-                this.players[(idx + 1) % this.players.length].isActive = true;
-                return;
-            }
-        }
-        // else
-        this.players[0].isActive = true;
-    }
-}
 
 /*
- * callbacks: onPlayersUpdate, onGameStart
+ * callbacks: onPlayersUpdate, onGameStart, onNoMames, onReset
  */
 
 export class Server {
     constructor(callbacks) {
         // TODO change this to a map uuid => player
-        this.playersList = new PlayersList();
         this.setCallbacks(callbacks);
+        this.myUUID = PubNub.generateUUID();
+        this.playersList = new PlayersList(this.myUUID);
     }
 
     setCallbacks(callbacks) {
@@ -84,8 +24,6 @@ export class Server {
 
     connect(channel) {
         this.channel = channel;
-
-        this.myUUID = PubNub.generateUUID();
 
         this.pubnub = new PubNub({
             subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',
@@ -132,8 +70,8 @@ export class Server {
         );
     }
 
-    getPlayers() {
-        return this.playersList.getPlayers();
+    getPlayersList() {
+        return this.playersList;
     }
 
     refreshPlayersList() {
@@ -151,7 +89,7 @@ export class Server {
                 }
             }
         );
-        this.callbacks.onPlayersUpdate(this.playersList.getPlayers());
+        this.callbacks.onPlayersUpdate(this.playersList);
     }
 
     publish(msg) {
@@ -188,6 +126,21 @@ export class Server {
         this.publish(msg);
     }
 
+    killPlayer(player) {
+        let msg = new KillPlayerMessage(player.uuid);
+        this.publish(msg);
+    }
+
+    noMames() {
+        let msg = new NoMamesMessage();
+        this.publish(msg);
+    }
+
+    reset() {
+        let msg = new ResetMessage();
+        this.publish(msg);
+    }
+
     handleMessage(msg, fromMe) {
         let deserialized = Message.deserialize(msg);
         switch (deserialized.type) {
@@ -208,7 +161,25 @@ export class Server {
                 let uuid = deserialized.activePlayerUUID;
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
-                this.callbacks.onPlayersUpdate(this.playersList.getPlayers());
+                this.callbacks.onPlayersUpdate(this.playersList);
+                break;
+            }
+            case KillPlayerMessage.getType(): {
+                let uuid = deserialized.uuid;
+                let player = this.playersList.getPlayerByUUID(uuid);
+                player.isDead = true;
+                if (player.isActive) {
+                    this.playersList.setNextPlayerActive();
+                }
+                this.callbacks.onPlayersUpdate(this.playersList);
+                break;
+            }
+            case NoMamesMessage.getType(): {
+                this.callbacks.onNoMames();
+                break;
+            }
+            case ResetMessage.getType(): {
+                this.callbacks.onReset();
                 break;
             }
         }
@@ -230,6 +201,6 @@ export class Server {
                 this.playersList.removePlayerByUUID(uuid);
                 break;
         }
-        this.callbacks.onPlayersUpdate(this.playersList.getPlayers());
+        this.callbacks.onPlayersUpdate(this.playersList);
     }
 }

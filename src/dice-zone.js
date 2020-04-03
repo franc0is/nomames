@@ -94,7 +94,6 @@ export class DiceZone extends Phaser.GameObjects.Zone {
     }
 
     onDieRoll(die) {
-        console.log('ondieroll');
         this.onUpdateCb();
     }
 }

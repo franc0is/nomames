@@ -4,6 +4,8 @@ export class Player {
         this.name = name;
         this.timestamp = timestamp;
         this.isActive = false;
+        this.isMe = false;
+        this.isDead = false;
     }
 
     static fromState(uuid, state) {
