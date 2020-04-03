@@ -100,8 +100,9 @@ export class NoMamesMessage extends Message {
 }
 
 export class ResetMessage extends Message {
-    constructor() {
+    constructor(uuid) {
         super('reset');
+        this.uuid = uuid;
     }
 
     static getType() {
@@ -109,7 +110,7 @@ export class ResetMessage extends Message {
     }
 
     static deserialize(msg) {
-        return new this();
+        return new this(msg['uuid']);
     }
 }
 export class LossLifeMessage extends Message {

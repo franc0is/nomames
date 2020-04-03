@@ -57,6 +57,7 @@ export class DiceScene extends Phaser.Scene {
 
         let cupLookButton = new TextButton(this, 610, 60, 'Look', () => {
             this.cup.setVisible(true);
+            this.noMamesButton.setEnabled(false);
         });
         this.add.existing(cupLookButton);
 
@@ -72,10 +73,10 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(makeDeadButton);
 
-        let noMamesButton = new TextButton(this, 610, 150, 'No Mames!', () => {
+        this.noMamesButton = new TextButton(this, 610, 150, 'No Mames!', () => {
             this.server.noMames();
         });
-        this.add.existing(noMamesButton);
+        this.add.existing(this.noMamesButton);
 
         let resetButton = new TextButton(this, 610, 180, 'Reset', () => {
             this.server.reset()
@@ -140,8 +141,9 @@ export class DiceScene extends Phaser.Scene {
         this.input.enabled = playable;
         this.cup.setVisible(false);
         this.cupRollButton.setEnabled(true);
+        this.noMamesButton.setEnabled(true);
         this.table.getDice().forEach(dice => {
-            dice.resetRoll(true);
+            dice.resetRoll();
         });
     }
 
@@ -161,7 +163,6 @@ export class DiceScene extends Phaser.Scene {
 
     onPlayersUpdate(playersList) {
         this.playersList = playersList;
-        console.log("Players update!");
         this.setPlayable(playersList.getActivePlayer().isMe);
         this.playersLabel.updateWithPlayers(playersList);
     }
@@ -193,6 +194,7 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onNoMames() {
+        this.setPlayable(true);
         this.cup.setVisible(true);
         this.noMamesText.setVisible(true);
     }

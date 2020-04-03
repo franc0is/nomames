@@ -46,6 +46,10 @@ export class Dice extends Phaser.GameObjects.Sprite {
         this.didRoll = false;
     }
 
+    markRolled() {
+        this.didRoll = true;
+    }
+
     onClick() {
         if (!this.individualRoll || this.didRoll) {
             return;
@@ -55,7 +59,6 @@ export class Dice extends Phaser.GameObjects.Sprite {
         this.lastClickTime = this.scene.time.now;
         if (clickDelay < 350) {
             this.roll();
-            this.didRoll = true;
         }
     }
 
@@ -63,5 +66,6 @@ export class Dice extends Phaser.GameObjects.Sprite {
         let n = Phaser.Math.RND.between(0, 5);
         this.setValue(n);
         this.onRollCb(this);
+        this.markRolled();
     }
 }
