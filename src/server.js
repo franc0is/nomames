@@ -138,7 +138,8 @@ export class Server {
     }
 
     reset() {
-        let msg = new ResetMessage();
+        let me = this.playersList.getMe();
+        let msg = new ResetMessage(me.uuid);
         this.publish(msg);
     }
 
@@ -181,6 +182,9 @@ export class Server {
                 break;
             }
             case ResetMessage.getType(): {
+                let uuid = deserialized.uuid;
+                this.playersList.getActivePlayer().isActive = false;
+                this.playersList.getPlayerByUUID(uuid).isActive = true;
                 this.callbacks.onReset();
                 break;
             }
