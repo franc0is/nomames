@@ -6,6 +6,7 @@ import { Message, StartGameMessage, DiceUpdateMessage,
          WidowUsedMessage} from './message';
 import { PlayersList } from './playerslist'
 import { Player } from './player'
+import { DiceScene } from './scenes/dice-scene';
 
 
 /*
@@ -13,6 +14,7 @@ import { Player } from './player'
  */
 
 export class Server {
+    widow = 1
     constructor(callbacks) {
         // TODO change this to a map uuid => player
         this.setCallbacks(callbacks);
