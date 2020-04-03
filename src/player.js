@@ -6,6 +6,7 @@ export class Player {
         this.isActive = false;
         this.isMe = false;
         this.isDead = false;
+        this.numLives = 3;
     }
 
     static fromState(uuid, state) {
