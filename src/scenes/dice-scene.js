@@ -42,7 +42,6 @@ export class DiceScene extends Phaser.Scene {
 
     create() {
         this.nomames = false;
-        let container = this.add.container();
         this.cup = new DiceZone(this, 305, 100, 600, 150, 'Cup');
         this.cup.setIndividualRoll(false);
         this.table = new DiceZone(this, 305, 300, 600, 150, 'Table');
@@ -103,9 +102,6 @@ export class DiceScene extends Phaser.Scene {
 
         this.input.on('dragleave', function(pointer, gameObject, dropZone) {
             dropZone.setHighlighted(false);
-            dropZone.remove(gameObject);
-            // XXX if the die is not in a container, it doesn't get rendered
-            container.add(gameObject);
         });
 
         this.input.on('drop', function(pointer, gameObject, dropZone) {
