@@ -72,7 +72,9 @@ export class DiceScene extends Phaser.Scene {
         this.add.existing(makeDeadButton);
 
         let noMamesButton = new TextButton(this, 610, 150, 'No Mames!', () => {
-            this.server.noMames();
+            if (this.cup.setVisible === false){
+                this.server.noMames();
+            }
         });
         this.add.existing(noMamesButton);
 

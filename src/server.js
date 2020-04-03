@@ -1,7 +1,9 @@
 import PubNub from 'pubnub';
 import { Message, StartGameMessage, DiceUpdateMessage,
          PassCupMessage, KillPlayerMessage, NoMamesMessage,
-         ResetMessage } from './message';
+         ResetMessage, 
+         LossLifeMessage,
+         WidowUsedMessage} from './message';
 import { PlayersList } from './playerslist'
 import { Player } from './player'
 
@@ -16,6 +18,7 @@ export class Server {
         this.setCallbacks(callbacks);
         this.myUUID = PubNub.generateUUID();
         this.playersList = new PlayersList(this.myUUID);
+        this.widow = 1;
     }
 
     setCallbacks(callbacks) {
@@ -128,8 +131,21 @@ export class Server {
     }
 
     killPlayer(player) {
-        let msg = new KillPlayerMessage(player.uuid);
-        this.publish(msg);
+        if (player.numLives > 1){
+            let Lives = player.numLives - 1;
+            let msg = new LossLifeMessage(player.uuid,Lives);
+            this.publish(msg);
+            let msg2 = new PassCupMessage(uuid);
+            this.publish(msg2);
+        }else if(this.widow === 1){
+            let msg = new WidowUsedMessage();
+            this.publish(msg);
+            let msg2 = new PassCupMessage(uuid);
+            this.publish(msg2);
+        }else{
+            let msg = new KillPlayerMessage(player.uuid);
+            this.publish(msg);
+        }
     }
 
     noMames() {
@@ -182,6 +198,17 @@ export class Server {
             }
             case ResetMessage.getType(): {
                 this.callbacks.onReset();
+                break;
+            }
+            case LossLifeMessage.getType():{
+                let uuid = deserialized.uuid;
+                let numLives = deserialized.numLives;
+                let player = this.playersList.getPlayerByUUID(uuid);
+                player.numLives = numLives;
+                break;
+            }
+            case WidowUsedMessage.getType():{
+                this.widow = 0;
                 break;
             }
         }
