@@ -49,34 +49,34 @@ export class DiceScene extends Phaser.Scene {
         this.noMamesText = this.add.text(200, 180, "🚨🚨 NO MAMES 🚨🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
 
-        this.cupRollButton = new TextButton(this, 610, 50, 'Roll', () => {
+        this.cupRollButton = new TextButton(this, 610, 30, 'Roll', () => {
             this.cup.roll();
             this.cupRollButton.setEnabled(false);
         });
         this.add.existing(this.cupRollButton);
 
-        let cupLookButton = new TextButton(this, 610, 80, 'Look', () => {
+        let cupLookButton = new TextButton(this, 610, 60, 'Look', () => {
             this.cup.setVisible(true);
         });
         this.add.existing(cupLookButton);
 
-        let nextPlayerButton = new TextButton(this, 610, 110, 'Pass', () => {
+        let nextPlayerButton = new TextButton(this, 610, 90, 'Pass', () => {
             this.server.passCup();
         });
         this.add.existing(nextPlayerButton);
 
-        let makeDeadButton = new TextButton(this, 610, 140, 'Die ☠️  ', () => {
+        let makeDeadButton = new TextButton(this, 610, 120, 'Die', () => {
             // FIXME needs to send this to server & other players
             this.server.killPlayer(this.playersList.getMe());
         });
         this.add.existing(makeDeadButton);
 
-        let noMamesButton = new TextButton(this, 610, 170, 'No Mames 💥', () => {
+        let noMamesButton = new TextButton(this, 610, 150, 'No Mames!', () => {
             this.server.noMames();
         });
         this.add.existing(noMamesButton);
 
-        let resetButton = new TextButton(this, 610, 200, 'Reset', () => {
+        let resetButton = new TextButton(this, 610, 180, 'Reset', () => {
             this.server.reset()
         });
         this.add.existing(resetButton);

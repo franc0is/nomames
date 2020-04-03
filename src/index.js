@@ -5,7 +5,7 @@ import { JoinScene } from './scenes/join-scene';
 
 const gameConfig = {
     type: Phaser.AUTO,
-    width: 680,
+    width: 720,
     height: 480,
     parent: 'no-mames',
     dom: {
