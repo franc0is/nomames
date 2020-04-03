@@ -140,7 +140,7 @@ export class DiceScene extends Phaser.Scene {
         this.cup.setVisible(false);
         this.cupRollButton.setEnabled(true);
         this.table.getDice().forEach(dice => {
-            dice.resetRoll(true);
+            dice.resetRoll();
         });
     }
 
@@ -160,7 +160,6 @@ export class DiceScene extends Phaser.Scene {
 
     onPlayersUpdate(playersList) {
         this.playersList = playersList;
-        console.log("Players update!");
         this.setPlayable(playersList.getActivePlayer().isMe);
         this.playersLabel.updateWithPlayers(playersList);
     }
@@ -194,6 +193,7 @@ export class DiceScene extends Phaser.Scene {
     onNoMames() {
         this.cup.setVisible(true);
         this.noMamesText.setVisible(true);
+        this.setPlayable(true);
     }
 
     onReset() {
