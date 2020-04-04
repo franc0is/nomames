@@ -14,7 +14,6 @@ import { DiceScene } from './scenes/dice-scene';
  */
 
 export class Server {
-    widow = 1
     constructor(callbacks) {
         // TODO change this to a map uuid => player
         this.setCallbacks(callbacks);
@@ -137,12 +136,12 @@ export class Server {
             let Lives = player.numLives - 1;
             let msg = new LossLifeMessage(player.uuid,Lives);
             this.publish(msg);
-            let msg2 = new PassCupMessage(uuid);
+            let msg2 = new PassCupMessage(player.uuid);
             this.publish(msg2);
         }else if(this.widow === 1){
             let msg = new WidowUsedMessage();
             this.publish(msg);
-            let msg2 = new PassCupMessage(uuid);
+            let msg2 = new PassCupMessage(player.uuid);
             this.publish(msg2);
         }else{
             let msg = new KillPlayerMessage(player.uuid);
@@ -208,9 +207,8 @@ export class Server {
             }
             case LossLifeMessage.getType():{
                 let uuid = deserialized.uuid;
-                let numLives = deserialized.numLives;
-                let player = this.playersList.getPlayerByUUID(uuid);
-                player.numLives = numLives;
+                let nLives = deserialized.numLives;
+                this.playersList.getPlayerByUUID(uuid).numLives = nLives;
                 break;
             }
             case WidowUsedMessage.getType():{

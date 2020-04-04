@@ -18,8 +18,8 @@ export class PlayersLabel extends Phaser.GameObjects.Container {
         // Recreate a label for each player
         let i = 0;
         this.playersList.getPlayers().forEach(player => {
-            let playerName = player.name;
-            if (playerName === '') {
+            let playerName = player.name + ":" + player.numLives;
+            if (player.name === '') {
                 playerName = 'Unnamed';
             }
             if (player.isMe) {

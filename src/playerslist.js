@@ -15,6 +15,7 @@ export class PlayersList {
         });
         return uuidList;
     }
+    
 
     orderByUUIDList(uuidList) {
         let orderedPlayers = []

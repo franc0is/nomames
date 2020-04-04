@@ -12,7 +12,7 @@ export class Message {
             [NoMamesMessage.getType()]: NoMamesMessage,
             [ResetMessage.getType()]: ResetMessage,
             [LossLifeMessage.getType()]: LossLifeMessage,
-            [WidowUsedMessade.getType()]: WidowUsedMessade
+            [WidowUsedMessage.getType()]: WidowUsedMessage
         };
     }
 
@@ -117,13 +117,13 @@ export class LossLifeMessage extends Message {
     constructor(uuid,numLives){
         super('LossOfLife');
         this.uuid = uuid;
-        this.lives = numLives;
+        this.numLives = numLives;
     }
     static getType(){
         return 'LossOfLife';
     }
     static deserialize(msg){
-        return new this(msg['uuid','numLives']);
+        return new this(msg['uuid'],msg['numLives']);
     }
 }
 export class WidowUsedMessage extends Message {
