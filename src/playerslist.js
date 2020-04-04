@@ -80,6 +80,30 @@ export class PlayersList {
         }
     }
 
+    setPreviousPlayerActive() {
+        let next = false;
+        let i = this.players.length - 1;
+        let activeIdx = 0;
+        do {
+            let player = this.players[i];
+            if (next && !player.isDead) {
+                player.isActive = true;
+                return;
+            }
+            if (player.isActive) {
+                player.isActive = false;
+                next = true;
+                activeIdx = i;
+            }
+            i--;
+            if (i < 0) {
+                i = this.players.length - 1;
+            }
+        } while (i != activeIdx);
+        // else
+        this.players[0].isActive = true;
+    }
+
     setNextPlayerActive() {
         let next = false;
         let i = 0;
@@ -97,8 +121,6 @@ export class PlayersList {
             }
             i = (i + 1) % this.players.length;
         } while (i != activeIdx);
-        for (const [idx, player] of this.players.entries()) {
-        }
         // else
         this.players[0].isActive = true;
     }

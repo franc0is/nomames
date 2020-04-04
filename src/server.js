@@ -16,6 +16,7 @@ export class Server {
         this.setCallbacks(callbacks);
         this.myUUID = PubNub.generateUUID();
         this.playersList = new PlayersList(this.myUUID);
+        this.widowUsed = false;
     }
 
     setCallbacks(callbacks) {
@@ -170,11 +171,22 @@ export class Server {
             case KillPlayerMessage.getType(): {
                 let uuid = deserialized.uuid;
                 let player = this.playersList.getPlayerByUUID(uuid);
-                player.isDead = true;
-                if (player.isActive) {
-                    this.playersList.setNextPlayerActive();
+                if (player.numLives > 1){
+                    player.numLives -= 1;
+                    player.setActive = true;
+                } else if (!this.widowUsed){
+                    this.widowUsed = true;
+                    player.setActive = true;
+                    // Alter player name to make fun of them
+                    player.name = '💩' + player.name.substring(1);
+                } else {
+                    player.numLives = 0;
+                    player.isDead = true;
+                    if (player.isActive) {
+                        this.playersList.setPreviousPlayerActive();
+                    }
                 }
-                this.callbacks.onPlayersUpdate(this.playersList);
+                this.callbacks.onReset();
                 break;
             }
             case NoMamesMessage.getType(): {
