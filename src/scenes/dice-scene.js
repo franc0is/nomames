@@ -88,6 +88,8 @@ export class DiceScene extends Phaser.Scene {
         this.dice = [];
         for (let i=0; i<5; i++) {
             let d = new Dice(this, 0, 0);
+            var diceval = 5-i;
+            d.setValue(diceval)
             this.add.existing(d);
             this.input.setDraggable(d);
             this.cup.add(d);
