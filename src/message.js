@@ -10,9 +10,7 @@ export class Message {
             [PassCupMessage.getType()]: PassCupMessage,
             [KillPlayerMessage.getType()]: KillPlayerMessage,
             [NoMamesMessage.getType()]: NoMamesMessage,
-            [ResetMessage.getType()]: ResetMessage,
-            [LossLifeMessage.getType()]: LossLifeMessage,
-            [WidowUsedMessage.getType()]: WidowUsedMessage
+            [ResetMessage.getType()]: ResetMessage
         };
     }
 
@@ -111,31 +109,5 @@ export class ResetMessage extends Message {
 
     static deserialize(msg) {
         return new this(msg['uuid']);
-    }
-}
-export class LossLifeMessage extends Message {
-    constructor(uuid,numLives){
-        super('LossOfLife');
-        this.uuid = uuid;
-        this.numLives = numLives;
-    }
-    static getType(){
-        return 'LossOfLife';
-    }
-    static deserialize(msg){
-        return new this(msg['uuid'],msg['numLives']);
-    }
-}
-export class WidowUsedMessage extends Message {
-    constructor() {
-        super('WidowUsed');
-    }
-
-    static getType() {
-        return 'WidowUsed';
-    }
-
-    static deserialize(msg) {
-        return new this();
     }
 }

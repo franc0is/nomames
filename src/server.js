@@ -6,7 +6,6 @@ import { Message, StartGameMessage, DiceUpdateMessage,
          WidowUsedMessage} from './message';
 import { PlayersList } from './playerslist'
 import { Player } from './player'
-import { DiceScene } from './scenes/dice-scene';
 
 
 /*
@@ -19,7 +18,7 @@ export class Server {
         this.setCallbacks(callbacks);
         this.myUUID = PubNub.generateUUID();
         this.playersList = new PlayersList(this.myUUID);
-        this.widow = 1;
+        this.widowUsed = false;
     }
 
     setCallbacks(callbacks) {
@@ -132,21 +131,8 @@ export class Server {
     }
 
     killPlayer(player) {
-        if (player.numLives > 1){
-            let Lives = player.numLives - 1;
-            let msg = new LossLifeMessage(player.uuid,Lives);
-            this.publish(msg);
-            let msg2 = new PassCupMessage(player.uuid);
-            this.publish(msg2);
-        }else if(this.widow === 1){
-            let msg = new WidowUsedMessage();
-            this.publish(msg);
-            let msg2 = new PassCupMessage(player.uuid);
-            this.publish(msg2);
-        }else{
-            let msg = new KillPlayerMessage(player.uuid);
-            this.publish(msg);
-        }
+        let msg = new KillPlayerMessage(player.uuid);
+        this.publish(msg);
     }
 
     noMames() {
@@ -154,9 +140,8 @@ export class Server {
         this.publish(msg);
     }
 
-    reset() {
-        let me = this.playersList.getMe();
-        let msg = new ResetMessage(me.uuid);
+    reset(nextPlayer) {
+        let msg = new ResetMessage(nextPlayer.uuid);
         this.publish(msg);
     }
 
@@ -187,11 +172,22 @@ export class Server {
             case KillPlayerMessage.getType(): {
                 let uuid = deserialized.uuid;
                 let player = this.playersList.getPlayerByUUID(uuid);
-                player.isDead = true;
-                if (player.isActive) {
-                    this.playersList.setNextPlayerActive();
+                if (player.numLives > 1){
+                    player.numLives -= 1;
+                    player.setActive = true;
+                } else if (!this.widowUsed){
+                    this.widowUsed = true;
+                    player.setActive = true;
+                    // TODO alter player name to make fun of them
+                } else {
+                    player.numLives = 0;
+                    player.isDead = true;
+                    if (player.isActive) {
+                        // TODO should be previous player
+                        this.playersList.setNextPlayerActive();
+                    }
                 }
-                this.callbacks.onPlayersUpdate(this.playersList);
+                this.callbacks.onReset();
                 break;
             }
             case NoMamesMessage.getType(): {
@@ -203,16 +199,6 @@ export class Server {
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
                 this.callbacks.onReset();
-                break;
-            }
-            case LossLifeMessage.getType():{
-                let uuid = deserialized.uuid;
-                let nLives = deserialized.numLives;
-                this.playersList.getPlayerByUUID(uuid).numLives = nLives;
-                break;
-            }
-            case WidowUsedMessage.getType():{
-                this.widow = 0;
                 break;
             }
         }
