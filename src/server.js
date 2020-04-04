@@ -177,13 +177,13 @@ export class Server {
                 } else if (!this.widowUsed){
                     this.widowUsed = true;
                     player.setActive = true;
-                    // TODO alter player name to make fun of them
+                    // Alter player name to make fun of them
+                    player.name = '💩' + player.name.substring(1);
                 } else {
                     player.numLives = 0;
                     player.isDead = true;
                     if (player.isActive) {
-                        // TODO should be previous player
-                        this.playersList.setNextPlayerActive();
+                        this.playersList.setPreviousPlayerActive();
                     }
                 }
                 this.callbacks.onReset();
