@@ -19,7 +19,7 @@ export class PlayersLabel extends Phaser.GameObjects.Container {
         let i = 0;
         this.playersList.getPlayers().forEach(player => {
             let playerName = player.name;
-            if (player.name === '') {
+            if (playerName === '') {
                 playerName = 'Unnamed';
             }
             if (player.isMe) {
