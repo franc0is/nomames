@@ -138,8 +138,9 @@ export class Server {
         this.publish(msg);
     }
 
-    reset(nextPlayer) {
-        let msg = new ResetMessage(nextPlayer.uuid);
+    reset() {
+        let me = this.playersList.getMe();
+        let msg = new ResetMessage(me.uuid);
         this.publish(msg);
     }
 
