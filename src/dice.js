@@ -1,6 +1,6 @@
 export class Dice extends Phaser.GameObjects.Sprite {
 
-    constructor(scene, x, y) {
+    constructor(scene, x, y, initial_value) {
         super(scene, x, y);
 
         this.lastClickTime = 0;
@@ -13,7 +13,7 @@ export class Dice extends Phaser.GameObjects.Sprite {
         this.individualRoll = true;
         this.on('pointerdown', this.onClick, this);
 
-        this.setValue(1);
+        this.setValue(initial_value);
         this.onRollCb = () => {};
         this.didRoll = false;
     }

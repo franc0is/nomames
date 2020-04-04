@@ -5,6 +5,8 @@ import { TextButton } from '../text-button';
 import { DiceUpdateMessage } from '../message';
 import { PlayersLabel } from '../playerslabel';
 
+const NUM_DICE = 5;
+
 export class DiceScene extends Phaser.Scene {
     /*
      * XXX
@@ -86,8 +88,8 @@ export class DiceScene extends Phaser.Scene {
         this.add.existing(resetButton);
 
         this.dice = [];
-        for (let i=0; i<5; i++) {
-            let d = new Dice(this, 0, 0);
+        for (let i=0; i< NUM_DICE; i++) {
+            let d = new Dice(this, 0, 0, NUM_DICE - i);
             this.add.existing(d);
             this.input.setDraggable(d);
             this.cup.add(d);
