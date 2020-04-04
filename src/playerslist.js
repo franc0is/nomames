@@ -74,7 +74,7 @@ export class PlayersList {
         }
         if (removeIdx !== undefined) {
             if (this.players[removeIdx].isActive) {
-                this.players[(removeIdx + 1) % this.players.length].isActive = true;
+                this.setNextPlayerActive();
             }
             delete this.players[removeIdx];
         }
@@ -82,7 +82,10 @@ export class PlayersList {
 
     setNextPlayerActive() {
         let next = false;
-        for (const [idx, player] of this.players.entries()) {
+        let i = 0;
+        let activeIdx = 0;
+        do {
+            let player = this.players[i];
             if (next && !player.isDead) {
                 player.isActive = true;
                 return;
@@ -90,7 +93,11 @@ export class PlayersList {
             if (player.isActive) {
                 player.isActive = false;
                 next = true;
+                activeIdx = i;
             }
+            i = (i + 1) % this.players.length;
+        } while (i != activeIdx);
+        for (const [idx, player] of this.players.entries()) {
         }
         // else
         this.players[0].isActive = true;

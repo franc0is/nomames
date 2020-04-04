@@ -41,7 +41,7 @@ export class DiceScene extends Phaser.Scene {
     }
 
     create() {
-        let container = this.add.container();
+        this.nomames = false;
         this.cup = new DiceZone(this, 305, 100, 600, 150, 'Cup');
         this.cup.setIndividualRoll(false);
         this.table = new DiceZone(this, 305, 300, 600, 150, 'Table');
@@ -52,6 +52,9 @@ export class DiceScene extends Phaser.Scene {
         this.cupRollButton = new TextButton(this, 610, 30, 'Roll', () => {
             this.cup.roll();
             this.cupRollButton.setEnabled(false);
+            if (this.nomames) {
+                this.onNoMames();
+            }
         });
         this.add.existing(this.cupRollButton);
 
@@ -103,9 +106,6 @@ export class DiceScene extends Phaser.Scene {
 
         this.input.on('dragleave', function(pointer, gameObject, dropZone) {
             dropZone.setHighlighted(false);
-            dropZone.remove(gameObject);
-            // XXX if the die is not in a container, it doesn't get rendered
-            container.add(gameObject);
         });
 
         this.input.on('drop', function(pointer, gameObject, dropZone) {
@@ -165,6 +165,9 @@ export class DiceScene extends Phaser.Scene {
         this.playersList = playersList;
         this.setPlayable(playersList.getActivePlayer().isMe);
         this.playersLabel.updateWithPlayers(playersList);
+        if (this.nomames) {
+            this.onNoMames();
+        }
     }
 
     onDiceUpdate(msg) {
@@ -194,6 +197,7 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onNoMames() {
+        this.nomames = true;
         this.setPlayable(true);
         this.cup.setVisible(true);
         this.noMamesText.setVisible(true);
