@@ -90,8 +90,8 @@ export class DiceScene extends Phaser.Scene {
 
         let makeDeadButton = new TextButton(this, 610, 120, 'Die', {
             onClick: () => {
-            // FIXME needs to send this to server & other players
-            this.server.killPlayer(this.playersList.getMe());
+                let playerList = this.server.getPlayersList();
+                this.server.killPlayer(playersList.getMe());
             }
         });
         this.add.existing(makeDeadButton);
