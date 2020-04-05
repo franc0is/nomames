@@ -37,6 +37,12 @@ export class DiceScene extends Phaser.Scene {
             },
             onPassDirectionChange: (isClockwise) => {
                 this.onPassDirectionChange(isClockwise);
+            },
+            onPause: (pauseText) => {
+                this.onPause(pauseText);
+            },
+            onResume: () => {
+                this.onResume();
             }
         });
     }
@@ -159,6 +165,17 @@ export class DiceScene extends Phaser.Scene {
         this.table.setOnUpdateCb(() => {
             this.updateDice();
         });
+    }
+
+    onPause(pauseText) {
+        this.scene.pause();
+        this.scene.launch('pauseScene', { pauseText: pauseText });
+    }
+
+    onResume() {
+        this.scene.stop('pauseScene');
+        this.scene.resume();
+
     }
 
     setPlayable(playable) {
