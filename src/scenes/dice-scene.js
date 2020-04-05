@@ -37,6 +37,9 @@ export class DiceScene extends Phaser.Scene {
             },
             onPassDirectionChange: (isClockwise) => {
                 this.onPassDirectionChange(isClockwise);
+            },
+            onLabelUpdate: (players) => {
+                this.onLabelUpdate(players);
             }
         });
     }
@@ -69,6 +72,7 @@ export class DiceScene extends Phaser.Scene {
             onClick: () => {
                 this.cup.setVisible(true);
                 this.noMamesButton.setEnabled(false);
+                this.server.playerLooked();
             }
         });
         this.add.existing(cupLookButton);
@@ -76,6 +80,9 @@ export class DiceScene extends Phaser.Scene {
         this.firstPass = false;
         this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass >', {
             onClick: () => {
+                let playersList = this.server.getPlayersList();
+                playersList.getMe().hasLooked = false; 
+                playersList.getMe().rolledCup = false;
                 this.server.passCup();
             },
             onLongClick: () => {
@@ -192,6 +199,10 @@ export class DiceScene extends Phaser.Scene {
         if (this.nomames) {
             this.onNoMames();
         }
+    }
+
+    onLabelUpdate(playersList) {
+        this.playersLabel.updateWithPlayers(playersList);
     }
 
     onDiceUpdate(msg) {

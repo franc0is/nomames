@@ -27,6 +27,10 @@ export class PlayersLabel extends Phaser.GameObjects.Container {
             }
             playerName += ":" + player.numLives;
             let c = player.isActive ? 'red' : 'white';
+            if (player.hasLooked){
+                c = 'green';
+            }
+            
             if (player.isDead) {
                 c = '#888888';
             }
