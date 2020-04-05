@@ -38,6 +38,7 @@ export class Server {
 
         this.pubnub.addListener({
             status: (statusEvent) => {
+                console.log(">>> ", statusEvent);
                 if (statusEvent.category === "PNConnectedCategory") {
                 }
             },
