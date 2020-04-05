@@ -180,10 +180,12 @@ export class Server {
                 let player = this.playersList.getPlayerByUUID(uuid);
                 if (player.numLives > 1){
                     player.numLives -= 1;
-                    player.setActive = true;
+                    this.playersList.getActivePlayer().isActive= false;
+                    player.isActive = true;
                 } else if (!this.widowUsed){
                     this.widowUsed = true;
-                    player.setActive = true;
+                    this.playersList.getActivePlayer().isActive= false;
+                    player.isActive = true;
                     // Alter player name to make fun of them
                     player.name = '💩' + player.name.substring(1);
                 } else {
