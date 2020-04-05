@@ -1,4 +1,5 @@
 import { Server } from '../server';
+import { ImageButton } from '../image-button';
 import { TextButton } from '../text-button';
 import { PlayersLabel } from '../playerslabel';
 
@@ -10,6 +11,8 @@ export class JoinScene extends Phaser.Scene {
     preload() {
         this.load.html('nameform', 'assets/nameform.html');
         this.load.html('hostjoinform', 'assets/hostjoinform.html');
+        this.load.image('createButton', 'assets/CreateButton.png');
+        this.load.image('joinButton', 'assets/JoinButton.png');
     }
 
     create() {
@@ -22,7 +25,12 @@ export class JoinScene extends Phaser.Scene {
             }
         });
 
+        this.createButton = new ImageButton(this, 200, 200, 'createButton');
+        this.add.existing(this.createButton);
+        this.joinButton = new ImageButton(this, 100, 100, 'joinButton');
+        this.add.existing(this.joinButton);
 
+        /*
         let text = this.add.text(
             50,
             30,
@@ -76,6 +84,7 @@ export class JoinScene extends Phaser.Scene {
         let playersList = this.server.getPlayersList();
         this.playersLabel = new PlayersLabel(this, 20, 400, playersList);
         this.add.existing(this.playersLabel);
+        */
     }
 
     onPlayersUpdate(playersList) {
