@@ -10,7 +10,8 @@ export class Message {
             [PassCupMessage.getType()]: PassCupMessage,
             [KillPlayerMessage.getType()]: KillPlayerMessage,
             [NoMamesMessage.getType()]: NoMamesMessage,
-            [ResetMessage.getType()]: ResetMessage
+            [ResetMessage.getType()]: ResetMessage,
+            [ChangeDirectionMessage.getType()]: ChangeDirectionMessage
         };
     }
 
@@ -109,5 +110,20 @@ export class ResetMessage extends Message {
 
     static deserialize(msg) {
         return new this(msg['uuid']);
+    }
+}
+
+export class ChangeDirectionMessage extends Message {
+    constructor(isClockwise) {
+        super('changeDirection');
+        this.isClockwise = isClockwise;
+    }
+
+    static getType() {
+        return 'changeDirection';
+    }
+
+    static deserialize(msg) {
+        return new this(msg['isClockwise']);
     }
 }

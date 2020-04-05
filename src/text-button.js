@@ -1,16 +1,15 @@
 export class TextButton extends Phaser.GameObjects.Text {
-    constructor(scene, x, y, text, callback) {
+    constructor(scene, x, y, text, callbacks) {
         super(scene, x, y, text, { fill: '#0f0'});
 
+        this.callbacks = callbacks;
         this.enabled = true;
+        this.startClickTime = 0;
         this.setInteractive({ useHandCursor: true })
             .on('pointerover', () => this.enterHoverState() )
             .on('pointerout', () => this.enterRestState() )
-            .on('pointerdown', () => this.enterActiveState() )
-            .on('pointerup', () => {
-                this.enterHoverState();
-                callback();
-            });
+            .on('pointerdown', () => this.onPointerDown() )
+            .on('pointerup', () => this.onPointerUp() );
     }
 
     setEnabled(enabled) {
@@ -24,9 +23,20 @@ export class TextButton extends Phaser.GameObjects.Text {
         }
     }
 
-    enterActiveState() {
+    onPointerDown() {
         if (!this.enabled) { return; }
+        this.startClickTime = this.scene.time.now;
         this.setStyle({ fill: '#0ff' });
+    }
+
+    onPointerUp() {
+        if (this.scene.time.now - this.startClickTime > 1000) {
+            this.callbacks.onLongClick();
+        } else {
+            this.callbacks.onClick();
+        }
+
+        this.enterHoverState();
     }
 
     enterHoverState() {

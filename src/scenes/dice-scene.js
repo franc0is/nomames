@@ -34,6 +34,9 @@ export class DiceScene extends Phaser.Scene {
             },
             onReset: () => {
                 this.onReset();
+            },
+            onPassDirectionChange: (isClockwise) => {
+                this.onPassDirectionChange(isClockwise);
             }
         });
     }
@@ -51,39 +54,59 @@ export class DiceScene extends Phaser.Scene {
         this.noMamesText = this.add.text(200, 180, "🚨🚨 NO MAMES 🚨🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
 
-        this.cupRollButton = new TextButton(this, 610, 30, 'Roll', () => {
-            this.cup.roll();
-            this.cupRollButton.setEnabled(false);
-            if (this.nomames) {
-                this.onNoMames();
+        this.cupRollButton = new TextButton(this, 610, 30, 'Roll', {
+            onClick: () => {
+                this.cup.roll();
+                this.cupRollButton.setEnabled(false);
+                if (this.nomames) {
+                    this.onNoMames();
+                }
             }
         });
         this.add.existing(this.cupRollButton);
 
-        let cupLookButton = new TextButton(this, 610, 60, 'Look', () => {
-            this.cup.setVisible(true);
-            this.noMamesButton.setEnabled(false);
+        let cupLookButton = new TextButton(this, 610, 60, 'Look', {
+            onClick: () => {
+                this.cup.setVisible(true);
+                this.noMamesButton.setEnabled(false);
+            }
         });
         this.add.existing(cupLookButton);
 
-        let nextPlayerButton = new TextButton(this, 610, 90, 'Pass', () => {
-            this.server.passCup();
-        });
-        this.add.existing(nextPlayerButton);
+        this.firstPass = false;
+        this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass >', {
+            onClick: () => {
+                this.server.passCup();
+            },
+            onLongClick: () => {
+                if (this.firstPass) {
+                    return;
+                }
 
-        let makeDeadButton = new TextButton(this, 610, 120, 'Die', () => {
+                this.server.changePassDirection();
+            }
+        });
+        this.add.existing(this.nextPlayerButton);
+
+        let makeDeadButton = new TextButton(this, 610, 120, 'Die', {
+            onClick: () => {
             // FIXME needs to send this to server & other players
             this.server.killPlayer(this.playersList.getMe());
+            }
         });
         this.add.existing(makeDeadButton);
 
-        this.noMamesButton = new TextButton(this, 610, 150, 'No Mames!', () => {
+        this.noMamesButton = new TextButton(this, 610, 150, 'No Mames!', {
+            onClick: () => {
             this.server.noMames();
+            }
         });
         this.add.existing(this.noMamesButton);
 
-        let resetButton = new TextButton(this, 610, 180, 'Reset', () => {
+        let resetButton = new TextButton(this, 610, 180, 'Reset', {
+            onClick: () => {
             this.server.reset()
+            }
         });
         this.add.existing(resetButton);
 
@@ -121,11 +144,11 @@ export class DiceScene extends Phaser.Scene {
             }
         });
 
-        this.playersList = this.server.getPlayersList();
-        this.playersLabel = new PlayersLabel(this, 20, 400, this.playersList);
+        let playersList = this.server.getPlayersList();
+        this.playersLabel = new PlayersLabel(this, 20, 400, playersList);
         this.add.existing(this.playersLabel);
 
-        if (!this.playersList.getActivePlayer().isMe) {
+        if (!playersList.getActivePlayer().isMe) {
             this.setPlayable(false);
         }
 
@@ -163,7 +186,7 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onPlayersUpdate(playersList) {
-        this.playersList = playersList;
+        this.firstPass = true;
         this.setPlayable(playersList.getActivePlayer().isMe);
         this.playersLabel.updateWithPlayers(playersList);
         if (this.nomames) {
@@ -206,5 +229,13 @@ export class DiceScene extends Phaser.Scene {
 
     onReset() {
         this.scene.restart();
+    }
+
+    onPassDirectionChange(isClockwise) {
+        if (this.isClockwise) {
+            this.nextPlayerButton.setText('Pass >');
+        } else {
+            this.nextPlayerButton.setText('Pass <');
+        }
     }
 }

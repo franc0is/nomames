@@ -65,8 +65,10 @@ export class JoinScene extends Phaser.Scene {
 
         });
 
-        this.startButton = new TextButton(this, 100, 300, '[ START ]', () => {
-            this.server.startGame();
+        this.startButton = new TextButton(this, 100, 300, '[ START ]', {
+            onClick: () => {
+                this.server.startGame();
+            }
         });
         this.add.existing(this.startButton);
         this.startButton.setVisible(false);

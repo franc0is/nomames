@@ -2,6 +2,7 @@ export class PlayersList {
     constructor(myUUID) {
         this.players = []
         this.myUUID = myUUID;
+        this.isClockwise = true;
     }
 
     getPlayers() {
@@ -80,10 +81,34 @@ export class PlayersList {
         }
     }
 
+    directionIsClockwise() {
+        return this.isClockwise;
+    }
+
+    setDirection(isClockwise) {
+        this.isClockwise = isClockwise;
+    }
+
     setPreviousPlayerActive() {
+        if (this.isClockwise) {
+            this.setNextCounterClockwise();
+        } else {
+            this.setNextClockwise();
+        }
+    }
+
+    setNextPlayerActive() {
+        if (this.isClockwise) {
+            this.setNextClockwise();
+        } else {
+            this.setNextCounterClockwise();
+        }
+    }
+
+    setNextCounterClockwise() {
         let next = false;
         let i = this.players.length - 1;
-        let activeIdx = 0;
+        let activeIdx = -1;
         do {
             let player = this.players[i];
             if (next && !player.isDead) {
@@ -104,7 +129,7 @@ export class PlayersList {
         this.players[0].isActive = true;
     }
 
-    setNextPlayerActive() {
+    setNextClockwise() {
         let next = false;
         let i = 0;
         let activeIdx = 0;

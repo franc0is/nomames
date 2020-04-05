@@ -1,7 +1,7 @@
 import PubNub from 'pubnub';
 import { Message, StartGameMessage, DiceUpdateMessage,
          PassCupMessage, KillPlayerMessage, NoMamesMessage,
-         ResetMessage } from './message';
+         ResetMessage, ChangeDirectionMessage } from './message';
 import { PlayersList } from './playerslist'
 import { Player } from './player'
 
@@ -123,6 +123,13 @@ export class Server {
         this.publish(msg);
     }
 
+    changePassDirection() {
+        let isClockwise = this.playersList.directionIsClockwise();
+        isClockwise = !isClockwise;
+        let msg = new ChangeDirectionMessage(isClockwise);
+        this.publish(msg);
+    }
+
     updateDice(update) {
         let msg = new DiceUpdateMessage(update);
         this.publish(msg);
@@ -186,6 +193,7 @@ export class Server {
                         this.playersList.setPreviousPlayerActive();
                     }
                 }
+                this.playersList.setDirection(true);
                 this.callbacks.onReset();
                 break;
             }
@@ -197,7 +205,13 @@ export class Server {
                 let uuid = deserialized.uuid;
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
+                this.playersList.setDirection(true);
                 this.callbacks.onReset();
+                break;
+            }
+            case ChangeDirectionMessage.getType(): {
+                this.playersList.setDirection(deserialized.isClockwise);
+                this.callbacks.onPassDirectionChange(deserialized.isClockwise);
                 break;
             }
         }
