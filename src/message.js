@@ -59,7 +59,7 @@ export class DiceUpdateMessage extends Message {
         super('diceUpdate');
         this.cup = update['cup'];
         this.table = update['table'];
-        this.rollType = update['roll'];
+        this.rollType = update['rollType'];
     }
 
     static getType() {

@@ -58,14 +58,33 @@ export class Dice extends Phaser.GameObjects.Sprite {
         let clickDelay = this.scene.time.now - this.lastClickTime;
         this.lastClickTime = this.scene.time.now;
         if (clickDelay < 350) {
-            this.roll();
+            this.indieRoll("indie");
         }
     }
 
-    roll() {
+    roll(rollType) {
         let n = Phaser.Math.RND.between(0, 5);
         this.setValue(n);
-        this.onRollCb(this);
+        this.onRollCb(rollType);
         this.markRolled();
+    }
+
+    indieRoll(rollType) {
+        let n = Phaser.Math.RND.between(0, 5);
+        for (let i=0; i< 5; i++){
+            //var x = setTimeout(function(){this.DieSetFunction(i,"primIndie")},500*i);
+        }
+        for (let i=0; i< n; i++){
+            //var y = setTimeout(this.DieSetFunction(i,"primIndie"),3000+1000*i);
+        }
+        //setTimeout(this.DieSetFunction(n,rollType),(3000+n*1000))
+        this.setValue(n);
+        this.onRollCb("indie")
+        this.markRolled();
+    }
+
+    DieSetFunction(d,rollType) {
+        this.setValue(d);
+        this.onRollCb(rollType);
     }
 }

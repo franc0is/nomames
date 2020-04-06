@@ -156,12 +156,12 @@ export class DiceScene extends Phaser.Scene {
             this.setPlayable(false);
         }
 
-        this.cup.setOnUpdateCb(() => {
-            this.updateDice()
+        this.cup.setOnUpdateCb((d) => {
+            this.updateDice(d)
         });
 
-        this.table.setOnUpdateCb(() => {
-            this.updateDice();
+        this.table.setOnUpdateCb((d) => {
+            this.updateDice(d);
         });
     }
 
@@ -184,12 +184,13 @@ export class DiceScene extends Phaser.Scene {
             'table': {
                 'dice': this.table.getDice().map(d => d.getValue())
             },
-            'roll': {
-                rollType
-            }
+            'rollType': rollType.toString()
         };
 
-        this.server.updateDice(update);
+        if (!(rollType === "primIndie")){
+            this.server.updateDice(update);
+        }
+        
     }
 
     onPlayersUpdate(playersList) {
@@ -224,12 +225,12 @@ export class DiceScene extends Phaser.Scene {
         });
         console.assert(i === 5);
 
-        this.cup.setOnUpdateCb(() => {
-            this.updateDice()
+        this.cup.setOnUpdateCb((d) => {
+            this.updateDice(d)
         });
 
-        this.table.setOnUpdateCb(() => {
-            this.updateDice();
+        this.table.setOnUpdateCb((d) => {
+            this.updateDice(d)
         });
     }
 
