@@ -11,7 +11,8 @@ export class Message {
             [KillPlayerMessage.getType()]: KillPlayerMessage,
             [NoMamesMessage.getType()]: NoMamesMessage,
             [ResetMessage.getType()]: ResetMessage,
-            [ChangeDirectionMessage.getType()]: ChangeDirectionMessage
+            [ChangeDirectionMessage.getType()]: ChangeDirectionMessage,
+            [PlayerLookedMessage.getType()]: PlayerLookedMessage
         };
     }
 
@@ -126,5 +127,19 @@ export class ChangeDirectionMessage extends Message {
 
     static deserialize(msg) {
         return new this(msg['isClockwise']);
+    }
+}
+
+export class PlayerLookedMessage extends Message {
+    constructor() {
+        super('playerLooked')
+    }
+
+    static getType() {
+        return 'playerLooked';
+    }
+
+    static deserialize(msg) {
+        return new this();
     }
 }

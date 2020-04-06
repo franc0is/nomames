@@ -69,6 +69,7 @@ export class DiceScene extends Phaser.Scene {
             onClick: () => {
                 this.cup.setVisible(true);
                 this.noMamesButton.setEnabled(false);
+                this.server.playerLooked();
             }
         });
         this.add.existing(cupLookButton);
@@ -76,6 +77,9 @@ export class DiceScene extends Phaser.Scene {
         this.firstPass = false;
         this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass >', {
             onClick: () => {
+                let playersList = this.server.getPlayersList();
+                playersList.getMe().hasLooked = false; 
+                playersList.getMe().rolledCup = false;
                 this.server.passCup();
             },
             onLongClick: () => {
@@ -189,9 +193,12 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onPlayersUpdate(playersList) {
-        this.firstPass = true;
-        this.setPlayable(playersList.getActivePlayer().isMe);
         this.playersLabel.updateWithPlayers(playersList);
+        if (!this.input.enabled && playerList.getActivePlayer().isMe) {
+            // this player is now active
+            this.firstPass = true;
+            this.setPlayable(true);
+        }
         if (this.nomames) {
             this.onNoMames();
         }
