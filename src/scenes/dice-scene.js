@@ -56,7 +56,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.cupRollButton = new TextButton(this, 610, 30, 'Roll', {
             onClick: () => {
-                this.cup.roll();
+                this.cup.roll("cup");
                 this.cupRollButton.setEnabled(false);
                 if (this.nomames) {
                     this.onNoMames();
@@ -171,7 +171,7 @@ export class DiceScene extends Phaser.Scene {
         });
     }
 
-    updateDice() {
+    updateDice(rollType) {
         let update = {
             'cup': {
                 'visible': this.cup.getVisible(),
@@ -179,6 +179,9 @@ export class DiceScene extends Phaser.Scene {
             },
             'table': {
                 'dice': this.table.getDice().map(d => d.getValue())
+            },
+            'roll': {
+                rollType
             }
         };
 

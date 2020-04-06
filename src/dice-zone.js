@@ -45,13 +45,13 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         this.onUpdateCb();
     }
 
-    roll() {
+    roll(rollType) {
         var dice = this.container.getAll();
         for (var die of dice) {
             die.roll();
         }
         this.setVisible(false);
-        this.onUpdateCb();
+        this.onUpdateCb(rollType);
     }
 
     setIndividualRoll(enabled) {
