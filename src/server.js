@@ -7,7 +7,7 @@ import { Player } from './player'
 
 
 /*
- * callbacks: onPlayersUpdate, onGameStart, onNoMames, onReset, onLabelUpdate, onDiceUpdate
+ * callbacks: onPlayersUpdate, onGameStart, onNoMames, onReset, onDiceUpdate
  */
 
 export class Server {
@@ -226,7 +226,7 @@ export class Server {
             case PlayerLookedMessage.getType(): {
                 let player = this.playersList.getActivePlayer();
                 player.hasLooked = true;
-                this.callbacks.onLabelUpdate(this.playersList);
+                this.callbacks.onPlayersUpdate(this.playersList);
                 break;
             }
         }

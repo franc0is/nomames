@@ -37,9 +37,6 @@ export class DiceScene extends Phaser.Scene {
             },
             onPassDirectionChange: (isClockwise) => {
                 this.onPassDirectionChange(isClockwise);
-            },
-            onLabelUpdate: (players) => {
-                this.onLabelUpdate(players);
             }
         });
     }
@@ -193,16 +190,15 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onPlayersUpdate(playersList) {
-        this.firstPass = true;
-        this.setPlayable(playersList.getActivePlayer().isMe);
         this.playersLabel.updateWithPlayers(playersList);
+        if (!this.input.enabled && playerList.getActivePlayer().isMe) {
+            // this player is now active
+            this.firstPass = true;
+            this.setPlayable(true);
+        }
         if (this.nomames) {
             this.onNoMames();
         }
-    }
-
-    onLabelUpdate(playersList) {
-        this.playersLabel.updateWithPlayers(playersList);
     }
 
     onDiceUpdate(msg) {
