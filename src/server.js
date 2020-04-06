@@ -172,6 +172,7 @@ export class Server {
             case DiceUpdateMessage.getType(): {
                 if (deserialized.rollType === "cup"){
                     this.playersList.getActivePlayer().rolledCup = true;
+                    this.callbacks.onPlayersUpdate(this.playersList);
                 }
                 if (!fromMe) {
                     this.callbacks.onDiceUpdate(deserialized);

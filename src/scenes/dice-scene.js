@@ -194,10 +194,13 @@ export class DiceScene extends Phaser.Scene {
 
     onPlayersUpdate(playersList) {
         this.playersLabel.updateWithPlayers(playersList);
-        if (!this.input.enabled && playerList.getActivePlayer().isMe) {
+        if (!this.input.enabled && playersList.getActivePlayer().isMe) {
             // this player is now active
             this.firstPass = true;
             this.setPlayable(true);
+        } 
+        if (!playersList.getActivePlayer().isMe){
+            this.setPlayable(false)
         }
         if (this.nomames) {
             this.onNoMames();
