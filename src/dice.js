@@ -65,7 +65,7 @@ export class Dice extends Phaser.GameObjects.Sprite {
     roll(rollType) {
         let n = Phaser.Math.RND.between(0, 5);
         if (rollType === "indie"){
-            this.indieRoll(n);
+            this.indieRoll(n,"indie");
         }else{
             this.setValue(n);
             this.onRollCb(rollType);
@@ -73,14 +73,14 @@ export class Dice extends Phaser.GameObjects.Sprite {
         }
     }
 
-    indieRoll(n) {
+    indieRoll(n,rollType) {
         for (let i=0; i< 5; i++){
             var x = setTimeout(function(){this.DieSetFunction(i,"primIndie")}.bind(this),100*i);
         }
         for (let i=0; i< n; i++){
             var x = setTimeout(function(){this.DieSetFunction(i,"primIndie")}.bind(this),600+200*i);
         }
-        var x = setTimeout(function(){this.DieSetFunction(n,"indie")}.bind(this),600+200*n);
+        var x = setTimeout(function(){this.DieSetFunction(n,rollType)}.bind(this),600+200*n);
         this.markRolled();
     }
 

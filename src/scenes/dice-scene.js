@@ -209,10 +209,29 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onDiceUpdate(msg) {
+        if (msg.rollType === "indie"){
+            let k = 0;
+            let deese = msg.table.dice;
+            let dies = this.table.getDice();
+            for (var douse of dies){
+                let m = 0;
+                for (var die of deese){
+                    if(die === douse){
+                        deese.splice(m);
+                        dies.splice(k);
+                    }else{
+                        var n=m;
+                    }
+                    m++
+                }
+                k++
+            }
+        }
         this.cup.setOnUpdateCb(() => {});
         this.table.setOnUpdateCb(() => {});
 
         let i = 0;
+        let m = 0;
         msg.cup.dice.forEach(die => {
             this.dice[i].setValue(die);
             this.cup.add(this.dice[i]);
@@ -221,7 +240,11 @@ export class DiceScene extends Phaser.Scene {
         msg.table.dice.forEach(die => {
             this.dice[i].setValue(die);
             this.table.add(this.dice[i]);
+            if (n === m){
+                this.dice[i].indieRoll(die,"primIndie");
+            }
             i++
+            m++
         });
         console.assert(i === 5);
 
