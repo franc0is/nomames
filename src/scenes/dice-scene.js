@@ -48,7 +48,6 @@ export class DiceScene extends Phaser.Scene {
     create() {
         this.nomames = false;
         this.cup = new DiceZone(this, 305, 100, 600, 150, 'Cup');
-        this.cup.setIndividualRoll(false);
         this.table = new DiceZone(this, 305, 300, 600, 150, 'Table');
 
         this.noMamesText = this.add.text(200, 180, "🚨🚨 NO MAMES 🚨🚨", { fill: 'red' });
@@ -176,6 +175,7 @@ export class DiceScene extends Phaser.Scene {
     }
 
     updateDice(rollType) {
+        console.log(rollType);
         let update = {
             'cup': {
                 'visible': this.cup.getVisible(),
@@ -186,7 +186,6 @@ export class DiceScene extends Phaser.Scene {
             },
             'rollType': rollType.toString()
         };
-
         if (!(rollType === "primIndie")){
             this.server.updateDice(update);
         }
@@ -241,7 +240,7 @@ export class DiceScene extends Phaser.Scene {
             this.dice[i].setValue(die);
             this.table.add(this.dice[i]);
             if (n === m){
-                this.dice[i].indieRoll(die,"primIndie");
+                this.dice[i].indieRoll(die);
             }
             i++
             m++

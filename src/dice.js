@@ -51,6 +51,8 @@ export class Dice extends Phaser.GameObjects.Sprite {
     }
 
     onClick() {
+        console.log(this.x);
+        console.log(this.y);
         if (!this.individualRoll || this.didRoll) {
             return;
         }
@@ -58,6 +60,14 @@ export class Dice extends Phaser.GameObjects.Sprite {
         let clickDelay = this.scene.time.now - this.lastClickTime;
         this.lastClickTime = this.scene.time.now;
         if (clickDelay < 350) {
+            if (this.y === 100) {
+                this.setValue(0);
+                //move to table
+                this.scene.cup.remove(this);
+                this.scene.table.add(this);
+                this.scene.update;
+                //var y = setTimeout(function(){this.roll("indie")}.bind(this), 50);
+            }
             this.roll("indie");
         }
     }
@@ -65,7 +75,8 @@ export class Dice extends Phaser.GameObjects.Sprite {
     roll(rollType) {
         let n = Phaser.Math.RND.between(0, 5);
         if (rollType === "indie"){
-            this.indieRoll(n,"indie");
+            this.DieSetFunction(n,"indie");
+            this.indieRoll(n);
         }else{
             this.setValue(n);
             this.onRollCb(rollType);
@@ -73,14 +84,14 @@ export class Dice extends Phaser.GameObjects.Sprite {
         }
     }
 
-    indieRoll(n,rollType) {
+    indieRoll(n) {
         for (let i=0; i< 5; i++){
             var x = setTimeout(function(){this.DieSetFunction(i,"primIndie")}.bind(this),100*i);
         }
         for (let i=0; i< n; i++){
             var x = setTimeout(function(){this.DieSetFunction(i,"primIndie")}.bind(this),600+200*i);
         }
-        var x = setTimeout(function(){this.DieSetFunction(n,rollType)}.bind(this),600+200*n);
+        var x = setTimeout(function(){this.DieSetFunction(n,"primIndie")}.bind(this),600+200*n);
         this.markRolled();
     }
 
