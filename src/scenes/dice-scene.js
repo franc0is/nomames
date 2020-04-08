@@ -83,19 +83,39 @@ export class DiceScene extends Phaser.Scene {
         this.add.existing(this.cupLookButton);
 
         this.firstPass = false;
-        this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass >', {
+        this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass', {
             onClick: () => {
-                this.server.passCup();
-            },
-            onLongClick: () => {
-                if (this.firstPass) {
+                if (this.firstPass){
+                    this.server.passCup();
                     return;
                 }
-
-                this.server.changePassDirection();
-            }
+                this.server.changePassDirection(this.clockwise);
+                for (let die of this.cup.getDice()){
+                    if (!die.didRoll){
+                        console.log("cup cheater!");
+                        return;
+                    }
+                }
+                for (let die of this.table.getDice()){
+                    if (!die.didRoll){
+                        console.log("table cheater!");
+                        return;
+                    }
+                }
+                this.server.passCup();
+            },
         });
         this.add.existing(this.nextPlayerButton);
+
+        this.clockwise = true;
+        this.passDirectionButton = new TextButton(this, 660, 90, '>',{
+            onClick: () => {
+                if (!this.firstPass){
+                    this.PassDirectionChange();
+                }
+            }
+        });
+        this.add.existing(this.passDirectionButton);
 
         this.makeDeadButton = new TextButton(this, 610, 120, 'Die', {
             onClick: () => {
@@ -263,11 +283,22 @@ export class DiceScene extends Phaser.Scene {
         this.scene.restart();
     }
 
-    onPassDirectionChange(isClockwise) {
-        if (this.isClockwise) {
-            this.nextPlayerButton.setText('Pass >');
+    PassDirectionChange() {
+        if (!this.clockwise) {
+            this.passDirectionButton.setText('>');
+            this.clockwise = true;
         } else {
-            this.nextPlayerButton.setText('Pass <');
+            this.passDirectionButton.setText('<');
+            this.clockwise = false;
         }
+    }
+
+    onPassDirectionChange(isClockwise) {
+        if (isClockwise) {
+            this.passDirectionButton.setText('>');
+        } else {
+            this.passDirectionButton.setText('<');
+        }
+
     }
 }
