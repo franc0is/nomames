@@ -116,17 +116,11 @@ export class Server {
         this.publish(msg);
     }
 
-    passCup() {
+    passCup(isClockwise) {
+        this.playersList.setDirection(isClockwise);
         this.playersList.setNextPlayerActive();
         let activePlayer = this.playersList.getActivePlayer();
-        let msg = new PassCupMessage(activePlayer.uuid);
-        this.publish(msg);
-    }
-
-    changePassDirection() {
-        let isClockwise = this.playersList.directionIsClockwise();
-        isClockwise = !isClockwise;
-        let msg = new ChangeDirectionMessage(isClockwise);
+        let msg = new PassCupMessage(activePlayer.uuid,isClockwise);
         this.publish(msg);
     }
 
@@ -169,6 +163,8 @@ export class Server {
                 break;
             }
             case PassCupMessage.getType(): {
+                this.playersList.setDirection(deserialized.isClockwise);
+                this.callbacks.onPassDirectionChange(deserialized.isClockwise);
                 let uuid = deserialized.activePlayerUUID;
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
@@ -209,11 +205,6 @@ export class Server {
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
                 this.playersList.setDirection(true);
                 this.callbacks.onReset();
-                break;
-            }
-            case ChangeDirectionMessage.getType(): {
-                this.playersList.setDirection(deserialized.isClockwise);
-                this.callbacks.onPassDirectionChange(deserialized.isClockwise);
                 break;
             }
         }
