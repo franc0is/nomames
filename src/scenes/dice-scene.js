@@ -58,6 +58,8 @@ export class DiceScene extends Phaser.Scene {
             onClick: () => {
                 this.cup.roll();
                 this.cupRollButton.setEnabled(false);
+                this.noMamesButton.setEnabled(false);
+                this.cupLookButton.setEnabled(true);
                 if (this.nomames) {
                     this.onNoMames();
                 }
@@ -65,13 +67,14 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.cupRollButton);
 
-        let cupLookButton = new TextButton(this, 610, 60, 'Look', {
+        this.cupLookButton = new TextButton(this, 610, 60, 'Look', {
             onClick: () => {
                 this.cup.setVisible(true);
                 this.noMamesButton.setEnabled(false);
+                this.cupLookButton.setEnabled(false);
             }
         });
-        this.add.existing(cupLookButton);
+        this.add.existing(this.cupLookButton);
 
         this.firstPass = false;
         this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass >', {
@@ -164,6 +167,7 @@ export class DiceScene extends Phaser.Scene {
     setPlayable(playable) {
         this.input.enabled = playable;
         this.cup.setVisible(false);
+        this.cupLookButton.setEnabled(true);
         this.cupRollButton.setEnabled(true);
         this.noMamesButton.setEnabled(true);
         this.table.getDice().forEach(dice => {
