@@ -128,6 +128,7 @@ export class DiceScene extends Phaser.Scene {
         });
 
         this.input.on('dragenter', function(pointer, gameObject, dropZone) {
+            gameObject.dragging = true;
             dropZone.setHighlighted(true);
         });
 
@@ -141,6 +142,10 @@ export class DiceScene extends Phaser.Scene {
         });
 
         this.input.on('dragend', function(pointer, gameObject, dropZone) {
+            if (!gameObject.dragging) {
+                return;
+            }
+            gameObject.dragging = false;
             if (!dropZone) {
                 gameObject.x = gameObject.input.dragStartX;
                 gameObject.y = gameObject.input.dragStartY;
