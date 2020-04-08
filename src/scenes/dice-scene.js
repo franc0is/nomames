@@ -91,13 +91,14 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.nextPlayerButton);
 
-        let makeDeadButton = new TextButton(this, 610, 120, 'Die', {
+        this.makeDeadButton = new TextButton(this, 610, 120, 'Die', {
             onClick: () => {
                 let playersList = this.server.getPlayersList();
                 this.server.killPlayer(playersList.getMe());
             }
         });
-        this.add.existing(makeDeadButton);
+        this.add.existing(this.makeDeadButton);
+        this.makeDeadButton.setEnabled(false);
 
         this.noMamesButton = new TextButton(this, 610, 150, 'No Mames!', {
             onClick: () => {
@@ -106,12 +107,12 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.noMamesButton);
 
-        let resetButton = new TextButton(this, 610, 180, 'Reset', {
+        this.resetButton = new TextButton(this, 610, 180, 'Reset', {
             onClick: () => {
             this.server.reset()
             }
         });
-        this.add.existing(resetButton);
+        this.add.existing(this.resetButton);
 
         this.dice = [];
         for (let i=0; i< NUM_DICE; i++) {
@@ -167,9 +168,11 @@ export class DiceScene extends Phaser.Scene {
     setPlayable(playable) {
         this.input.enabled = playable;
         this.cup.setVisible(false);
-        this.cupLookButton.setEnabled(true);
-        this.cupRollButton.setEnabled(true);
-        this.noMamesButton.setEnabled(true);
+        this.cupLookButton.setEnabled(playable);
+        this.cupRollButton.setEnabled(playable);
+        this.noMamesButton.setEnabled(playable);
+        this.resetButton.setEnabled(playable);
+        this.nextPlayerButton.setEnabled(playable);
         this.table.getDice().forEach(dice => {
             dice.resetRoll();
         });
@@ -229,6 +232,11 @@ export class DiceScene extends Phaser.Scene {
         this.setPlayable(true);
         this.cup.setVisible(true);
         this.noMamesText.setVisible(true);
+        this.makeDeadButton.setEnabled(true);
+        this.cupLookButton.setEnabled(false);
+        this.cupRollButton.setEnabled(false);
+        this.noMamesButton.setEnabled(false);
+        this.nextPlayerButton.setEnabled(false);
     }
 
     onReset() {
