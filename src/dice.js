@@ -51,8 +51,6 @@ export class Dice extends Phaser.GameObjects.Sprite {
     }
 
     onClick() {
-        console.log(this.x);
-        console.log(this.y);
         if (!this.individualRoll || this.didRoll) {
             return;
         }
@@ -61,6 +59,7 @@ export class Dice extends Phaser.GameObjects.Sprite {
         this.lastClickTime = this.scene.time.now;
         if (clickDelay < 350) {
             if (this.y === 100) {
+                //if the die is inside the cup, set value to a 9 and
                 this.setValue(0);
                 //move to table
                 this.scene.table.add(this);

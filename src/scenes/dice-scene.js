@@ -180,7 +180,6 @@ export class DiceScene extends Phaser.Scene {
     }
 
     updateDice(rollType) {
-        console.log(rollType);
         let update = {
             'cup': {
                 'visible': this.cup.getVisible(),
