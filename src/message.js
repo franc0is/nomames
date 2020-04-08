@@ -11,7 +11,6 @@ export class Message {
             [KillPlayerMessage.getType()]: KillPlayerMessage,
             [NoMamesMessage.getType()]: NoMamesMessage,
             [ResetMessage.getType()]: ResetMessage,
-            [ChangeDirectionMessage.getType()]: ChangeDirectionMessage,
             [PlayerLookedMessage.getType()]: PlayerLookedMessage
         };
     }
