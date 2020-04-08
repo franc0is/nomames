@@ -77,10 +77,9 @@ export class DiceScene extends Phaser.Scene {
         this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass', {
             onClick: () => {
                 if (this.firstPass){
-                    this.server.passCup();
+                    this.server.passCup(this.clockwise);
                     return;
                 }
-                this.server.changePassDirection(this.clockwise);
                 for (let die of this.cup.getDice()){
                     if (!die.didRoll){
                         console.log("cup cheater!");
@@ -93,7 +92,7 @@ export class DiceScene extends Phaser.Scene {
                         return;
                     }
                 }
-                this.server.passCup();
+                this.server.passCup(this.clockwise);
             },
         });
         this.add.existing(this.nextPlayerButton);
@@ -264,8 +263,10 @@ export class DiceScene extends Phaser.Scene {
     onPassDirectionChange(isClockwise) {
         if (isClockwise) {
             this.passDirectionButton.setText('>');
+            this.clockwise = isClockwise;
         } else {
             this.passDirectionButton.setText('<');
+            this.clockwise = isClockwise;
         }
 
     }
