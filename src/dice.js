@@ -63,12 +63,9 @@ export class Dice extends Phaser.GameObjects.Sprite {
             if (this.y === 100) {
                 this.setValue(0);
                 //move to table
-                this.scene.cup.remove(this);
                 this.scene.table.add(this);
-                this.scene.update;
-                //var y = setTimeout(function(){this.roll("indie")}.bind(this), 50);
-            }
-            this.roll("indie");
+            } 
+            this.roll("indie");            
         }
     }
 
