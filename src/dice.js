@@ -58,6 +58,7 @@ export class Dice extends Phaser.GameObjects.Sprite {
         let clickDelay = this.scene.time.now - this.lastClickTime;
         this.lastClickTime = this.scene.time.now;
         if (clickDelay < 350) {
+            this.scene.noMamesButton.setEnabled(false);
             this.roll();
         }
     }
