@@ -48,7 +48,6 @@ export class DiceScene extends Phaser.Scene {
     create() {
         this.nomames = false;
         this.cup = new DiceZone(this, 305, 100, 600, 150, 'Cup');
-        this.cup.setIndividualRoll(false);
         this.table = new DiceZone(this, 305, 300, 600, 150, 'Table');
 
         this.noMamesText = this.add.text(200, 180, "🚨🚨 NO MAMES 🚨🚨", { fill: 'red' });
@@ -56,7 +55,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.cupRollButton = new TextButton(this, 610, 30, 'Roll', {
             onClick: () => {
-                this.cup.roll();
+                this.cup.roll("cup");
                 this.cupRollButton.setEnabled(false);
                 this.noMamesButton.setEnabled(false);
                 this.cupLookButton.setEnabled(true);
@@ -72,6 +71,7 @@ export class DiceScene extends Phaser.Scene {
                 this.cup.setVisible(true);
                 this.noMamesButton.setEnabled(false);
                 this.cupLookButton.setEnabled(false);
+                this.server.playerLooked();
             }
         });
         this.add.existing(this.cupLookButton);
@@ -80,6 +80,9 @@ export class DiceScene extends Phaser.Scene {
         this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass', {
             onClick: () => {
                 if (this.firstPass){
+                    let playersList = this.server.getPlayersList();
+                    playersList.getMe().hasLooked = false; 
+                    playersList.getMe().rolledCup = false;
                     this.server.passCup(this.clockwise);
                     return;
                 }
@@ -95,6 +98,9 @@ export class DiceScene extends Phaser.Scene {
                         return;
                     }
                 }
+                let playersList = this.server.getPlayersList();
+                playersList.getMe().hasLooked = false; 
+                playersList.getMe().rolledCup = false;
                 this.server.passCup(this.clockwise);
             },
         });
@@ -148,6 +154,7 @@ export class DiceScene extends Phaser.Scene {
         });
 
         this.input.on('dragenter', function(pointer, gameObject, dropZone) {
+            gameObject.dragging = true;
             dropZone.setHighlighted(true);
         });
 
@@ -161,6 +168,10 @@ export class DiceScene extends Phaser.Scene {
         });
 
         this.input.on('dragend', function(pointer, gameObject, dropZone) {
+            if (!gameObject.dragging) {
+                return;
+            }
+            gameObject.dragging = false;
             if (!dropZone) {
                 gameObject.x = gameObject.input.dragStartX;
                 gameObject.y = gameObject.input.dragStartY;
@@ -175,12 +186,12 @@ export class DiceScene extends Phaser.Scene {
             this.setPlayable(false);
         }
 
-        this.cup.setOnUpdateCb(() => {
-            this.updateDice()
+        this.cup.setOnUpdateCb((d) => {
+            this.updateDice(d)
         });
 
-        this.table.setOnUpdateCb(() => {
-            this.updateDice();
+        this.table.setOnUpdateCb((d) => {
+            this.updateDice(d);
         });
     }
 
@@ -197,7 +208,7 @@ export class DiceScene extends Phaser.Scene {
         });
     }
 
-    updateDice() {
+    updateDice(rollType) {
         let update = {
             'cup': {
                 'visible': this.cup.getVisible(),
@@ -205,26 +216,54 @@ export class DiceScene extends Phaser.Scene {
             },
             'table': {
                 'dice': this.table.getDice().map(d => d.getValue())
-            }
+            },
+            'rollType': rollType.toString()
         };
-
-        this.server.updateDice(update);
+        if (!(rollType === "primIndie")){
+            this.server.updateDice(update);
+        }
+        
     }
 
     onPlayersUpdate(playersList) {
-        this.firstPass = true;
-        this.setPlayable(playersList.getActivePlayer().isMe);
         this.playersLabel.updateWithPlayers(playersList);
+        if (!this.input.enabled && playersList.getActivePlayer().isMe) {
+            // this player is now active
+            this.firstPass = true;
+            this.setPlayable(true);
+        } 
+        if (!playersList.getActivePlayer().isMe){
+            this.setPlayable(false)
+        }
         if (this.nomames) {
             this.onNoMames();
         }
     }
 
     onDiceUpdate(msg) {
+        if (msg.rollType === "indie"){
+            let k = 0;
+            let deese = msg.table.dice;
+            let dies = this.table.getDice();
+            for (var douse of dies){
+                let m = 0;
+                for (var die of deese){
+                    if(die === douse){
+                        deese.splice(m);
+                        dies.splice(k);
+                    }else{
+                        var n=m;
+                    }
+                    m++
+                }
+                k++
+            }
+        }
         this.cup.setOnUpdateCb(() => {});
         this.table.setOnUpdateCb(() => {});
 
         let i = 0;
+        let m = 0;
         msg.cup.dice.forEach(die => {
             this.dice[i].setValue(die);
             this.cup.add(this.dice[i]);
@@ -233,16 +272,20 @@ export class DiceScene extends Phaser.Scene {
         msg.table.dice.forEach(die => {
             this.dice[i].setValue(die);
             this.table.add(this.dice[i]);
+            if (n === m){
+                this.dice[i].indieRoll(die);
+            }
             i++
+            m++
         });
         console.assert(i === 5);
 
-        this.cup.setOnUpdateCb(() => {
-            this.updateDice()
+        this.cup.setOnUpdateCb((d) => {
+            this.updateDice(d)
         });
 
-        this.table.setOnUpdateCb(() => {
-            this.updateDice();
+        this.table.setOnUpdateCb((d) => {
+            this.updateDice(d)
         });
     }
 

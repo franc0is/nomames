@@ -11,7 +11,8 @@ export class Message {
             [KillPlayerMessage.getType()]: KillPlayerMessage,
             [NoMamesMessage.getType()]: NoMamesMessage,
             [ResetMessage.getType()]: ResetMessage,
-            [ChangeDirectionMessage.getType()]: ChangeDirectionMessage
+            [ChangeDirectionMessage.getType()]: ChangeDirectionMessage,
+            [PlayerLookedMessage.getType()]: PlayerLookedMessage
         };
     }
 
@@ -59,6 +60,7 @@ export class DiceUpdateMessage extends Message {
         super('diceUpdate');
         this.cup = update['cup'];
         this.table = update['table'];
+        this.rollType = update['rollType'];
     }
 
     static getType() {
@@ -111,5 +113,19 @@ export class ResetMessage extends Message {
 
     static deserialize(msg) {
         return new this(msg['uuid']);
+    }
+}
+
+export class PlayerLookedMessage extends Message {
+    constructor() {
+        super('playerLooked')
+    }
+
+    static getType() {
+        return 'playerLooked';
+    }
+
+    static deserialize(msg) {
+        return new this();
     }
 }
