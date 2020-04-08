@@ -123,9 +123,7 @@ export class Server {
         this.publish(msg);
     }
 
-    changePassDirection() {
-        let isClockwise = this.playersList.directionIsClockwise();
-        isClockwise = !isClockwise;
+    changePassDirection(isClockwise) {
         let msg = new ChangeDirectionMessage(isClockwise);
         this.publish(msg);
     }
