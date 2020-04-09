@@ -148,6 +148,45 @@ export class DiceScene extends Phaser.Scene {
             this.dice.push(d);
         }
 
+        this.diceModel = {
+            'd1': {
+                'index': 0,
+                'value': 5,
+                'inCup': true,
+                'slot': 0,
+                'didRoll': false
+            },
+            '2': {
+                'index': 1,
+                'value': 4,
+                'inCup': true,
+                'slot': 0,
+                'didRoll': false
+            },
+            '3': {
+                'index': 2,
+                'value': 3,
+                'inCup': true,
+                'slot': 0,
+                'didRoll': false
+            },
+            '4': {
+                'index': 3,
+                'value': 2,
+                'inCup': true,
+                'slot': 0,
+                'didRoll': false
+            },
+            '5': {
+                'index': 4,
+                'value': 1,
+                'inCup': true,
+                'slot': 0,
+                'didRoll': false
+            }
+        };
+        console.log(this.diceModel.die1);
+
         this.input.on('drag', function(pointer, gameObject, dragX, dragY) {
             gameObject.x = dragX;
             gameObject.y = dragY;
@@ -224,6 +263,8 @@ export class DiceScene extends Phaser.Scene {
         }
         
     }
+        
+    
 
     onPlayersUpdate(playersList) {
         this.playersLabel.updateWithPlayers(playersList);
