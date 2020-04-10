@@ -4,6 +4,7 @@ import { DiceZone } from '../dice-zone';
 import { TextButton } from '../text-button';
 import { DiceUpdateMessage } from '../message';
 import { PlayersLabel } from '../playerslabel';
+import { DiceModel } from '../dicemodel';
 
 const NUM_DICE = 5;
 
@@ -49,6 +50,8 @@ export class DiceScene extends Phaser.Scene {
         this.nomames = false;
         this.cup = new DiceZone(this, 305, 100, 600, 150, 'Cup');
         this.table = new DiceZone(this, 305, 300, 600, 150, 'Table');
+        this.diceMod = new DiceModel(NUM_DICE);
+        console.log(this.diceMod);
 
         this.noMamesText = this.add.text(200, 180, "🚨🚨 NO MAMES 🚨🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
