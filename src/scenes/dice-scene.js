@@ -37,6 +37,12 @@ export class DiceScene extends Phaser.Scene {
             },
             onPassDirectionChange: (isClockwise) => {
                 this.onPassDirectionChange(isClockwise);
+            },
+            onPause: (pauseText) => {
+                this.onPause(pauseText);
+            },
+            onResume: () => {
+                this.onResume();
             }
         });
     }
@@ -57,6 +63,8 @@ export class DiceScene extends Phaser.Scene {
             onClick: () => {
                 this.cup.roll("cup");
                 this.cupRollButton.setEnabled(false);
+                this.noMamesButton.setEnabled(false);
+                this.cupLookButton.setEnabled(true);
                 if (this.nomames) {
                     this.onNoMames();
                 }
@@ -64,40 +72,42 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.cupRollButton);
 
-        let cupLookButton = new TextButton(this, 610, 60, 'Look', {
+        this.cupLookButton = new TextButton(this, 610, 60, 'Look', {
             onClick: () => {
                 this.cup.setVisible(true);
                 this.noMamesButton.setEnabled(false);
+                this.cupLookButton.setEnabled(false);
                 this.server.playerLooked();
             }
         });
-        this.add.existing(cupLookButton);
+        this.add.existing(this.cupLookButton);
 
-        this.firstPass = false;
-        this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass >', {
+        this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass', {
             onClick: () => {
                 let playersList = this.server.getPlayersList();
                 playersList.getMe().hasLooked = false; 
                 playersList.getMe().rolledCup = false;
-                this.server.passCup();
+                this.server.passCup(this.clockwise);
             },
-            onLongClick: () => {
-                if (this.firstPass) {
-                    return;
-                }
-
-                this.server.changePassDirection();
-            }
         });
         this.add.existing(this.nextPlayerButton);
 
-        let makeDeadButton = new TextButton(this, 610, 120, 'Die', {
+        this.clockwise = true;
+        this.passDirectionButton = new TextButton(this, 660, 90, '>',{
+            onClick: () => {
+                this.onPassDirectionChange(!this.clockwise);
+            }
+        });
+        this.add.existing(this.passDirectionButton);
+
+        this.makeDeadButton = new TextButton(this, 610, 120, 'Die', {
             onClick: () => {
                 let playersList = this.server.getPlayersList();
                 this.server.killPlayer(playersList.getMe());
             }
         });
-        this.add.existing(makeDeadButton);
+        this.add.existing(this.makeDeadButton);
+        this.makeDeadButton.setEnabled(false);
 
         this.noMamesButton = new TextButton(this, 610, 150, 'No Mames!', {
             onClick: () => {
@@ -106,12 +116,12 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.noMamesButton);
 
-        let resetButton = new TextButton(this, 610, 180, 'Reset', {
+        this.resetButton = new TextButton(this, 610, 180, 'Reset', {
             onClick: () => {
             this.server.reset()
             }
         });
-        this.add.existing(resetButton);
+        this.add.existing(this.resetButton);
 
         this.dice = [];
         for (let i=0; i< NUM_DICE; i++) {
@@ -169,17 +179,37 @@ export class DiceScene extends Phaser.Scene {
         });
     }
 
+    onPause(pauseText) {
+        this.scene.pause();
+        this.scene.launch('pauseScene', { pauseText: pauseText });
+    }
+
+    onResume() {
+        this.scene.stop('pauseScene');
+        this.scene.resume();
+
+    }
+
     setPlayable(playable) {
         this.input.enabled = playable;
         this.cup.setVisible(false);
-        this.cupRollButton.setEnabled(true);
-        this.noMamesButton.setEnabled(true);
+        this.cupLookButton.setEnabled(playable);
+        this.cupRollButton.setEnabled(playable);
+        this.noMamesButton.setEnabled(playable);
+        this.resetButton.setEnabled(playable);
+        this.nextPlayerButton.setEnabled(playable);
         this.table.getDice().forEach(dice => {
             dice.resetRoll();
         });
+        if (!playable) {
+            this.passDirectionButton.setEnabled(false);
+        }
     }
 
     updateDice(rollType) {
+        // we've taken an action that changes dice,
+        // no mames is disabled
+        this.noMamesButton.setEnabled(false);
         let update = {
             'cup': {
                 'visible': this.cup.getVisible(),
@@ -193,16 +223,18 @@ export class DiceScene extends Phaser.Scene {
         if (!(rollType === "primIndie")){
             this.server.updateDice(update);
         }
-        
     }
 
     onPlayersUpdate(playersList) {
+        // XXX this is not completely correct.
+        // in the event a player joins or leaves the game, it will
+        // disable the pass direction button
+        this.passDirectionButton.setEnabled(false);
         this.playersLabel.updateWithPlayers(playersList);
         if (!this.input.enabled && playersList.getActivePlayer().isMe) {
             // this player is now active
-            this.firstPass = true;
             this.setPlayable(true);
-        } 
+        }
         if (!playersList.getActivePlayer().isMe){
             this.setPlayable(false)
         }
@@ -265,6 +297,11 @@ export class DiceScene extends Phaser.Scene {
         this.setPlayable(true);
         this.cup.setVisible(true);
         this.noMamesText.setVisible(true);
+        this.makeDeadButton.setEnabled(true);
+        this.cupLookButton.setEnabled(false);
+        this.cupRollButton.setEnabled(false);
+        this.noMamesButton.setEnabled(false);
+        this.nextPlayerButton.setEnabled(false);
     }
 
     onReset() {
@@ -272,10 +309,11 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onPassDirectionChange(isClockwise) {
-        if (this.isClockwise) {
-            this.nextPlayerButton.setText('Pass >');
+        if (isClockwise) {
+            this.passDirectionButton.setText('>');
         } else {
-            this.nextPlayerButton.setText('Pass <');
+            this.passDirectionButton.setText('<');
         }
+        this.clockwise = isClockwise;
     }
 }

@@ -1,7 +1,7 @@
 import PubNub from 'pubnub';
 import { Message, StartGameMessage, DiceUpdateMessage,
          PassCupMessage, KillPlayerMessage, NoMamesMessage,
-         ResetMessage, ChangeDirectionMessage, PlayerLookedMessage } from './message';
+         ResetMessage, PlayerLookedMessage } from './message';
 import { PlayersList } from './playerslist'
 import { Player } from './player'
 
@@ -17,6 +17,45 @@ export class Server {
         this.myUUID = PubNub.generateUUID();
         this.playersList = new PlayersList(this.myUUID);
         this.widowUsed = false;
+        this.lastTimetoken = 0;
+
+        this.pubnub = new PubNub({
+            subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',
+            publishKey: 'pub-c-759cd5e9-128d-44d4-b7e7-925bc983f3f4',
+            // FIXME UUID ideally more stable
+            uuid: this.myUUID,
+            ssl: true,
+            heartbeatInterval: 30,
+            presenceTimeout: 120
+        });
+
+        this.pubnub.addListener({
+            status: (statusEvent) => {
+                if (statusEvent.category === "PNConnectedCategory") {
+                    // connected to server
+                }
+                if (statusEvent.category === "PNNetworkDownCategory") {
+                    // no internet
+                    this.callbacks.onPause('Disconnected :-(');
+                }
+                if (statusEvent.category === "PNNetworkUpCategory") {
+                    // internet back
+                    this.connect(this.channel);
+                    this.callbacks.onResume();
+                }
+                if (statusEvent.category === "PNTimeoutCategory") {
+                    // network timeout
+                }
+            },
+            presence: (presenceEvent) => {
+                this.handlePresence(presenceEvent);
+            },
+            message: (msg) => {
+                let fromMe = (msg.publisher === this.myUUID);
+                this.lastTimetoken = msg.timetoken;
+                this.handleMessage(msg.message, fromMe);
+            }
+        })
     }
 
     setCallbacks(callbacks) {
@@ -26,33 +65,10 @@ export class Server {
     connect(channel) {
         this.channel = channel;
 
-        this.pubnub = new PubNub({
-            subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',
-            publishKey: 'pub-c-759cd5e9-128d-44d4-b7e7-925bc983f3f4',
-            // FIXME UUID ideally more stable
-            uuid: this.myUUID,
-            ssl: true,
-            heartbeatInterval: 30,
-            presenceTimeout: 60
-        });
-
-        this.pubnub.addListener({
-            status: (statusEvent) => {
-                if (statusEvent.category === "PNConnectedCategory") {
-                }
-            },
-            presence: (presenceEvent) => {
-                this.handlePresence(presenceEvent);
-            },
-            message: (msg) => {
-                let fromMe = (msg.publisher === this.myUUID);
-                this.handleMessage(msg.message, fromMe);
-            }
-        })
-
         this.pubnub.subscribe({
             channels: [this.channel],
-            withPresence: true
+            withPresence: true,
+            timetoken: this.lastTimetoken
         });
 
         this.refreshPlayersList();
@@ -99,10 +115,11 @@ export class Server {
                 message: msg,
                 channel: this.channel
             },
-            function (status) {
+            (status) => {
                 if (status.error) {
                     // handle error
-                    console.log("Publish error with status: ", status);
+                    console.log("Publish error with status: ", status, ". Retrying in 3s");
+                    setTimeout(this.publish(msg), 3000);
                 }
             }
         );
@@ -116,19 +133,13 @@ export class Server {
         this.publish(msg);
     }
 
-    passCup() {
+    passCup(isClockwise) {
         this.playersList.getActivePlayer.hasLooked = false;
         this.playersList.getActivePlayer.rolledCup = false;
+        this.playersList.setDirection(isClockwise);
         this.playersList.setNextPlayerActive();
         let activePlayer = this.playersList.getActivePlayer();
-        let msg = new PassCupMessage(activePlayer.uuid);
-        this.publish(msg);
-    }
-
-    changePassDirection() {
-        let isClockwise = this.playersList.directionIsClockwise();
-        isClockwise = !isClockwise;
-        let msg = new ChangeDirectionMessage(isClockwise);
+        let msg = new PassCupMessage(activePlayer.uuid,isClockwise);
         this.publish(msg);
     }
 
@@ -181,6 +192,8 @@ export class Server {
                 break;
             }
             case PassCupMessage.getType(): {
+                this.playersList.setDirection(deserialized.isClockwise);
+                this.callbacks.onPassDirectionChange(deserialized.isClockwise);
                 let uuid = deserialized.activePlayerUUID;
                 this.playersList.getActivePlayer().hasLooked = false;
                 this.playersList.getActivePlayer().rolledCup = false;
@@ -223,11 +236,6 @@ export class Server {
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
                 this.playersList.setDirection(true);
                 this.callbacks.onReset();
-                break;
-            }
-            case ChangeDirectionMessage.getType(): {
-                this.playersList.setDirection(deserialized.isClockwise);
-                this.callbacks.onPassDirectionChange(deserialized.isClockwise);
                 break;
             }
             case PlayerLookedMessage.getType(): {
