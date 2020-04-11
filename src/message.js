@@ -10,7 +10,8 @@ export class Message {
             [PassCupMessage.getType()]: PassCupMessage,
             [KillPlayerMessage.getType()]: KillPlayerMessage,
             [NoMamesMessage.getType()]: NoMamesMessage,
-            [ResetMessage.getType()]: ResetMessage
+            [ResetMessage.getType()]: ResetMessage,
+            [PlayerLookedMessage.getType()]: PlayerLookedMessage
         };
     }
 
@@ -110,5 +111,19 @@ export class ResetMessage extends Message {
 
     static deserialize(msg) {
         return new this(msg['uuid']);
+    }
+}
+
+export class PlayerLookedMessage extends Message {
+    constructor() {
+        super('playerLooked')
+    }
+
+    static getType() {
+        return 'playerLooked';
+    }
+
+    static deserialize(msg) {
+        return new this();
     }
 }

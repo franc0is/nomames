@@ -78,12 +78,16 @@ export class DiceScene extends Phaser.Scene {
                 this.cup.setVisible(true);
                 this.noMamesButton.setEnabled(false);
                 this.cupLookButton.setEnabled(false);
+                this.server.playerLooked();
             }
         });
         this.add.existing(this.cupLookButton);
 
         this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass', {
             onClick: () => {
+                let playersList = this.server.getPlayersList();
+                playersList.getMe().hasLooked = false; 
+                playersList.getMe().rolledCup = false;
                 this.server.passCup(this.clockwise);
             },
         });
@@ -220,8 +224,14 @@ export class DiceScene extends Phaser.Scene {
         // in the event a player joins or leaves the game, it will
         // disable the pass direction button
         this.passDirectionButton.setEnabled(false);
-        this.setPlayable(playersList.getActivePlayer().isMe);
         this.playersLabel.updateWithPlayers(playersList);
+        if (!this.input.enabled && playersList.getActivePlayer().isMe) {
+            // this player is now active
+            this.setPlayable(true);
+        }
+        if (!playersList.getActivePlayer().isMe){
+            this.setPlayable(false)
+        }
         if (this.nomames) {
             this.onNoMames();
         }
