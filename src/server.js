@@ -1,7 +1,7 @@
 import PubNub from 'pubnub';
 import { Message, StartGameMessage, DiceUpdateMessage,
          PassCupMessage, KillPlayerMessage, NoMamesMessage,
-         ResetMessage, ChangeDirectionMessage } from './message';
+         ResetMessage } from './message';
 import { PlayersList } from './playerslist'
 import { Player } from './player'
 

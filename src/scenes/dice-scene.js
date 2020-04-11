@@ -82,25 +82,8 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.cupLookButton);
 
-        this.firstPass = false;
         this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass', {
             onClick: () => {
-                if (this.firstPass){
-                    this.server.passCup(this.clockwise);
-                    return;
-                }
-                for (let die of this.cup.getDice()){
-                    if (!die.didRoll){
-                        console.log("cup cheater!");
-                        return;
-                    }
-                }
-                for (let die of this.table.getDice()){
-                    if (!die.didRoll){
-                        console.log("table cheater!");
-                        return;
-                    }
-                }
                 this.server.passCup(this.clockwise);
             },
         });
@@ -109,9 +92,7 @@ export class DiceScene extends Phaser.Scene {
         this.clockwise = true;
         this.passDirectionButton = new TextButton(this, 660, 90, '>',{
             onClick: () => {
-                if (!this.firstPass){
-                    this.PassDirectionChange();
-                }
+                this.onPassDirectionChange(!this.clockwise);
             }
         });
         this.add.existing(this.passDirectionButton);
@@ -212,6 +193,9 @@ export class DiceScene extends Phaser.Scene {
         this.table.getDice().forEach(dice => {
             dice.resetRoll();
         });
+        if (!playable) {
+            this.passDirectionButton.setEnabled(false);
+        }
     }
 
     updateDice() {
@@ -232,7 +216,10 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onPlayersUpdate(playersList) {
-        this.firstPass = true;
+        // XXX this is not completely correct.
+        // in the event a player joins or leaves the game, it will
+        // disable the pass direction button
+        this.passDirectionButton.setEnabled(false);
         this.setPlayable(playersList.getActivePlayer().isMe);
         this.playersLabel.updateWithPlayers(playersList);
         if (this.nomames) {
@@ -282,24 +269,12 @@ export class DiceScene extends Phaser.Scene {
         this.scene.restart();
     }
 
-    PassDirectionChange() {
-        if (!this.clockwise) {
-            this.passDirectionButton.setText('>');
-            this.clockwise = true;
-        } else {
-            this.passDirectionButton.setText('<');
-            this.clockwise = false;
-        }
-    }
-
     onPassDirectionChange(isClockwise) {
         if (isClockwise) {
             this.passDirectionButton.setText('>');
-            this.clockwise = isClockwise;
         } else {
             this.passDirectionButton.setText('<');
-            this.clockwise = isClockwise;
         }
-
+        this.clockwise = isClockwise;
     }
 }

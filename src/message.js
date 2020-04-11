@@ -10,8 +10,7 @@ export class Message {
             [PassCupMessage.getType()]: PassCupMessage,
             [KillPlayerMessage.getType()]: KillPlayerMessage,
             [NoMamesMessage.getType()]: NoMamesMessage,
-            [ResetMessage.getType()]: ResetMessage,
-            [ChangeDirectionMessage.getType()]: ChangeDirectionMessage
+            [ResetMessage.getType()]: ResetMessage
         };
     }
 
