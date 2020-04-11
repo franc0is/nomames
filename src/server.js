@@ -1,13 +1,13 @@
 import PubNub from 'pubnub';
 import { Message, StartGameMessage, DiceUpdateMessage,
          PassCupMessage, KillPlayerMessage, NoMamesMessage,
-         ResetMessage, PlayerLookedMessage } from './message';
+         ResetMessage } from './message';
 import { PlayersList } from './playerslist'
 import { Player } from './player'
 
 
 /*
- * callbacks: onPlayersUpdate, onGameStart, onNoMames, onReset, onDiceUpdate
+ * callbacks: onPlayersUpdate, onGameStart, onNoMames, onReset
  */
 
 export class Server {
@@ -134,8 +134,6 @@ export class Server {
     }
 
     passCup(isClockwise) {
-        this.playersList.getActivePlayer.hasLooked = false;
-        this.playersList.getActivePlayer.rolledCup = false;
         this.playersList.setDirection(isClockwise);
         this.playersList.setNextPlayerActive();
         let activePlayer = this.playersList.getActivePlayer();
@@ -164,11 +162,6 @@ export class Server {
         this.publish(msg);
     }
 
-    playerLooked() {
-        let msg = new PlayerLookedMessage();
-        this.publish(msg);
-    }
-
     handleMessage(msg, fromMe) {
         let deserialized = Message.deserialize(msg);
         switch (deserialized.type) {
@@ -181,11 +174,6 @@ export class Server {
                 break;
             }
             case DiceUpdateMessage.getType(): {
-                if (deserialized.cup.rolled) {
-                    this.playersList.getActivePlayer().rolledCup = true;
-                    this.playersList.getActivePlayer().hasLooked = false;
-                    this.callbacks.onPlayersUpdate(this.playersList);
-                }
                 if (!fromMe) {
                     this.callbacks.onDiceUpdate(deserialized);
                 }
@@ -195,8 +183,6 @@ export class Server {
                 this.playersList.setDirection(deserialized.isClockwise);
                 this.callbacks.onPassDirectionChange(deserialized.isClockwise);
                 let uuid = deserialized.activePlayerUUID;
-                this.playersList.getActivePlayer().hasLooked = false;
-                this.playersList.getActivePlayer().rolledCup = false;
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
                 this.callbacks.onPlayersUpdate(this.playersList);
@@ -236,12 +222,6 @@ export class Server {
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
                 this.playersList.setDirection(true);
                 this.callbacks.onReset();
-                break;
-            }
-            case PlayerLookedMessage.getType(): {
-                let player = this.playersList.getActivePlayer();
-                player.hasLooked = true;
-                this.callbacks.onPlayersUpdate(this.playersList);
                 break;
             }
         }

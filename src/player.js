@@ -7,8 +7,6 @@ export class Player {
         this.isMe = false;
         this.isDead = false;
         this.numLives = 3;
-        this.hasLooked = false;
-        this.rolledCup = false;
     }
 
     static fromState(uuid, state) {
