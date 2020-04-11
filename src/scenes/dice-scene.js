@@ -188,7 +188,7 @@ export class DiceScene extends Phaser.Scene {
 
     setPlayable(playable) {
         this.input.enabled = playable;
-        this.cup.setVisible(false);
+        this.cup.reset();
         this.cupLookButton.setEnabled(playable);
         this.cupRollButton.setEnabled(playable);
         this.noMamesButton.setEnabled(playable);
@@ -208,6 +208,7 @@ export class DiceScene extends Phaser.Scene {
         this.noMamesButton.setEnabled(false);
         let update = {
             'cup': {
+                'rolled': this.cup.didRoll(),
                 'visible': this.cup.getVisible(),
                 'dice': this.cup.getDice().map(d => d.getValue())
             },

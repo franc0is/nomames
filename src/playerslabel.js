@@ -33,7 +33,6 @@ export class PlayersLabel extends Phaser.GameObjects.Container {
             if (player.hasLooked){
                 c = 'green';
             }
-            
             if (player.isDead) {
                 c = '#888888';
             }
