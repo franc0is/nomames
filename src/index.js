@@ -2,6 +2,7 @@ import 'phaser';
 
 import { DiceScene } from './scenes/dice-scene';
 import { JoinScene } from './scenes/join-scene';
+import { PauseScene } from './scenes/pause-scene';
 
 const gameConfig = {
     type: Phaser.AUTO,
@@ -11,7 +12,7 @@ const gameConfig = {
     dom: {
         createContainer: true
     },
-    scene: [ JoinScene, DiceScene ]
+    scene: [ JoinScene, DiceScene, PauseScene ]
 };
 
 var game = new Phaser.Game(gameConfig);
