@@ -179,6 +179,9 @@ export class DiceScene extends Phaser.Scene {
     }
 
     updateDice() {
+        // we've taken an action that changes dice,
+        // no mames is disabled
+        this.noMamesButton.setEnabled(false);
         let update = {
             'cup': {
                 'visible': this.cup.getVisible(),
