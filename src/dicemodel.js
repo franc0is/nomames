@@ -86,4 +86,12 @@ export class DiceModel {
         let slot = this.dice[index].slot;
         return [cup,slot];
     };
+
+    getDieByLoc(cup,slot) {
+        for (let d of this.dice) {
+            if (d.inCup === cup && d.slot === slot){
+                return d.index
+            };
+        };
+    };
 }

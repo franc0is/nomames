@@ -158,6 +158,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.input.on('dragenter', function(pointer, gameObject, dropZone) {
             gameObject.dragging = true;
+            console.log("dragging");
             dropZone.setHighlighted(true);
         });
 
