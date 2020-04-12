@@ -17,6 +17,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         this.graphics.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width - 20, this.height - 20);
         this.individualRoll = true
         this.onUpdateCb = () => {};
+        this.rolled = false;
     }
 
     reorder() {
@@ -45,12 +46,22 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         this.onUpdateCb();
     }
 
+    reset() {
+        this.rolled = false;
+        this.setVisible(false);
+    }
+
+    didRoll() {
+        return this.rolled;
+    }
+
     roll() {
         var dice = this.container.getAll();
         for (var die of dice) {
             die.roll();
         }
         this.setVisible(false);
+        this.rolled = true;
         this.onUpdateCb();
     }
 
