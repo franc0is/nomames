@@ -59,6 +59,7 @@ export class Dice extends Phaser.GameObjects.Sprite {
         this.lastClickTime = this.scene.time.now;
         if (clickDelay < 350) {
             this.roll();
+            this.scene.dieRollAudio.play();
         }
     }
 

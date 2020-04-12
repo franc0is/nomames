@@ -49,10 +49,13 @@ export class DiceScene extends Phaser.Scene {
 
     preload() {
         this.load.spritesheet('dice', 'assets/andrewDice.png', { frameWidth: 64, frameHeight: 64});
-    }
+        this.load.audio('indieRoll', 'assets/dieRoll.mp3');
+        this.load.audio('cupRoll', 'assets/cupRoll.mp3');
+    };
 
     create() {
         this.nomames = false;
+        this.muted = false;
         this.cup = new DiceZone(this, 305, 100, 600, 150, 'Cup');
         this.cup.setIndividualRoll(false);
         this.table = new DiceZone(this, 305, 300, 600, 150, 'Table');
@@ -60,12 +63,18 @@ export class DiceScene extends Phaser.Scene {
         this.noMamesText = this.add.text(200, 180, "🚨🚨 NO MAMES 🚨🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
 
+        this.cupRollAudio = this.sound.add('cupRoll');
+        this.dieRollAudio = this.sound.add('indieRoll');
+
         this.cupRollButton = new TextButton(this, 610, 30, 'Roll', {
             onClick: () => {
                 this.cup.roll();
                 this.cupRollButton.setEnabled(false);
                 this.noMamesButton.setEnabled(false);
                 this.cupLookButton.setEnabled(true);
+                if (!this.muted){
+                    this.cupRollAudio.play();
+                }
                 if (this.nomames) {
                     this.onNoMames();
                 }
@@ -119,6 +128,18 @@ export class DiceScene extends Phaser.Scene {
             }
         });
         this.add.existing(this.resetButton);
+
+        this.muteButton = new TextButton(this, 610, 210, 'Mute', {
+            onClick: () => {
+                this.muted = !this.muted;
+                if (this.muted){
+                    this.muteButton.setText('Unmute');
+                }else {
+                    this.muteButton.setText('Mute');
+                };
+            }
+        });
+        this.add.existing(this.muteButton);
 
         this.dice = [];
         for (let i=0; i< NUM_DICE; i++) {
