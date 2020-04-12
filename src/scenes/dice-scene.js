@@ -197,6 +197,12 @@ export class DiceScene extends Phaser.Scene {
         this.scene.launch('pauseScene', { pauseText: pauseText });
     }
 
+    playDieRoll(){
+        if(!this.muted){
+            this.dieRollAudio.play();
+        }
+    }
+
     onResume() {
         this.scene.stop('pauseScene');
         this.scene.resume();
