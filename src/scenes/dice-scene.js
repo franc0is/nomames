@@ -206,7 +206,7 @@ export class DiceScene extends Phaser.Scene {
         this.noMamesButton.setEnabled(playable);
         this.resetButton.setEnabled(playable);
         this.nextPlayerButton.setEnabled(playable);
-        this.table.getDice().forEach(dice => {
+        this.dice.forEach(dice => {
             dice.resetRoll();
         });
         if (!playable) {
