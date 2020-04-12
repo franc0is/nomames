@@ -1,3 +1,5 @@
+import { Action } from './message'
+
 export class DiceZone extends Phaser.GameObjects.Zone {
     constructor(scene, x, y, width, height, name) {
         super(scene, x, y, width, height);
@@ -16,7 +18,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         this.graphics.lineStyle(2, 0xffff00);
         this.graphics.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width - 20, this.height - 20);
         this.individualRoll = true
-        this.onUpdateCb = () => {};
+        this.onUpdateCb = (action) => {};
     }
 
     reorder() {
@@ -42,7 +44,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
 
     setVisible(value) {
         this.container.setVisible(value);
-        this.onUpdateCb();
+        this.onUpdateCb(Action.SHOW_MANY);
     }
 
     roll() {
@@ -51,7 +53,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
             die.roll();
         }
         this.setVisible(false);
-        this.onUpdateCb();
+        this.onUpdateCb(Action.ROLL_MANY);
     }
 
     setIndividualRoll(enabled) {
@@ -75,7 +77,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         }
         this.container.add(die);
         this.reorder();
-        this.onUpdateCb();
+        this.onUpdateCb(Action.MOVE_ONE);
     }
 
     remove(die) {
@@ -94,6 +96,6 @@ export class DiceZone extends Phaser.GameObjects.Zone {
     }
 
     onDieRoll(die) {
-        this.onUpdateCb();
+        this.onUpdateCb(Action.ROLL_ONE);
     }
 }

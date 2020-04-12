@@ -20,13 +20,12 @@ export class Dice extends Phaser.GameObjects.Sprite {
         this.tween = scene.tweens.add({
             targets: this,
             angle: { from: 0, to: 360 },
-            ease: 'Sine',
-            duration: 1000,
+            ease: 'Linear',
+            loop: 1,
+            loopDelay: -2,
+            duration: 350,
             repeat: 0,
-            paused: true,
-            onComplete: () => {
-                this.roll();
-            }
+            paused: true
         });
     }
 
@@ -62,6 +61,13 @@ export class Dice extends Phaser.GameObjects.Sprite {
         this.didRoll = true;
     }
 
+    animate(cb) {
+        // looks like there's phaser bug here
+        // if I don't specify arguments, it crashes
+        this.tween.setCallback('onLoop', cb, [this], this);
+        this.tween.play();
+    }
+
     onClick() {
         if (!this.individualRoll || this.didRoll) {
             return;
@@ -70,7 +76,9 @@ export class Dice extends Phaser.GameObjects.Sprite {
         let clickDelay = this.scene.time.now - this.lastClickTime;
         this.lastClickTime = this.scene.time.now;
         if (clickDelay < 350) {
-            this.tween.play();
+            this.animate(function(target) {
+                target.roll();
+            });
         }
     }
 
