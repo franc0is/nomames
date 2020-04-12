@@ -16,6 +16,18 @@ export class Dice extends Phaser.GameObjects.Sprite {
         this.setValue(initial_value);
         this.onRollCb = () => {};
         this.didRoll = false;
+
+        this.tween = scene.tweens.add({
+            targets: this,
+            angle: { from: 0, to: 360 },
+            ease: 'Sine',
+            duration: 1000,
+            repeat: 0,
+            paused: true,
+            onComplete: () => {
+                this.roll();
+            }
+        });
     }
 
     setIndividualRoll(enabled) {
@@ -58,7 +70,7 @@ export class Dice extends Phaser.GameObjects.Sprite {
         let clickDelay = this.scene.time.now - this.lastClickTime;
         this.lastClickTime = this.scene.time.now;
         if (clickDelay < 350) {
-            this.roll();
+            this.tween.play();
         }
     }
 
