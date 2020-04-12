@@ -2,15 +2,15 @@ import { Server } from '../server';
 import { TextButton } from '../text-button';
 import { PlayersLabel } from '../playerslabel';
 
-export class JoinScene extends Phaser.Scene {
+export class StartScene extends Phaser.Scene {
     constructor() {
-        super({ key: 'joinScene' });
-    }
+        super({ key: 'startScene' });
+    };
 
     preload() {
         this.load.html('nameform', 'assets/nameform.html');
-        this.load.html('hostjoinform', 'assets/hostjoinform.html');
-    }
+        this.load.html('hoststartform', 'assets/hoststartform.html');
+    };
 
     create() {
         this.server = new Server({
@@ -21,11 +21,10 @@ export class JoinScene extends Phaser.Scene {
                 this.scene.start('diceScene', { server: this.server });
             }
         });
+        let text = this.add.text(50,30,'Welcome! \n\nTo start, enter a game ID\nThis will create a game.',{ color: 'white', fontSize: '20px '}
+        );
 
-
-        let text = this.add.text(50,30,'Welcome! \n\nTo join, enter the game ID.',{ color: 'white', fontSize: '20px '});
-
-        this.hostJoinEl = this.add.dom(360, 150).createFromCache('hostjoinform');
+        this.hostJoinEl = this.add.dom(360, 150).createFromCache('hoststartform');
         this.hostJoinEl.addListener('click');
         this.hostJoinEl.on('click', (event) => {
             if (event.target.name === 'playButton') {
@@ -57,22 +56,32 @@ export class JoinScene extends Phaser.Scene {
                     this.server.setName(inputText.value);
                     this.nameText.setText('Name: ' +inputText.value);
                     this.nameText.setVisible(true);
+                    this.startButton.setVisible(true);
                 }
             }
 
         });
 
-        
         this.nameText = this.add.text(200,200, '',{color: '#0f0', fontsize: '36px'});
         this.nameText.setVisible(false);
+
+        this.startButton = new TextButton(this, 325, 300, '[ START ]', {
+            onClick: () => {
+                this.server.startGame();
+            }
+        });
+        this.add.existing(this.startButton);
+        this.startButton.setVisible(false);
 
 
         let playersList = this.server.getPlayersList();
         this.playersLabel = new PlayersLabel(this, 20, 400, playersList);
         this.add.existing(this.playersLabel);
         this.playersLabel.setVisible(false);
+
     }
 
+    
     onPlayersUpdate(playersList) {
         console.log("Players update!");
         this.playersLabel.updateWithPlayers(playersList);
