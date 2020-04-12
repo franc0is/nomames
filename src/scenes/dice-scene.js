@@ -48,7 +48,7 @@ export class DiceScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.spritesheet('dice', 'assets/andrewDice.png', { frameWidth: 64, frameHeight: 64});
+        this.load.spritesheet('dice', 'assets/dice-pixel.png', { frameWidth: 64, frameHeight: 64});
     }
 
     create() {
