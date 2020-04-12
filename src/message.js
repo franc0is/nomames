@@ -53,9 +53,17 @@ export class PassCupMessage extends Message {
     }
 }
 
+export const Action = {
+    ROLL_ONE:  'rollOne',
+    ROLL_MANY: 'rollMany',
+    MOVE_ONE:  'moveOne',
+    SHOW_MANY: 'showMany'
+};
+
 export class DiceUpdateMessage extends Message {
     constructor(update) {
         super('diceUpdate');
+        this.action = update['action'];
         this.cup = update['cup'];
         this.table = update['table'];
     }
