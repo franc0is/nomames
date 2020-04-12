@@ -270,11 +270,13 @@ export class DiceScene extends Phaser.Scene {
                         table_dice.splice(idx, 1);
                     }
                 });
-                console.assert(new_value !== -1);
-                console.assert(table_dice.length === 1);
-                table_dice[0].animate(function(target) {
-                    target.setValue(new_value);
-                });
+                // FIXME we don't know which dice to animate
+                // when we roll the exact same...
+                if (new_value !== -1) {
+                    table_dice[0].animate(function(target) {
+                        target.setValue(new_value);
+                    });
+                }
                 break;
             }
             case Action.MOVE_ONE: {
