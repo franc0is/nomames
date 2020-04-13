@@ -52,6 +52,7 @@ export class DiceScene extends Phaser.Scene {
         this.load.audio('indieRoll', 'assets/dieRoll.mp3');
         this.load.audio('cupRoll', 'assets/cupRoll.mp3');
         this.load.audio('noMames', 'assets/NoMamesWey.mp3');
+        this.load.audio('noMames2', 'assets/AyNoMames.mp3');
     };
 
     create() {
@@ -66,6 +67,7 @@ export class DiceScene extends Phaser.Scene {
         this.cupRollAudio = this.sound.add('cupRoll');
         this.dieRollAudio = this.sound.add('indieRoll');
         this.noMamesAudio = this.sound.add('noMames');
+        this.ayNoMamesAudio = this.sound.add('noMames2');
 
         this.cupRollButton = new TextButton(this, 610, 30, 'Roll', {
             onClick: () => {
@@ -344,7 +346,15 @@ export class DiceScene extends Phaser.Scene {
         this.noMamesButton.setEnabled(false);
         this.nextPlayerButton.setEnabled(false);
         if (!this.server.muted){
+            let even = true;
+            this.table.getDice().forEach(die => {
+                even = !even;
+            });
+            if (even){
             this.noMamesAudio.play();
+            } else {
+                this.ayNoMamesAudio.play();
+            }
         }
     }
 
