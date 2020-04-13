@@ -2,7 +2,7 @@ import PubNub from 'pubnub';
 import { Dice } from '../dice';
 import { DiceZone } from '../dice-zone';
 import { TextButton } from '../text-button';
-import { DiceUpdateMessage } from '../message';
+import { Action } from '../message';
 import { PlayersLabel } from '../playerslabel';
 
 const NUM_DICE = 5;
@@ -48,7 +48,7 @@ export class DiceScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.spritesheet('dice', 'assets/andrewDice.png', { frameWidth: 64, frameHeight: 64});
+        this.load.spritesheet('dice', 'assets/dice-pixel.png', { frameWidth: 64, frameHeight: 64});
         this.load.audio('indieRoll', 'assets/dieRoll.mp3');
         this.load.audio('cupRoll', 'assets/cupRoll.mp3');
     };
@@ -117,14 +117,14 @@ export class DiceScene extends Phaser.Scene {
 
         this.noMamesButton = new TextButton(this, 610, 150, 'No Mames!', {
             onClick: () => {
-            this.server.noMames();
+                this.server.noMames();
             }
         });
         this.add.existing(this.noMamesButton);
 
         this.resetButton = new TextButton(this, 610, 180, 'Reset', {
             onClick: () => {
-            this.server.reset()
+                this.server.reset()
             }
         });
         this.add.existing(this.resetButton);
@@ -140,6 +140,19 @@ export class DiceScene extends Phaser.Scene {
             }
         });
         this.add.existing(this.muteButton);
+        this.lookedButton = new TextButton(this, 610, 250, 'Looked', {
+            onClick: () => {
+            }
+        });
+        this.add.existing(this.lookedButton);
+        this.lookedButton.setEnabled(false);
+
+        this.rolledButton = new TextButton(this, 610, 280, 'Rolled', {
+            onClick: () => {
+            }
+        });
+        this.add.existing(this.rolledButton);
+        this.rolledButton.setEnabled(false);
 
         this.dice = [];
         for (let i=0; i< NUM_DICE; i++) {
@@ -183,12 +196,12 @@ export class DiceScene extends Phaser.Scene {
             this.setPlayable(false);
         }
 
-        this.cup.setOnUpdateCb(() => {
-            this.updateDice()
+        this.cup.setOnUpdateCb((action) => {
+            this.updateDice(action)
         });
 
-        this.table.setOnUpdateCb(() => {
-            this.updateDice();
+        this.table.setOnUpdateCb((action) => {
+            this.updateDice(action);
         });
     }
 
@@ -210,14 +223,16 @@ export class DiceScene extends Phaser.Scene {
     }
 
     setPlayable(playable) {
+        this.lookedButton.setEnabled(false);
+        this.rolledButton.setEnabled(false);
         this.input.enabled = playable;
-        this.cup.setVisible(false);
+        this.cup.reset();
         this.cupLookButton.setEnabled(playable);
         this.cupRollButton.setEnabled(playable);
         this.noMamesButton.setEnabled(playable);
         this.resetButton.setEnabled(playable);
         this.nextPlayerButton.setEnabled(playable);
-        this.table.getDice().forEach(dice => {
+        this.dice.forEach(dice => {
             dice.resetRoll();
         });
         if (!playable) {
@@ -225,12 +240,16 @@ export class DiceScene extends Phaser.Scene {
         }
     }
 
-    updateDice() {
+    updateDice(action) {
         // we've taken an action that changes dice,
         // no mames is disabled
+        this.lookedButton.setEnabled(this.cup.getVisible());
+        this.rolledButton.setEnabled(this.cup.didRoll());
         this.noMamesButton.setEnabled(false);
         let update = {
+            'action': action,
             'cup': {
+                'rolled': this.cup.didRoll(),
                 'visible': this.cup.getVisible(),
                 'dice': this.cup.getDice().map(d => d.getValue())
             },
@@ -247,36 +266,77 @@ export class DiceScene extends Phaser.Scene {
         // in the event a player joins or leaves the game, it will
         // disable the pass direction button
         this.passDirectionButton.setEnabled(false);
-        this.setPlayable(playersList.getActivePlayer().isMe);
         this.playersLabel.updateWithPlayers(playersList);
+        if (!this.input.enabled && playersList.getActivePlayer().isMe) {
+            // this player is now active
+            this.setPlayable(true);
+        }
+        if (!playersList.getActivePlayer().isMe){
+            this.setPlayable(false)
+        }
         if (this.nomames) {
             this.onNoMames();
         }
     }
 
     onDiceUpdate(msg) {
-        this.cup.setOnUpdateCb(() => {});
-        this.table.setOnUpdateCb(() => {});
+        this.cup.setOnUpdateCb((action) => {});
+        this.table.setOnUpdateCb((action) => {});
 
-        let i = 0;
-        msg.cup.dice.forEach(die => {
-            this.dice[i].setValue(die);
-            this.cup.add(this.dice[i]);
-            i++
-        });
-        msg.table.dice.forEach(die => {
-            this.dice[i].setValue(die);
-            this.table.add(this.dice[i]);
-            i++
-        });
-        console.assert(i === 5);
+        switch (msg.action) {
+            case Action.ROLL_ONE: {
+                let table_dice = Array.from(this.table.getDice());
+                let new_value = -1;
+                msg.table.dice.forEach(die => {
+                    let idx = table_dice.findIndex(d => d.getValue() === die);
+                    if (idx === -1) {
+                        console.assert(new_value === -1);
+                        new_value = die;
+                    } else {
+                        table_dice.splice(idx, 1);
+                    }
+                });
+                // FIXME we don't know which dice to animate
+                // when we roll the exact same...
+                if (new_value !== -1) {
+                    table_dice[0].animate(function(target) {
+                        target.setValue(new_value);
+                    });
+                }
+                break;
+            }
+            case Action.MOVE_ONE: {
+                let i = 0;
+                msg.cup.dice.forEach(die => {
+                    this.dice[i].setValue(die);
+                    this.cup.add(this.dice[i]);
+                    i++
+                });
+                msg.table.dice.forEach(die => {
+                    this.dice[i].setValue(die);
+                    this.table.add(this.dice[i]);
+                    i++
+                });
+                console.assert(i === 5);
+                break;
+            }
+            case Action.ROLL_MANY: {
+                for (const [i, die] of msg.cup.dice.entries()) {
+                    this.cup.getDice()[i].setValue(die);
+                }
+                break;
+            }
+        }
 
-        this.cup.setOnUpdateCb(() => {
-            this.updateDice()
+        this.rolledButton.setEnabled(msg.cup.rolled);
+        this.lookedButton.setEnabled(msg.cup.visible);
+
+        this.cup.setOnUpdateCb((action) => {
+            this.updateDice(action)
         });
 
-        this.table.setOnUpdateCb(() => {
-            this.updateDice();
+        this.table.setOnUpdateCb((action) => {
+            this.updateDice(action);
         });
     }
 
