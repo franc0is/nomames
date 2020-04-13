@@ -4,7 +4,7 @@ import { DiceZone } from '../dice-zone';
 import { TextButton } from '../text-button';
 import { Action } from '../message';
 import { PlayersLabel } from '../playerslabel';
-import { Life } from '../Life';
+import { Life } from '../life';
 
 const NUM_DICE = 5;
 
