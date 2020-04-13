@@ -4,6 +4,7 @@ import { DiceZone } from '../dice-zone';
 import { TextButton } from '../text-button';
 import { Action } from '../message';
 import { PlayersLabel } from '../playerslabel';
+import { Life } from '../Life';
 
 const NUM_DICE = 5;
 
@@ -49,13 +50,18 @@ export class DiceScene extends Phaser.Scene {
 
     preload() {
         this.load.spritesheet('dice', 'assets/dice-pixel.png', { frameWidth: 64, frameHeight: 64});
+        this.load.spritesheet('life', 'assets/life_spritesheet.png', { frameWidth: 90, frameHeight: 22});
+        this.load.image('heart','assets/heart.png');
+        this.load.image('crown','assets/crown.png');
+        this.load.image('harlequin', 'assets/harlequin.png');
+        this.load.image('skull','assets/skull.png');
     }
 
     create() {
         this.nomames = false;
-        this.cup = new DiceZone(this, 305, 100, 600, 150, 'Cup');
+        this.cup = new DiceZone(this, 305, 300, 600, 150, 'Cup');
         this.cup.setIndividualRoll(false);
-        this.table = new DiceZone(this, 305, 300, 600, 150, 'Table');
+        this.table = new DiceZone(this, 305, 100, 600, 150, 'Table');
 
         this.noMamesText = this.add.text(200, 180, "🚨🚨 NO MAMES 🚨🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
@@ -142,6 +148,15 @@ export class DiceScene extends Phaser.Scene {
             this.cup.add(d);
             this.dice.push(d);
         }
+        this.lives = [];
+        let k = 0
+        let pList = this.server.getPlayersList();
+        pList.getPlayers().forEach( player => {
+            let l = new Life(this, 100*k+59, 468, 3-player.numLives);
+            this.add.existing(l);
+            this.lives.push(l);
+            k++;
+        });
 
         this.input.on('drag', function(pointer, gameObject, dragX, dragY) {
             gameObject.x = dragX;

@@ -7,7 +7,9 @@ export class PlayersLabel extends Phaser.GameObjects.Container {
         this.playerLabels = [];
         this.updateWithPlayers(playersList);
         this.setPosition(x, y);
+        this.container = scene.add.container();
     }
+
 
     updateWithPlayers(playersList) {
         this.playersList = playersList;
@@ -25,7 +27,6 @@ export class PlayersLabel extends Phaser.GameObjects.Container {
             if (player.isMe) {
                 playerName += '*';
             }
-            playerName += ":" + player.numLives;
             let c = player.isActive ? 'red' : 'white';
             if (player.isDead) {
                 c = '#888888';
@@ -33,7 +34,9 @@ export class PlayersLabel extends Phaser.GameObjects.Container {
             let t = this.scene.add.text(100*i, 40, playerName, { 'color': c })
             this.add(t);
             this.playerLabels.push(t);
+            
             i++;
         });
     }
+
 }
