@@ -18,6 +18,7 @@ export class Server {
         this.playersList = new PlayersList(this.myUUID);
         this.widowUsed = false;
         this.lastTimetoken = 0;
+        this.muted = false;
 
         this.pubnub = new PubNub({
             subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',

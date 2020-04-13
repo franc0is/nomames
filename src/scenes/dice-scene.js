@@ -51,11 +51,11 @@ export class DiceScene extends Phaser.Scene {
         this.load.spritesheet('dice', 'assets/dice-pixel.png', { frameWidth: 64, frameHeight: 64});
         this.load.audio('indieRoll', 'assets/dieRoll.mp3');
         this.load.audio('cupRoll', 'assets/cupRoll.mp3');
+        this.load.audio('noMames', 'assets/NoMamesWey.mp3');
     };
 
     create() {
         this.nomames = false;
-        this.muted = false;
         this.cup = new DiceZone(this, 305, 100, 600, 150, 'Cup');
         this.cup.setIndividualRoll(false);
         this.table = new DiceZone(this, 305, 300, 600, 150, 'Table');
@@ -65,6 +65,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.cupRollAudio = this.sound.add('cupRoll');
         this.dieRollAudio = this.sound.add('indieRoll');
+        this.noMamesAudio = this.sound.add('noMames');
 
         this.cupRollButton = new TextButton(this, 610, 30, 'Roll', {
             onClick: () => {
@@ -72,7 +73,7 @@ export class DiceScene extends Phaser.Scene {
                 this.cupRollButton.setEnabled(false);
                 this.noMamesButton.setEnabled(false);
                 this.cupLookButton.setEnabled(true);
-                if (!this.muted){
+                if (!this.server.muted){
                     this.cupRollAudio.play();
                 }
                 if (this.nomames) {
@@ -129,17 +130,6 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.resetButton);
 
-        this.muteButton = new TextButton(this, 610, 210, 'Mute', {
-            onClick: () => {
-                this.muted = !this.muted;
-                if (this.muted){
-                    this.muteButton.setText('Unmute');
-                }else {
-                    this.muteButton.setText('Mute');
-                };
-            }
-        });
-        this.add.existing(this.muteButton);
         this.lookedButton = new TextButton(this, 610, 250, 'Looked', {
             onClick: () => {
             }
@@ -208,12 +198,6 @@ export class DiceScene extends Phaser.Scene {
     onPause(pauseText) {
         this.scene.pause();
         this.scene.launch('pauseScene', { pauseText: pauseText });
-    }
-
-    playDieRoll(){
-        if(!this.muted){
-            this.dieRollAudio.play();
-        }
     }
 
     onResume() {
@@ -285,6 +269,10 @@ export class DiceScene extends Phaser.Scene {
 
         switch (msg.action) {
             case Action.ROLL_ONE: {
+                if (!this.server.muted){
+                    this.dieRollAudio.play();
+                };
+
                 let table_dice = Array.from(this.table.getDice());
                 let new_value = -1;
                 msg.table.dice.forEach(die => {
@@ -298,6 +286,7 @@ export class DiceScene extends Phaser.Scene {
                 });
                 // FIXME we don't know which dice to animate
                 // when we roll the exact same...
+                // I don't think this matters since everyone's orders are different. -ac
                 if (new_value !== -1) {
                     table_dice[0].animate(function(target) {
                         target.setValue(new_value);
@@ -323,6 +312,10 @@ export class DiceScene extends Phaser.Scene {
             case Action.ROLL_MANY: {
                 for (const [i, die] of msg.cup.dice.entries()) {
                     this.cup.getDice()[i].setValue(die);
+                }
+                console.log(this.server.muted);
+                if (!this.server.muted){
+                    this.cupRollAudio.play();
                 }
                 break;
             }
@@ -350,6 +343,9 @@ export class DiceScene extends Phaser.Scene {
         this.cupRollButton.setEnabled(false);
         this.noMamesButton.setEnabled(false);
         this.nextPlayerButton.setEnabled(false);
+        if (!this.server.muted){
+            this.noMamesAudio.play();
+        }
     }
 
     onReset() {
