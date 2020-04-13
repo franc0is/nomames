@@ -79,6 +79,9 @@ export class Dice extends Phaser.GameObjects.Sprite {
             this.animate(function(target) {
                 target.roll();
             });
+            if (!this.scene.server.muted){
+                this.scene.dieRollAudio.play();
+            }
         }
     }
 
