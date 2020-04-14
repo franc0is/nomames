@@ -57,7 +57,7 @@ export class DiceScene extends Phaser.Scene {
         this.cup.setIndividualRoll(false);
         this.table = new DiceZone(this, 305, 300, 600, 150, 'Table');
 
-        this.noMamesText = this.add.text(200, 180, "🚨🚨 NO MAMES 🚨🚨", { fill: 'red' });
+        this.noMamesText = this.add.text(200, 180, "🚨🖕🚨 NO MAMES GUEY 🚨🖕🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
 
         this.cupRollButton = new TextButton(this, 610, 30, 'Roll', {
