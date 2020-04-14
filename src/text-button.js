@@ -30,9 +30,10 @@ export class TextButton extends Phaser.GameObjects.Text {
     }
 
     onPointerUp() {
-        if (this.scene.time.now - this.startClickTime > 1000) {
+        if (this.callbacks.onLongClick &&
+                this.scene.time.now - this.startClickTime > 1000) {
             this.callbacks.onLongClick();
-        } else {
+        } else if (this.callbacks.onClick) {
             this.callbacks.onClick();
         }
 
