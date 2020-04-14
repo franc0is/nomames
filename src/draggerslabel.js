@@ -30,29 +30,11 @@ export class DraggersLabel extends Phaser.GameObjects.Container {
             if (player.isDead) {
                 c = '#888888';
             }
-            let t = this.scene.add.text(100*i, 40, playerName, { 'color': c })
+            let t = this.scene.add.text(100*i, 40, playerName, { 'color': c }).setInteractive();
             this.add(t);
+            this.scene.input.setDraggable(t);
             this.playerLabels.push(t);
             i++;
         });
     }
 }
-
-/*
-function preload() {
-
-    game.load.bitmapFont('carrier_command', 'assets/fonts/bitmapFonts/carrier_command.png', 'assets/fonts/bitmapFonts/carrier_command.xml');
-
-}
-
-var bpmText;
-
-function create() {
-
-    bmpText = game.add.bitmapText(10, 100, 'carrier_command','Drag me around !',34);
-
-    bmpText.inputEnabled = true;
-
-    bmpText.input.enableDrag();
-
-}*/

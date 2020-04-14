@@ -1,6 +1,7 @@
 import { Server } from '../server';
 import { TextButton } from '../text-button';
 import { DraggersLabel } from '../draggerslabel';
+import { SeatZone } from '../seatzone';
 
 export class StartScene extends Phaser.Scene {
     constructor() {
@@ -23,7 +24,6 @@ export class StartScene extends Phaser.Scene {
         });
 
         let text = this.add.text(50,30,'Welcome! \n\nTo start, enter a game ID\nThis will create a game.',{ color: 'white', fontSize: '20px '});
-        text.input.enableDrag()
 
         this.hostJoinEl = this.add.dom(360, 150).createFromCache('hoststartform');
         this.hostJoinEl.addListener('click');
@@ -59,6 +59,7 @@ export class StartScene extends Phaser.Scene {
                     this.nameText.setVisible(true);
                     this.startButton.setVisible(true);
                     this.directionText.setVisible(true);
+                    this.seat1.setVisible(true);
                 }
             }
 
@@ -77,12 +78,41 @@ export class StartScene extends Phaser.Scene {
         });
         this.add.existing(this.startButton);
         this.startButton.setVisible(false);
-        this.input.setDraggable
 
         let playersList = this.server.getPlayersList();
         this.playersLabel = new DraggersLabel(this, 20, 400, playersList);
+
         this.add.existing(this.playersLabel);
         this.playersLabel.setVisible(false);
+
+        this.seat1 = new SeatZone(this, 500, 200, 100, 80, 'Seat 1');
+        this.add.existing(this.seat1);
+        this.seat1.setVisible(false);
+
+        this.input.on('drag', function(pointer, gameObject, dragX, dragY) {
+            gameObject.x = dragX;
+            gameObject.y = dragY;
+        });
+
+        this.input.on('dragenter', function(pointer, gameObject, dropZone) {
+            dropZone.setHighlighted(true);
+        });
+
+        this.input.on('dragleave', function(pointer, gameObject, dropZone) {
+            dropZone.setHighlighted(false);
+        });
+
+        this.input.on('drop', function(pointer, gameObject, dropZone) {
+            dropZone.add(gameObject);
+            dropZone.setHighlighted(false);
+        });
+
+        this.input.on('dragend', function(pointer, gameObject, dropZone) {
+            if (!dropZone) {
+                gameObject.x = gameObject.input.dragStartX;
+                gameObject.y = gameObject.input.dragStartY;
+            }
+        });
 
 
     }
