@@ -68,7 +68,7 @@ export class JoinScene extends Phaser.Scene {
 
 
         let playersList = this.server.getPlayersList();
-        this.playersLabel = new PlayersLabel(this, 20, 400, playersList);
+        this.playersLabel = new PlayersLabel(this, 5, 400, playersList);
         this.add.existing(this.playersLabel);
         this.playersLabel.setVisible(false);
     }

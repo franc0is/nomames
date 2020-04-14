@@ -31,7 +31,7 @@ export class PlayersLabel extends Phaser.GameObjects.Container {
             if (player.isDead) {
                 c = '#888888';
             }
-            let t = this.scene.add.text(100*i, 40, playerName, { 'color': c })
+            let t = this.scene.add.text(89*i, 40, playerName, { 'color': c })
             this.add(t);
             this.playerLabels.push(t);
             

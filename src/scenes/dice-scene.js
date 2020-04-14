@@ -152,7 +152,7 @@ export class DiceScene extends Phaser.Scene {
         let k = 0
         let pList = this.server.getPlayersList();
         pList.getPlayers().forEach( player => {
-            let l = new Life(this, 100*k+59, 468, 3-player.numLives);
+            let l = new Life(this, 89*k+44, 468, 3-player.numLives);
             this.add.existing(l);
             this.lives.push(l);
             k++;
@@ -184,7 +184,7 @@ export class DiceScene extends Phaser.Scene {
         });
 
         let playersList = this.server.getPlayersList();
-        this.playersLabel = new PlayersLabel(this, 20, 400, playersList);
+        this.playersLabel = new PlayersLabel(this, 5, 400, playersList);
         this.add.existing(this.playersLabel);
 
         if (!playersList.getActivePlayer().isMe) {
