@@ -1,6 +1,6 @@
 import { Server } from '../server';
 import { TextButton } from '../text-button';
-import { PlayersLabel } from '../playerslabel';
+import { DraggersLabel } from '../draggerslabel';
 
 export class StartScene extends Phaser.Scene {
     constructor() {
@@ -21,8 +21,9 @@ export class StartScene extends Phaser.Scene {
                 this.scene.start('diceScene', { server: this.server });
             }
         });
-        let text = this.add.text(50,30,'Welcome! \n\nTo start, enter a game ID\nThis will create a game.',{ color: 'white', fontSize: '20px '}
-        );
+
+        let text = this.add.text(50,30,'Welcome! \n\nTo start, enter a game ID\nThis will create a game.',{ color: 'white', fontSize: '20px '});
+        text.input.enableDrag()
 
         this.hostJoinEl = this.add.dom(360, 150).createFromCache('hoststartform');
         this.hostJoinEl.addListener('click');
@@ -41,7 +42,7 @@ export class StartScene extends Phaser.Scene {
             }
         });
 
-        this.channelText = this.add.text(200, 150, '', { color: '#0f0', fontsize: '36px' });
+        this.channelText = this.add.text(50, 150, '', { color: '#0f0', fontsize: '36px' });
         this.channelText.setVisible(false);
 
         this.nameEl = this.add.dom(360, 200).createFromCache('nameform');
@@ -57,27 +58,32 @@ export class StartScene extends Phaser.Scene {
                     this.nameText.setText('Name: ' +inputText.value);
                     this.nameText.setVisible(true);
                     this.startButton.setVisible(true);
+                    this.directionText.setVisible(true);
                 }
             }
 
         });
 
-        this.nameText = this.add.text(200,200, '',{color: '#0f0', fontsize: '36px'});
+        this.nameText = this.add.text(50,200, '',{color: '#0f0', fontsize: '36px'});
         this.nameText.setVisible(false);
+        this.directionText = this.add.text(50,350,'To set the order of players,\nplease drag their name to a seat', {color: '#0f0', fontsize: '24px'});
+        this.directionText.setVisible(false);
 
-        this.startButton = new TextButton(this, 325, 300, '[ START ]', {
+        
+        this.startButton = new TextButton(this, 50, 300, '[ START ]', {
             onClick: () => {
                 this.server.startGame();
             }
         });
         this.add.existing(this.startButton);
         this.startButton.setVisible(false);
-
+        this.input.setDraggable
 
         let playersList = this.server.getPlayersList();
-        this.playersLabel = new PlayersLabel(this, 20, 400, playersList);
+        this.playersLabel = new DraggersLabel(this, 20, 400, playersList);
         this.add.existing(this.playersLabel);
         this.playersLabel.setVisible(false);
+
 
     }
 
