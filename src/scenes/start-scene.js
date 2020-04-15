@@ -71,10 +71,10 @@ export class StartScene extends Phaser.Scene {
 
         this.nameText = this.add.text(50,200, '',{color: '#0f0', fontsize: '36px'});
         this.nameText.setVisible(false);
-        this.directionText = this.add.text(50,350,'To set the order of players,\ndrag players to a seat', {color: '#0f0', fontsize: '24px'});
+        this.directionText = this.add.text(50,350,'To set the order of players,\ndrag players to a seat or \nclick on "RANDOMIZE SEATING"', {color: '#0f0', fontsize: '24px'});
         this.directionText.setVisible(false);
 
-        this.startButton = new TextButton(this, 50, 300, '[ START ]', {
+        this.startButton = new TextButton(this, 50, 250, '[ START ]', {
             onClick: () => {
                 let names = [];
                 this.seats.forEach(seat => {
@@ -126,11 +126,10 @@ export class StartScene extends Phaser.Scene {
         });
 
         this.input.on('drop', function(pointer, gameObject, dropZone) {
-            console.log(this.playersLabel);
             if (dropZone.getUuid().length === 0){
                 dropZone.add(gameObject);
                 dropZone.setHighlighted(false);
-            }else {
+            } else {
                 gameObject.x = gameObject.input.dragStartX;
                 gameObject.y = gameObject.input.dragStartY;
                 dropZone.setHighlighted(false);
@@ -144,16 +143,20 @@ export class StartScene extends Phaser.Scene {
             }
         });
 
-        this.randomizeButton = new TextButton(this, 50, 400, 'RANDOMIZE SEATING', {
+        this.randomizeButton = new TextButton(this, 50, 300, 'RANDOMIZE SEATING', {
             onClick: () => {
                 // Make an array all the seats and randomly pick them off for each player
                 let emptySeats = []
                 this.seats.forEach(seat => {
                     emptySeats.push(seat);
                 });
-                this.nameText.forEach(label => {
+                console.log('n_players: ', this.playersLabel.playerLabels)
+                this.playersLabel.playerLabels.forEach(label => {
                     let randomIndex = Math.floor(Math.random()*emptySeats.length);
                     let next_seat = emptySeats.splice(randomIndex, 1)[0]
+                    console.log('label: ', label)
+                    console.log('index: ', randomIndex)
+                    console.log('next_seat: ', next_seat)
                     next_seat.add(label);
                 });
             }
