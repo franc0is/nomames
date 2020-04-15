@@ -32,7 +32,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         }
     }
 
-    getVisible(value) {
+    getVisible() {
         return this.container.visible;
     }
 
