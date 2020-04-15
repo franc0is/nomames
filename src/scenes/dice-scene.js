@@ -61,10 +61,11 @@ export class DiceScene extends Phaser.Scene {
         this.nomames = false;
         this.table = new DiceZone(this, 305, 100, 600, 150, 'Table');
         this.cup = new DiceZone(this, 305, 300, 600, 150, 'Cup');
-        this.cup.setIndividualRoll(false);
 
         this.noMamesText = this.add.text(170, 180, "🚨🖕🚨 NO MAMES GUEY 🚨🖕🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
+        
+        this.firstpass = true;
 
         this.cupRollButton = new TextButton(this, 610, 30, 'Roll', {
             onClick: () => {
@@ -90,7 +91,23 @@ export class DiceScene extends Phaser.Scene {
 
         this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass', {
             onClick: () => {
-                this.server.passCup(this.clockwise);
+                let letpass = true;
+                if (this.firstpass){
+                    this.cup.getDice().forEach( d => {
+                        if (!d.didRoll){
+                            letpass = false;
+                        }
+                    });
+                    this.table.getDice().forEach(d => {
+                        if (!d.didRoll){
+                            letpass = false;
+                        }
+                    });
+                };
+                if (letpass){
+                    this.server.passCup(this.clockwise);
+                }
+
             },
         });
         this.add.existing(this.nextPlayerButton);
@@ -149,6 +166,7 @@ export class DiceScene extends Phaser.Scene {
             this.dice.push(d);
         }
 
+        this.dragstarted = false;
         this.input.on('drag', function(pointer, gameObject, dragX, dragY) {
             gameObject.x = dragX;
             gameObject.y = dragY;
@@ -156,6 +174,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.input.on('dragenter', function(pointer, gameObject, dropZone) {
             dropZone.setHighlighted(true);
+            this.dragstarted = true;
         });
 
         this.input.on('dragleave', function(pointer, gameObject, dropZone) {
@@ -173,9 +192,12 @@ export class DiceScene extends Phaser.Scene {
         });
 
         this.input.on('dragend', function(pointer, gameObject, dropZone) {
-            if (!dropZone) {
-                gameObject.x = gameObject.input.dragStartX;
-                gameObject.y = gameObject.input.dragStartY;
+            if(this.dragstarted){
+                if (!dropZone) {
+                    gameObject.x = gameObject.input.dragStartX;
+                    gameObject.y = gameObject.input.dragStartY;
+                }
+                this.dragstarted = false;
             }
         });
 
@@ -222,6 +244,7 @@ export class DiceScene extends Phaser.Scene {
         });
         if (!playable) {
             this.passDirectionButton.setEnabled(false);
+            this.firstpass = false;
         }
     }
 
