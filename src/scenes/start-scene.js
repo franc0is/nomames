@@ -20,6 +20,7 @@ export class StartScene extends Phaser.Scene {
             },
             onGameStart: (msg) => {
                 this.scene.start('diceScene', { server: this.server });
+                this.scene.start('muteScene', { server: this.server });
             }
         });
 
