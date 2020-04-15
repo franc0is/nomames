@@ -146,17 +146,15 @@ export class StartScene extends Phaser.Scene {
         this.randomizeButton = new TextButton(this, 50, 300, 'RANDOMIZE SEATING', {
             onClick: () => {
                 // Make an array all the seats and randomly pick them off for each player
+                this.removeInactivePlayers() // FIXME normally for every player, there are ~2 additional inactive players. This manages to remove all of them
                 let emptySeats = []
                 this.seats.forEach(seat => {
                     emptySeats.push(seat);
                 });
-                console.log('n_players: ', this.playersLabel.playerLabels)
+                console.log('players: ', this.playersLabel.playerLabels) //used to debug the
                 this.playersLabel.playerLabels.forEach(label => {
                     let randomIndex = Math.floor(Math.random()*emptySeats.length);
                     let next_seat = emptySeats.splice(randomIndex, 1)[0]
-                    console.log('label: ', label)
-                    console.log('index: ', randomIndex)
-                    console.log('next_seat: ', next_seat)
                     next_seat.add(label);
                 });
             }
@@ -169,5 +167,16 @@ export class StartScene extends Phaser.Scene {
     onPlayersUpdate(playersList) {
         console.log("Players update!");
         this.playersLabel.updateWithPlayers(playersList);
+        this.removeInactivePlayers() // FIXME normally for every player, there are ~2 additional inactive players. This manages to reduce it to ~1 additional inactive player per player
+    }
+
+    // FIXME should ultimately remove
+    removeInactivePlayers() {
+        var i;
+        for (i = 0; i < this.playersLabel.playerLabels.length; i++) {
+            if (!this.playersLabel.playerLabels[i].active) {
+                this.playersLabel.playerLabels.splice(i, 1)
+            }
+        }
     }
 }
