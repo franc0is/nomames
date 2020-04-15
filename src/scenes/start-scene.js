@@ -151,7 +151,7 @@ export class StartScene extends Phaser.Scene {
                 this.seats.forEach(seat => {
                     emptySeats.push(seat);
                 });
-                console.log('players: ', this.playersLabel.playerLabels) //used to debug the
+                console.log('players: ', this.playersLabel.playerLabels) // FIXME used for debugging inactive player problem
                 this.playersLabel.playerLabels.forEach(label => {
                     let randomIndex = Math.floor(Math.random()*emptySeats.length);
                     let next_seat = emptySeats.splice(randomIndex, 1)[0]
