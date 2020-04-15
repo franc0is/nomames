@@ -38,10 +38,11 @@ export class StartGameMessage extends Message {
 }
 
 export class PassCupMessage extends Message {
-    constructor(activePlayerUUID,isClockwise) {
+    constructor(activePlayerUUID,isClockwise,fiverPass) {
         super('passCup');
         this.activePlayerUUID = activePlayerUUID;
         this.isClockwise = isClockwise;
+        this.fiverPass = fiverPass;
     }
 
     static getType() {
@@ -49,7 +50,7 @@ export class PassCupMessage extends Message {
     }
 
     static deserialize(msg) {
-        return new this(msg['activePlayerUUID'],msg['isClockwise']);
+        return new this(msg['activePlayerUUID'],msg['isClockwise'],msg['fiverPass']);
     }
 }
 
