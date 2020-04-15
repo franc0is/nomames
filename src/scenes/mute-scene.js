@@ -4,26 +4,23 @@ export class MuteScene extends Phaser.Scene {
     constructor() {
         super({ key: 'muteScene' });
     }
+
     init(data) {
-        this.server = data.server;
+        this.audioManager = data.audioManager;
     };
 
     create() {
         this.muteButton = new TextButton(this, 610, 210, 'Mute', {
             onClick: () => {
-                this.server.muted = !this.server.muted;
-                console.log(this.server.muted)
-                if (this.server.muted){
+                this.audioManager.toggleMute();
+                if (this.audioManager.isMuted()){
                     this.muteButton.setText('Unmute');
-                }else {
+                } else {
                     this.muteButton.setText('Mute');
                 };
             }
         });
 
         this.add.existing(this.muteButton);
-
-        
     }
-
 }

@@ -4,6 +4,7 @@ import { DiceZone } from '../dice-zone';
 import { TextButton } from '../text-button';
 import { Action } from '../message';
 import { PlayersLabel } from '../playerslabel';
+import { NMAudioManager } from '../audio';
 
 const NUM_DICE = 5;
 
@@ -22,6 +23,7 @@ export class DiceScene extends Phaser.Scene {
 
     init(data) {
         this.server = data.server;
+        this.audioManager = new NMAudioManager(this);
         this.server.setCallbacks({
             onPlayersUpdate: (players) => {
                 this.onPlayersUpdate(players);
@@ -49,13 +51,13 @@ export class DiceScene extends Phaser.Scene {
 
     preload() {
         this.load.spritesheet('dice', 'assets/dice-pixel.png', { frameWidth: 64, frameHeight: 64});
-        this.load.audio('indieRoll', 'assets/dieRoll.mp3');
-        this.load.audio('cupRoll', 'assets/cupRoll.mp3');
-        this.load.audio('noMames', 'assets/NoMamesWey.mp3');
-        this.load.audio('noMames2', 'assets/AyNoMames.mp3');
+        this.audioManager.preload();
     };
 
     create() {
+        this.audioManager.create();
+        this.scene.launch('muteScene', { audioManager: this.audioManager });
+
         this.nomames = false;
         this.cup = new DiceZone(this, 305, 100, 600, 150, 'Cup');
         this.cup.setIndividualRoll(false);
@@ -64,20 +66,12 @@ export class DiceScene extends Phaser.Scene {
         this.noMamesText = this.add.text(200, 180, "🚨🖕🚨 NO MAMES GUEY 🚨🖕🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
 
-        this.cupRollAudio = this.sound.add('cupRoll');
-        this.dieRollAudio = this.sound.add('indieRoll');
-        this.noMamesAudio = this.sound.add('noMames');
-        this.ayNoMamesAudio = this.sound.add('noMames2');
-
         this.cupRollButton = new TextButton(this, 610, 30, 'Roll', {
             onClick: () => {
                 this.cup.roll();
                 this.cupRollButton.setEnabled(false);
                 this.noMamesButton.setEnabled(false);
                 this.cupLookButton.setEnabled(true);
-                if (!this.server.muted){
-                    this.cupRollAudio.play();
-                }
                 if (this.nomames) {
                     this.onNoMames();
                 }
@@ -232,6 +226,7 @@ export class DiceScene extends Phaser.Scene {
         this.lookedButton.setEnabled(this.cup.getVisible());
         this.rolledButton.setEnabled(this.cup.didRoll());
         this.noMamesButton.setEnabled(false);
+        this.audioManager.playAudioForAction(action);
         let update = {
             'action': action,
             'cup': {
@@ -271,10 +266,6 @@ export class DiceScene extends Phaser.Scene {
 
         switch (msg.action) {
             case Action.ROLL_ONE: {
-                if (!this.server.muted){
-                    this.dieRollAudio.play();
-                };
-
                 let table_dice = Array.from(this.table.getDice());
                 let new_value = -1;
                 msg.table.dice.forEach(die => {
@@ -315,13 +306,11 @@ export class DiceScene extends Phaser.Scene {
                 for (const [i, die] of msg.cup.dice.entries()) {
                     this.cup.getDice()[i].setValue(die);
                 }
-                console.log(this.server.muted);
-                if (!this.server.muted){
-                    this.cupRollAudio.play();
-                }
                 break;
             }
         }
+
+        this.audioManager.playAudioForAction(msg.action);
 
         this.rolledButton.setEnabled(msg.cup.rolled);
         this.lookedButton.setEnabled(msg.cup.visible);
@@ -345,17 +334,7 @@ export class DiceScene extends Phaser.Scene {
         this.cupRollButton.setEnabled(false);
         this.noMamesButton.setEnabled(false);
         this.nextPlayerButton.setEnabled(false);
-        if (!this.server.muted){
-            let even = true;
-            this.table.getDice().forEach(die => {
-                even = !even;
-            });
-            if (even){
-            this.noMamesAudio.play();
-            } else {
-                this.ayNoMamesAudio.play();
-            }
-        }
+        this.audioManager.playNoMames();
     }
 
     onReset() {
