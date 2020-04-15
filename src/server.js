@@ -242,6 +242,8 @@ export class Server {
                 this.playersList.removePlayerByUUID(uuid);
                 break;
         }
+        console.log('Received ', presenceEvent['action'], ' with state ',
+            presenceEvent['state'], ' playersList is now ' ,this.playersList);
         this.callbacks.onPlayersUpdate(this.playersList);
     }
 }
