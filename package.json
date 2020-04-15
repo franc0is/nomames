@@ -6,6 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "@azerion/phaser-input": "^2.0.5",
+    "@sentry/browser": "^5.15.4",
     "phaser": "3.22.0",
     "pubnub": "^4.27.4"
   },
