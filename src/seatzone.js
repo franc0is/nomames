@@ -32,7 +32,7 @@ export class SeatZone extends Phaser.GameObjects.Zone {
     }
 
     getUuid() {
-        return this.uuid;
+        return this.container.getAll();
     }
 
     reset() {
@@ -49,12 +49,11 @@ export class SeatZone extends Phaser.GameObjects.Zone {
         playerlabel.x = this.x-45;
         playerlabel.y = this.y-10;
         console.log(playerlabel);
-        this.uuid = playerlabel.uuid;
         this.container.add(playerlabel);
     };
 
-    remove(playername) {
-        this.container.remove(playername);
+    remove(playerlabel) {
+        this.container.remove(playerlabel);
     };
 
     setHighlighted(enable) {

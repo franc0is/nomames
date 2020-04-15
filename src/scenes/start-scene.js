@@ -82,9 +82,9 @@ export class StartScene extends Phaser.Scene {
             onClick: () => {
                 let names = [];
                 this.seats.forEach(seat => {
-                    if (seat.getUuid() !== undefined){
-                        let uuid = seat.getUuid();
-                        names.push(uuid);
+                    let name = seat.getUuid()
+                    if (name[0] !== undefined){
+                        names.push(name[0].uuid);
                     }
                 });
                 this.server.playersList.orderByUUIDList(names);
@@ -156,8 +156,14 @@ export class StartScene extends Phaser.Scene {
         });
 
         this.input.on('drop', function(pointer, gameObject, dropZone) {
-            dropZone.add(gameObject);
-            dropZone.setHighlighted(false);
+            if (dropZone.getUuid().length === 0){
+                dropZone.add(gameObject);
+                dropZone.setHighlighted(false);
+            }else {
+                gameObject.x = gameObject.input.dragStartX;
+                gameObject.y = gameObject.input.dragStartY;
+                dropZone.setHighlighted(false);
+            }
         });
 
         this.input.on('dragend', function(pointer, gameObject, dropZone) {
