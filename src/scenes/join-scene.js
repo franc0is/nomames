@@ -16,7 +16,6 @@ export class JoinScene extends Phaser.Scene {
         this.server = new Server({
             onPlayersUpdate: (players) => {
                 this.onPlayersUpdate(players);
-                //this.removeInactivePlayers(); // FIXME normally for every player, there are ~2 additional inactive players. This manages to reduce it to ~1 additional inactive player per player
             },
             onGameStart: (msg) => {
                 this.scene.start('diceScene', { server: this.server });
@@ -77,15 +76,5 @@ export class JoinScene extends Phaser.Scene {
     onPlayersUpdate(playersList) {
         console.log("Players update!");
         this.playersLabel.updateWithPlayers(playersList);
-    }
-
-    // FIXME should ultimately remove
-    removeInactivePlayers() {
-        var i;
-        for (i = 0; i < this.playersLabel.playerLabels.length; i++) {
-            if (!this.playersLabel.playerLabels[i].active) {
-                this.playersLabel.playerLabels.splice(i, 1)
-            }
-        }
     }
 }

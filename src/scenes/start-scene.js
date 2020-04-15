@@ -146,14 +146,12 @@ export class StartScene extends Phaser.Scene {
         this.randomizeButton = new TextButton(this, 50, 300, 'RANDOMIZE SEATING', {
             onClick: () => {
                 // Make an array all the seats and randomly pick them off for each player
-                //this.removeInactivePlayers() // FIXME normally for every player, there are ~2 additional inactive players. This manages to remove all of them
+                this.removeInactivePlayers() // FIXME normally for every player, there are ~2 additional inactive players. This manages to remove all of them
                 let emptySeats = []
                 this.seats.forEach(seat => {
                     emptySeats.push(seat);
                 });
-                console.log('players: ', this.playersLabel.playerLabels) // FIXME used for debugging inactive player problem
-                console.log('players: ', this.server.playersList)
-                this.server.playersList.players.forEach(label => {
+                this.server.playersLabel.playerLabels.forEach(label => {
                     let randomIndex = Phaser.Math.RND.integerInRange(0, emptySeats.length-1);
                     let next_seat = emptySeats.splice(randomIndex, 1)[0]
                     next_seat.add(label.Player);
@@ -168,7 +166,6 @@ export class StartScene extends Phaser.Scene {
     onPlayersUpdate(playersList) {
         console.log("Players update!");
         this.playersLabel.updateWithPlayers(playersList);
-        //this.removeInactivePlayers() // FIXME normally for every player, there are ~2 additional inactive players. This manages to reduce it to ~1 additional inactive player per player
     }
 
     // FIXME should ultimately remove
