@@ -163,8 +163,13 @@ export class DiceScene extends Phaser.Scene {
         });
 
         this.input.on('drop', function(pointer, gameObject, dropZone) {
-            dropZone.add(gameObject);
-            dropZone.setHighlighted(false);
+            if (gameObject instanceof Dice && gameObject.didRoll && dropZone.name === "Cup" ){
+                gameObject.x = gameObject.input.dragStartX;
+                gameObject.y = gameObject.input.dragStartY;
+            } else {
+                dropZone.add(gameObject);
+                dropZone.setHighlighted(false);
+            }
         });
 
         this.input.on('dragend', function(pointer, gameObject, dropZone) {
