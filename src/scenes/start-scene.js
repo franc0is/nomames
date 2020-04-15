@@ -154,7 +154,7 @@ export class StartScene extends Phaser.Scene {
                 this.playersLabel.playerLabels.forEach(label => {
                     let randomIndex = Phaser.Math.RND.integerInRange(0, emptySeats.length-1);
                     let next_seat = emptySeats.splice(randomIndex, 1)[0]
-                    next_seat.add(label.Player);
+                    next_seat.add(label);
                 });
             }
         });
