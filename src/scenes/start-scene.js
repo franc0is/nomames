@@ -1,6 +1,6 @@
 import { Server } from '../server';
 import { TextButton } from '../text-button';
-import { DraggersLabel } from '../draggerslabel';
+import { DraggableLabel } from '../draggable-label';
 import { SeatZone } from '../seatzone';
 
 export class StartScene extends Phaser.Scene {
@@ -90,7 +90,7 @@ export class StartScene extends Phaser.Scene {
         this.startButton.setVisible(false);
 
         let playersList = this.server.getPlayersList();
-        this.playersLabel = new DraggersLabel(this, 20, 400, playersList);
+        this.playersLabel = new DraggableLabel(this, 20, 400, playersList);
 
         this.add.existing(this.playersLabel);
         this.playersLabel.setVisible(false);

@@ -1,4 +1,4 @@
-export class DraggersLabel extends Phaser.GameObjects.Container {
+export class DraggableLabel extends Phaser.GameObjects.Container {
     constructor(scene, x, y, playersList) {
         super(scene, x, y);
         this.scene = scene;
@@ -25,14 +25,13 @@ export class DraggersLabel extends Phaser.GameObjects.Container {
             if (player.isMe) {
                 playerName += '*';
             }
-            playerName += ":" + player.numLives;
-            let c = player.isActive ? 'red' : 'white';
-            if (player.isDead) {
-                c = '#888888';
-            }
-            let t = this.scene.add.text(100*i, 40, playerName, { 'color': c }).setInteractive();
+            let t = this.scene.add.text(100*i,
+                                        40,
+                                        playerName,
+                                        { 'color': 'white' });
             t.uuid = player.uuid;
             this.add(t);
+            t.setInteractive();
             this.scene.input.setDraggable(t);
             this.playerLabels.push(t);
             i++;
