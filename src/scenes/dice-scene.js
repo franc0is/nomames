@@ -166,6 +166,7 @@ export class DiceScene extends Phaser.Scene {
             if (gameObject instanceof Dice && gameObject.didRoll && dropZone.name === "Cup" ){
                 gameObject.x = gameObject.input.dragStartX;
                 gameObject.y = gameObject.input.dragStartY;
+                dropZone.setHighlighted(false);
             } else {
                 dropZone.add(gameObject);
                 dropZone.setHighlighted(false);
