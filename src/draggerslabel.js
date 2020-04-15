@@ -31,6 +31,7 @@ export class DraggersLabel extends Phaser.GameObjects.Container {
                 c = '#888888';
             }
             let t = this.scene.add.text(100*i, 40, playerName, { 'color': c }).setInteractive();
+            t.uuid = player.uuid;
             this.add(t);
             this.scene.input.setDraggable(t);
             this.playerLabels.push(t);

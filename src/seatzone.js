@@ -1,10 +1,8 @@
-import { Action } from './message'
-
 export class SeatZone extends Phaser.GameObjects.Zone {
     constructor(scene, x, y, width, height, name) {
         super(scene, x, y, width, height);
         scene.add.existing(this);
-        scene.add.text(
+        this.nameText = scene.add.text(
             x + 10 - width/2,
             y + 10 - height/2,
             name,
@@ -14,6 +12,7 @@ export class SeatZone extends Phaser.GameObjects.Zone {
         this.setInteractive({dropZone: true});
         this.container = scene.add.container();
         this.setName(name);
+        
         this.graphics = scene.add.graphics();
         this.graphics.lineStyle(2, 0xffff00);
         this.graphics.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width - 20, this.height - 20);
@@ -32,8 +31,8 @@ export class SeatZone extends Phaser.GameObjects.Zone {
         return this.container.visible;
     }
 
-    getName() {
-        return this.container.getAll();
+    getUuid() {
+        return this.uuid;
     }
 
     reset() {
@@ -41,12 +40,17 @@ export class SeatZone extends Phaser.GameObjects.Zone {
         this.setVisible(false);
     }
 
+    setVisible(value){
+            this.graphics.setVisible(value);
+            this.nameText.setVisible(value);
+    }
 
-
-    add(playername) {
-        playername.x = this.x;
-        playername.y = this.y;
-        this.container.add(playername);
+    add(playerlabel) {
+        playerlabel.x = this.x-45;
+        playerlabel.y = this.y-10;
+        console.log(playerlabel);
+        this.uuid = playerlabel.uuid;
+        this.container.add(playerlabel);
     };
 
     remove(playername) {

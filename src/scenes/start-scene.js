@@ -60,6 +60,13 @@ export class StartScene extends Phaser.Scene {
                     this.startButton.setVisible(true);
                     this.directionText.setVisible(true);
                     this.seat1.setVisible(true);
+                    this.seat2.setVisible(true);
+                    this.seat3.setVisible(true);
+                    this.seat4.setVisible(true);
+                    this.seat5.setVisible(true);
+                    this.seat6.setVisible(true);
+                    this.seat7.setVisible(true);
+                    this.seat8.setVisible(true);
                 }
             }
 
@@ -67,12 +74,21 @@ export class StartScene extends Phaser.Scene {
 
         this.nameText = this.add.text(50,200, '',{color: '#0f0', fontsize: '36px'});
         this.nameText.setVisible(false);
-        this.directionText = this.add.text(50,350,'To set the order of players,\nplease drag their name to a seat', {color: '#0f0', fontsize: '24px'});
+        this.directionText = this.add.text(50,350,'To set the order of players,\ndrag players to a seat', {color: '#0f0', fontsize: '24px'});
         this.directionText.setVisible(false);
 
         
         this.startButton = new TextButton(this, 50, 300, '[ START ]', {
             onClick: () => {
+                let names = [];
+                this.seats.forEach(seat => {
+                    if (seat.getUuid() !== undefined){
+                        let uuid = seat.getUuid();
+                        names.push(uuid);
+                    }
+                });
+                this.server.playersList.orderByUUIDList(names);
+                console.log(names);
                 this.server.startGame();
             }
         });
@@ -85,9 +101,46 @@ export class StartScene extends Phaser.Scene {
         this.add.existing(this.playersLabel);
         this.playersLabel.setVisible(false);
 
-        this.seat1 = new SeatZone(this, 500, 200, 100, 80, 'Seat 1');
+        this.seats = [];
+        this.seat1 = new SeatZone(this, 500, 100, 100, 100, 'Seat 1');
         this.add.existing(this.seat1);
         this.seat1.setVisible(false);
+        this.seats.push(this.seat1);
+
+        this.seat2 = new SeatZone(this, 600, 150, 100, 100, 'Seat 2');
+        this.add.existing(this.seat2);
+        this.seat2.setVisible(false);
+        this.seats.push(this.seat2);
+
+        this.seat3 = new SeatZone(this, 650, 250, 100, 100, 'Seat 3');
+        this.add.existing(this.seat3);
+        this.seat3.setVisible(false);
+        this.seats.push(this.seat3);
+
+        this.seat4 = new SeatZone(this, 600, 350, 100, 100, 'Seat 4');
+        this.add.existing(this.seat4);
+        this.seat4.setVisible(false);
+        this.seats.push(this.seat4);
+
+        this.seat5 = new SeatZone(this, 500, 400, 100, 100, 'Seat 5');
+        this.add.existing(this.seat5);
+        this.seat5.setVisible(false);
+        this.seats.push(this.seat5);
+
+        this.seat6 = new SeatZone(this, 400, 350, 100, 100, 'Seat 6');
+        this.add.existing(this.seat6);
+        this.seat6.setVisible(false);
+        this.seats.push(this.seat6);
+
+        this.seat7 = new SeatZone(this, 350, 250, 100, 100, 'Seat 7');
+        this.add.existing(this.seat7);
+        this.seat7.setVisible(false);
+        this.seats.push(this.seat7);
+
+        this.seat8 = new SeatZone(this, 400, 150, 100, 100, 'Seat 8');
+        this.add.existing(this.seat8);
+        this.seat8.setVisible(false);
+        this.seats.push(this.seat8);
 
         this.input.on('drag', function(pointer, gameObject, dragX, dragY) {
             gameObject.x = dragX;
