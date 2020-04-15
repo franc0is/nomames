@@ -4,6 +4,7 @@ import { DiceZone } from '../dice-zone';
 import { TextButton } from '../text-button';
 import { Action } from '../message';
 import { PlayersLabel } from '../playerslabel';
+import { NMAudioManager } from '../audio';
 
 const NUM_DICE = 5;
 
@@ -18,6 +19,7 @@ export class DiceScene extends Phaser.Scene {
      */
     constructor() {
         super({ key: 'diceScene' });
+        this.audioManager = new NMAudioManager(this);
     }
 
     init(data) {
@@ -49,9 +51,13 @@ export class DiceScene extends Phaser.Scene {
 
     preload() {
         this.load.spritesheet('dice', 'assets/dice-pixel.png', { frameWidth: 64, frameHeight: 64});
-    }
+        this.audioManager.preload();
+    };
 
     create() {
+        this.audioManager.create();
+        this.scene.launch('muteScene', { audioManager: this.audioManager });
+
         this.nomames = false;
         this.cup = new DiceZone(this, 305, 100, 600, 150, 'Cup');
         this.cup.setIndividualRoll(false);
@@ -220,6 +226,7 @@ export class DiceScene extends Phaser.Scene {
         this.lookedButton.setEnabled(this.cup.getVisible());
         this.rolledButton.setEnabled(this.cup.didRoll());
         this.noMamesButton.setEnabled(false);
+        this.audioManager.playAudioForAction(action);
         let update = {
             'action': action,
             'cup': {
@@ -272,6 +279,7 @@ export class DiceScene extends Phaser.Scene {
                 });
                 // FIXME we don't know which dice to animate
                 // when we roll the exact same...
+                // I don't think this matters since everyone's orders are different. -ac
                 if (new_value !== -1) {
                     table_dice[0].animate(function(target) {
                         target.setValue(new_value);
@@ -302,6 +310,8 @@ export class DiceScene extends Phaser.Scene {
             }
         }
 
+        this.audioManager.playAudioForAction(msg.action);
+
         this.rolledButton.setEnabled(msg.cup.rolled);
         this.lookedButton.setEnabled(msg.cup.visible);
 
@@ -324,6 +334,7 @@ export class DiceScene extends Phaser.Scene {
         this.cupRollButton.setEnabled(false);
         this.noMamesButton.setEnabled(false);
         this.nextPlayerButton.setEnabled(false);
+        this.audioManager.playNoMames();
     }
 
     onReset() {
