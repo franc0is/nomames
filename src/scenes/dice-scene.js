@@ -19,11 +19,11 @@ export class DiceScene extends Phaser.Scene {
      */
     constructor() {
         super({ key: 'diceScene' });
+        this.audioManager = new NMAudioManager(this);
     }
 
     init(data) {
         this.server = data.server;
-        this.audioManager = new NMAudioManager(this);
         this.server.setCallbacks({
             onPlayersUpdate: (players) => {
                 this.onPlayersUpdate(players);
