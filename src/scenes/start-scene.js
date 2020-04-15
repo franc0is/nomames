@@ -147,10 +147,10 @@ export class StartScene extends Phaser.Scene {
             onClick: () => {
                 // Make an array all the seats and randomly pick them off for each player
                 this.removeInactivePlayers()  // FIXME normally for every player, there are ~2 additional inactive players. This manages to remove all of them
-                let emptySeats = [...this.seats]
+                let emptySeats = [...this.seats];
                 this.playersLabel.playerLabels.forEach(label => {
                     let randomIndex = Phaser.Math.RND.integerInRange(0, emptySeats.length-1);
-                    let next_seat = emptySeats.splice(randomIndex, 1)[0]
+                    let next_seat = emptySeats.splice(randomIndex, 1)[0];
                     next_seat.add(label);
                 });
             }
