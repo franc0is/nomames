@@ -228,6 +228,8 @@ export class DiceScene extends Phaser.Scene {
     updateDice(action) {
         // we've taken an action that changes dice,
         // no mames is disabled
+        this.cup.reorder();
+        this.table.reorder();
         this.lookedButton.setEnabled(this.cup.getVisible());
         this.rolledButton.setEnabled(this.cup.didRoll());
         this.noMamesButton.setEnabled(false);
@@ -293,6 +295,15 @@ export class DiceScene extends Phaser.Scene {
                 break;
             }
             case Action.MOVE_ONE: {
+                //remove all dice
+                this.cup.getDice().forEach(d => {
+                    this.cup.remove(d);
+                });
+                this.table.getDice().forEach(d => {
+                    this.table.remove(d);
+                });
+
+                //refill all dice per message
                 let i = 0;
                 msg.cup.dice.forEach(die => {
                     this.dice[i].setValue(die);
