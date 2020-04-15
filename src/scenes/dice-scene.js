@@ -332,7 +332,6 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onFiverReceipt(){
-        console.log('received!!!')
         this.setPlayable(true);
         this.dice.forEach(d=> {
             d.maxRoll = 5;
