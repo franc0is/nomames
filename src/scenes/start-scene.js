@@ -60,6 +60,7 @@ export class StartScene extends Phaser.Scene {
                     this.nameText.setVisible(true);
                     this.startButton.setVisible(true);
                     this.directionText.setVisible(true);
+                    this.randomizeButton.setVisible(true);
                     for (let seat of this.seats) {
                         seat.setVisible(true);
                     }
@@ -125,6 +126,7 @@ export class StartScene extends Phaser.Scene {
         });
 
         this.input.on('drop', function(pointer, gameObject, dropZone) {
+            console.log(this.playersLabel);
             if (dropZone.getUuid().length === 0){
                 dropZone.add(gameObject);
                 dropZone.setHighlighted(false);
@@ -142,7 +144,22 @@ export class StartScene extends Phaser.Scene {
             }
         });
 
-
+        this.randomizeButton = new TextButton(this, 50, 400, 'RANDOMIZE SEATING', {
+            onClick: () => {
+                // Make an array all the seats and randomly pick them off for each player
+                let emptySeats = []
+                this.seats.forEach(seat => {
+                    emptySeats.push(seat);
+                });
+                this.nameText.forEach(label => {
+                    let randomIndex = Math.floor(Math.random()*emptySeats.length);
+                    let next_seat = emptySeats.splice(randomIndex, 1)[0]
+                    next_seat.add(label);
+                });
+            }
+        });
+        this.add.existing(this.randomizeButton);
+        this.randomizeButton.setVisible(false);
     }
 
 
