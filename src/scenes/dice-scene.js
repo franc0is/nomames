@@ -64,7 +64,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.noMamesText = this.add.text(170, 180, "🚨🖕🚨 NO MAMES GUEY 🚨🖕🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
-        
+
         this.firstpass = true;
 
         this.cupRollButton = new TextButton(this, 610, 30, 'Roll', {
@@ -166,7 +166,7 @@ export class DiceScene extends Phaser.Scene {
             this.dice.push(d);
         }
 
-        this.dragstarted = false;
+        this.dragging = false;
         this.input.on('drag', function(pointer, gameObject, dragX, dragY) {
             gameObject.x = dragX;
             gameObject.y = dragY;
@@ -174,7 +174,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.input.on('dragenter', function(pointer, gameObject, dropZone) {
             dropZone.setHighlighted(true);
-            this.dragstarted = true;
+            this.dragging = true;
         });
 
         this.input.on('dragleave', function(pointer, gameObject, dropZone) {
@@ -193,12 +193,12 @@ export class DiceScene extends Phaser.Scene {
         });
 
         this.input.on('dragend', function(pointer, gameObject, dropZone) {
-            if(this.dragstarted){
+            if (this.dragging){
                 if (!dropZone) {
                     gameObject.x = gameObject.input.dragStartX;
                     gameObject.y = gameObject.input.dragStartY;
                 }
-                this.dragstarted = false;
+                this.dragging = false;
             }
         });
 
