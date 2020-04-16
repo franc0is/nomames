@@ -210,16 +210,13 @@ export class DiceScene extends Phaser.Scene {
             this.setPlayable(false);
         }
 
-        this.cup.setOnUpdateCb((action) => {
-            this.updateDice(action)
+        this.cup.setOnUpdateCb((action, dice) => {
+            this.updateCup(action, dice)
         });
 
-        this.table.setOnUpdateCb((action) => {
-            this.updateDice(action);
+        this.table.setOnUpdateCb((action, dice) => {
+            this.updateTable(action, dice);
         });
-
-        this.cup.OnDieRoll = (action) => {};
-
     }
 
     onPause(pauseText) {
@@ -250,6 +247,18 @@ export class DiceScene extends Phaser.Scene {
             this.lookedButton.setEnabled(false);
             this.rolledButton.setEnabled(false);
         }
+    }
+
+    updateCup(action, dice) {
+        if (action === Action.ROLL_ONE) {
+            this.table.add(dice[0]);
+        }
+        this.updateDice(action);
+    }
+
+
+    updateTable(action, dice) {
+        this.updateDice(action);
     }
 
     updateDice(action) {
@@ -295,8 +304,8 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onDiceUpdate(msg) {
-        this.cup.setOnUpdateCb((action) => {});
-        this.table.setOnUpdateCb((action) => {});
+        this.cup.setOnUpdateCb((action, dice) => {});
+        this.table.setOnUpdateCb((action, dice) => {});
 
         switch (msg.action) {
             case Action.ROLL_ONE: {
@@ -358,12 +367,12 @@ export class DiceScene extends Phaser.Scene {
         this.rolledButton.setEnabled(msg.cup.rolled);
         this.lookedButton.setEnabled(msg.cup.visible);
 
-        this.cup.setOnUpdateCb((action) => {
-            this.updateDice(action)
+        this.cup.setOnUpdateCb((action, dice) => {
+            this.updateCup(action, dice)
         });
 
-        this.table.setOnUpdateCb((action) => {
-            this.updateDice(action);
+        this.table.setOnUpdateCb((action, dice) => {
+            this.updateTable(action, dice);
         });
     }
 

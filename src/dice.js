@@ -75,11 +75,6 @@ export class Dice extends Phaser.GameObjects.Sprite {
         let clickDelay = this.scene.time.now - this.lastClickTime;
         this.lastClickTime = this.scene.time.now;
         if (clickDelay < 350) {
-            if (this.y === 300) {
-                this.setValue(0);
-                //move to table
-                this.scene.table.add(this);
-            }
             this.animate(function(target) {
                 target.roll();
             });

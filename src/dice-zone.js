@@ -18,7 +18,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         this.graphics.lineStyle(2, 0xffff00);
         this.graphics.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width - 20, this.height - 20);
 
-        this.onUpdateCb = (action) => {};
+        this.onUpdateCb = (action, dice) => {};
         this.rolled = false;
     }
 
@@ -45,7 +45,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
 
     setVisible(value) {
         this.container.setVisible(value);
-        this.onUpdateCb(Action.SHOW_MANY);
+        this.onUpdateCb(Action.SHOW_MANY, this.getDice());
     }
 
     reset() {
@@ -58,27 +58,34 @@ export class DiceZone extends Phaser.GameObjects.Zone {
     }
 
     roll() {
+        // disable onupdatecb so we don't get updates for individual rolls
+        let cb = this.onUpdateCb;
+        this.onUpdateCb = (action, dice) => {};
+
         var dice = this.container.getAll();
         for (var die of dice) {
             die.roll();
         }
         this.setVisible(false);
         this.rolled = true;
-        this.onUpdateCb(Action.ROLL_MANY);
+
+        // re-enable onupdatecb
+        this.onUpdateCb = cb;
+        this.onUpdateCb(Action.ROLL_MANY, this.getDice());
     }
 
 
     add(die) {
         die.x = this.x;
         die.y = this.y;
-        
+
         die.setOnRoll((d) => {
             this.onDieRoll(d);
         });
 
         this.container.add(die);
         this.reorder();
-        this.onUpdateCb(Action.MOVE_ONE);
+        this.onUpdateCb(Action.MOVE_ONE, [die]);
     }
 
     remove(die) {
@@ -97,6 +104,6 @@ export class DiceZone extends Phaser.GameObjects.Zone {
     }
 
     onDieRoll(die) {
-        this.onUpdateCb(Action.ROLL_ONE);
+        this.onUpdateCb(Action.ROLL_ONE, [die]);
     }
 }
