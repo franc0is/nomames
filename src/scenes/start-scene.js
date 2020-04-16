@@ -83,8 +83,10 @@ export class StartScene extends Phaser.Scene {
                         names.push(name[0].uuid);
                     }
                 });
-                this.server.playersList.orderByUUIDList(names);
-                this.server.startGame();
+                if (names.length > 0){
+                    this.server.playersList.orderByUUIDList(names);
+                    this.server.startGame();
+                }
             }
         });
         this.add.existing(this.startButton);
