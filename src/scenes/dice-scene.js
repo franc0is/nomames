@@ -289,7 +289,6 @@ export class DiceScene extends Phaser.Scene {
         });
         this.server.updateDice(update);
         this.updateFiver();
-        console.log(update);
     }
 
     updateFiver() {
