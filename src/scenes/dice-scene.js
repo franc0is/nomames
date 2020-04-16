@@ -289,6 +289,7 @@ export class DiceScene extends Phaser.Scene {
         });
         this.server.updateDice(update);
         this.updateFiver();
+        console.log(update);
     }
 
     updateFiver() {
@@ -395,6 +396,9 @@ export class DiceScene extends Phaser.Scene {
 
         this.rolledButton.setEnabled(msg.cup.rolled);
         this.lookedButton.setEnabled(msg.cup.visible);
+        if (this.fiverPass){
+            this.cup.setVisible(msg.cup.visible);
+        }
 
         this.cup.setOnUpdateCb((action) => {
             this.updateDice(action)
