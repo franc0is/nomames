@@ -19,7 +19,6 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         this.graphics.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width - 20, this.height - 20);
 
         this.onUpdateCb = (action) => {};
-        this.onUpdateCb = () => {};
         this.rolled = false;
     }
 
@@ -32,7 +31,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         }
     }
 
-    getVisible(value) {
+    getVisible() {
         return this.container.visible;
     }
 
