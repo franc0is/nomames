@@ -93,17 +93,9 @@ export class DiceScene extends Phaser.Scene {
             onClick: () => {
                 let letpass = true;
                 if (this.firstpass){
-                    this.cup.getDice().forEach( d => {
-                        if (!d.didRoll){
-                            letpass = false;
-                        }
-                    });
-                    this.table.getDice().forEach(d => {
-                        if (!d.didRoll){
-                            letpass = false;
-                        }
-                    });
-                };
+                    // first time around, make sure all the dice have been rolled
+                    letpass = this.dice.reduce((previous, die) => { previous && die.didRoll }, true /* initial value */);
+                }
                 if (letpass){
                     this.server.passCup(this.clockwise);
                 }
