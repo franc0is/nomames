@@ -91,18 +91,11 @@ export class DiceScene extends Phaser.Scene {
 
         this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass', {
             onClick: () => {
-                let letpass = true;
-                if (this.firstpass){
-                    // first time around, make sure all the dice have been rolled
-                    letpass = this.dice.reduce((previous, die) => { previous && die.didRoll }, true /* initial value */);
-                }
-                if (letpass){
-                    this.server.passCup(this.clockwise);
-                }
-
+                this.server.passCup(this.clockwise);
             },
         });
         this.add.existing(this.nextPlayerButton);
+        this.nextPlayerButton.setEnabled(false);
 
         this.clockwise = true;
         this.passDirectionButton = new TextButton(this, 660, 90, '>',{
@@ -235,7 +228,6 @@ export class DiceScene extends Phaser.Scene {
         });
         if (!playable) {
             this.passDirectionButton.setEnabled(false);
-            this.firstpass = false;
             this.lookedButton.setEnabled(false);
             this.rolledButton.setEnabled(false);
         }
@@ -254,6 +246,14 @@ export class DiceScene extends Phaser.Scene {
     }
 
     updateDice(action) {
+        if (this.firstpass) {
+            let allrolled = this.dice.reduce((previous, die) => previous && die.didRoll,
+                                             true /* initial value */);
+            this.nextPlayerButton.setEnabled(allrolled);
+        } else {
+            this.nextPlayerButton.setEnabled(true);
+        }
+
         // we've taken an action that changes dice,
         // no mames is disabled
         this.cup.reorder();
@@ -281,6 +281,7 @@ export class DiceScene extends Phaser.Scene {
         // XXX this is not completely correct.
         // in the event a player joins or leaves the game, it will
         // disable the pass direction button
+        this.firstpass = false;
         this.passDirectionButton.setEnabled(false);
         this.playersLabel.updateWithPlayers(playersList);
         if (!this.input.enabled && playersList.getActivePlayer().isMe) {

@@ -84,7 +84,7 @@ export class Dice extends Phaser.GameObjects.Sprite {
     roll() {
         let n = Phaser.Math.RND.between(0, 5);
         this.setValue(n);
-        this.onRollCb(this);
         this.markRolled();
+        this.onRollCb(this);
     }
 }
