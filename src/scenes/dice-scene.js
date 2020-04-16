@@ -185,6 +185,7 @@ export class DiceScene extends Phaser.Scene {
             if (gameObject instanceof Dice && gameObject.didRoll && dropZone.name === "Cup" ){
                 gameObject.x = gameObject.input.dragStartX;
                 gameObject.y = gameObject.input.dragStartY;
+                dropZone.setHighlighted(false);
             } else {
                 dropZone.add(gameObject);
                 dropZone.setHighlighted(false);
@@ -353,16 +354,18 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onNoMames() {
+        if (!this.nomames) {
+            this.audioManager.playNoMames();
+        }
         this.nomames = true;
         this.setPlayable(true);
         this.cup.setVisible(true);
         this.noMamesText.setVisible(true);
         this.makeDeadButton.setEnabled(true);
         this.cupLookButton.setEnabled(false);
-        this.cupRollButton.setEnabled(false);
+        this.cupRollButton.setEnabled(true);
         this.noMamesButton.setEnabled(false);
         this.nextPlayerButton.setEnabled(false);
-        this.audioManager.playNoMames();
     }
 
     onReset() {
