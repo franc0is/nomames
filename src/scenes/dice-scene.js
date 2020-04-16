@@ -195,6 +195,9 @@ export class DiceScene extends Phaser.Scene {
         this.table.setOnUpdateCb((action) => {
             this.updateDice(action);
         });
+
+        this.cup.OnDieRoll = (action) => {};
+
     }
 
     onPause(pauseText) {
