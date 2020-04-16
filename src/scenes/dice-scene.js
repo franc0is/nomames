@@ -209,8 +209,6 @@ export class DiceScene extends Phaser.Scene {
     }
 
     setPlayable(playable) {
-        this.lookedButton.setEnabled(false);
-        this.rolledButton.setEnabled(false);
         this.input.enabled = playable;
         this.cup.reset();
         this.cupLookButton.setEnabled(playable);
@@ -223,6 +221,8 @@ export class DiceScene extends Phaser.Scene {
         });
         if (!playable) {
             this.passDirectionButton.setEnabled(false);
+            this.lookedButton.setEnabled(false);
+            this.rolledButton.setEnabled(false);
         }
     }
 
