@@ -110,35 +110,11 @@ export class DiceScene extends Phaser.Scene {
         
         this.makeDeadButton = new TextButton(this, 610, 120, 'Die', {
             onClick: () => {
-                //this.leftButtonAction = () => ({
-                 //   let playersList = this.server.getPlayersList();
-                  //  this.server.killPlayer(playersList.getMe());
-                //});
-                this.scene.launch('popUpScene', { server: this.server, message: 'Are you sure you want to die?', 
-                leftButtonText: '[ confirm ]',
-                leftButtonAction: this.leftButtonAction,
-                rightButtonText: '[ cancel ]',
-                rightButtonAction: this.rightButtonAction
-                });
-                //let playersList = this.server.getPlayersList();
-                //this.server.killPlayer(playersList.getMe());
+                this.scene.launch('popDieScene', { server: this.server});
             }
         });
         this.add.existing(this.makeDeadButton);
         this.makeDeadButton.setEnabled(false);
-
-        this.dieButton = new TextButton('PopUpScene',300, 240,'[ confirm ]',{
-            onClick: () => {
-                let playersList = this.server.getPlayersList();
-                this.server.killPlayer(playersList.getMe());
-            }
-        });
-
-        this.cancelButton = new TextButton(this, 400, 240, '[ cancel ]', {
-            onClick: () => {
-                this.graphics.setVisible(false);
-            }
-        })
 
         this.noMamesButton = new TextButton(this, 610, 150, 'No Mames!', {
             onClick: () => {
@@ -421,10 +397,5 @@ export class DiceScene extends Phaser.Scene {
             this.passDirectionButton.setText('<');
         }
         this.clockwise = isClockwise;
-    }
-
-    die() {
-        let playersList = this.server.getPlayersList();
-        this.server.killPlayer(playersList.getMe());
     }
 }
