@@ -123,7 +123,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.resetButton = new TextButton(this, 610, 180, 'Reset', {
             onClick: () => {
-                this.server.reset()
+                this.scene.launch('popResetScene',{server: this.server});
             }
         });
         this.add.existing(this.resetButton);
