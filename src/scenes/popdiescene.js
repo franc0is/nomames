@@ -26,7 +26,7 @@ export class PopDieScene extends Phaser.Scene {
 
         this.graphics.fillRect(160, 120, 400, 200);
 
-        let text = this.add.text(190,150,'Are you sure you want to die?',{ color: 'white', fontSize: '20px '});
+        let text = this.add.text(185,150,'You are about to loose a life!',{ color: 'white', fontSize: '20px '});
 
         this.leftButton = new TextButton(this, 220, 240, '[ confirm ]', {
             onClick: () =>  {
