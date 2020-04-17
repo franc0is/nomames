@@ -66,6 +66,7 @@ export class DiceScene extends Phaser.Scene {
         this.noMamesText.setVisible(false);
 
         this.firstpass = true;
+        this.clockwise = true;
 
         this.cupRollButton = new TextButton(this, 610, 30, 'Roll', {
             onClick: () => {
@@ -91,19 +92,15 @@ export class DiceScene extends Phaser.Scene {
 
         this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass', {
             onClick: () => {
-                this.server.passCup(this.clockwise);
+                if (!this.firstpass) {
+                    this.server.passCup(this.clockwise);
+                } else {
+                    this.scene.launch('popPassScene',{server: this.server})
+                }
             },
         });
         this.add.existing(this.nextPlayerButton);
         this.nextPlayerButton.setEnabled(false);
-
-        this.clockwise = true;
-        this.passDirectionButton = new TextButton(this, 660, 90, '>',{
-            onClick: () => {
-                this.onPassDirectionChange(!this.clockwise);
-            }
-        });
-        this.add.existing(this.passDirectionButton);
 
         this.makeDeadButton = new TextButton(this, 610, 120, 'Die', {
             onClick: () => {

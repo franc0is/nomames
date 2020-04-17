@@ -7,6 +7,7 @@ import { StartScene } from './scenes/start-scene';
 import { FirstScene } from './scenes/first-scene';
 import { MuteScene } from './scenes/mute-scene';
 import { init } from '@sentry/browser';
+import { PopPassScene } from './scenes/poppass-scene';
 
 /* Sentry */
 init({
@@ -22,7 +23,7 @@ const gameConfig = {
     dom: {
         createContainer: true
     },
-    scene: [ FirstScene, StartScene, JoinScene, DiceScene, PauseScene, MuteScene ]
+    scene: [ FirstScene, StartScene, JoinScene, DiceScene, PauseScene, MuteScene, PopPassScene ]
 };
 
 var game = new Phaser.Game(gameConfig);

@@ -26,19 +26,19 @@ export class PopPassScene extends Phaser.Scene {
 
         this.graphics.fillRect(160, 120, 400, 200);
 
-        let text = this.add.text(190,150,'Are you sure you want to die?',{ color: 'white', fontSize: '20px '});
+        let text = this.add.text(190,150,'Who would you like to pass to?',{ color: 'white', fontSize: '20px '});
 
-        this.leftButton = new TextButton(this, 220, 240, '[ confirm ]', {
+        this.leftButton = new TextButton(this, 220, 240, '[ '+this.server.playersList.getNextClockwise()+ ' ]', {
             onClick: () =>  {
-            let playersList = this.server.getPlayersList();
-            this.server.killPlayer(playersList.getMe());
+            this.server.passCup(true);
             this.scene.stop('popPassScene');
             }
         });
         this.add.existing(this.leftButton);
 
-        this.rightButton = new TextButton(this, 400, 240, '[ cancel ]', {
+        this.rightButton = new TextButton(this, 400, 240, '[ '+ this.server.playersList.getNextCounterClockwise() +' ]', {
             onClick: () => {
+                this.server.passCup(false);
                 this.scene.stop('popDieScene');
             }
         });

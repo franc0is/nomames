@@ -149,4 +149,41 @@ export class PlayersList {
         // else
         this.players[0].isActive = true;
     }
+
+    getNextClockwise() {
+        let next = false;
+        let i = 0;
+        let activeIdx = 0;
+        do {
+            let player = this.players[i];
+            if (next && !player.isDead) {
+                return player.name;
+            }
+            if (player.isActive) {
+                next = true;
+                activeIdx = i;
+            }
+            i = (i + 1) % this.players.length;
+        } while (i != activeIdx);
+    }
+
+    getNextCounterClockwise() {
+        let next = false;
+        let i = this.players.length - 1;
+        let activeIdx = -1;
+        do {
+            let player = this.players[i];
+            if (next && !player.isDead) {
+                return player.name;
+            }
+            if (player.isActive) {
+                next = true;
+                activeIdx = i;
+            }
+            i--;
+            if (i < 0) {
+                i = this.players.length - 1;
+            }
+        } while (i != activeIdx);
+    }
 }
