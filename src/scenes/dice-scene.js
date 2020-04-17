@@ -224,7 +224,6 @@ export class DiceScene extends Phaser.Scene {
             dice.resetRoll();
         });
         if (!playable) {
-            this.passDirectionButton.setEnabled(false);
             this.lookedButton.setEnabled(false);
             this.rolledButton.setEnabled(false);
         }
@@ -279,7 +278,6 @@ export class DiceScene extends Phaser.Scene {
         // in the event a player joins or leaves the game, it will
         // disable the pass direction button
         this.firstpass = false;
-        this.passDirectionButton.setEnabled(false);
         this.playersLabel.updateWithPlayers(playersList);
         if (!this.input.enabled && playersList.getActivePlayer().isMe) {
             // this player is now active
@@ -386,11 +384,6 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onPassDirectionChange(isClockwise) {
-        if (isClockwise) {
-            this.passDirectionButton.setText('>');
-        } else {
-            this.passDirectionButton.setText('<');
-        }
         this.clockwise = isClockwise;
     }
 }
