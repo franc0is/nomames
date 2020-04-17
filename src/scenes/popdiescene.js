@@ -44,9 +44,5 @@ export class PopDieScene extends Phaser.Scene {
         });
         this.add.existing(this.rightButton);
 
-        console.log('hello');
-        console.log(this.leftButton);
-        console.log(this.rightButton);
-
     }
 }
