@@ -53,23 +53,24 @@ export class DiceScene extends Phaser.Scene {
 
     preload() {
         this.load.spritesheet('dice', 'assets/dice-pixel.png', { frameWidth: 64, frameHeight: 64});
+        this.load.spritesheet('life', 'assets/life_spritesheet.png', { frameWidth: 90, frameHeight: 22});
         this.audioManager.preload();
-    };
+    }
 
     create() {
         this.audioManager.create();
         this.scene.launch('muteScene', { audioManager: this.audioManager });
 
         this.nomames = false;
-        this.table = new DiceZone(this, 305, 100, 600, 150, 'Table');
-        this.cup = new DiceZone(this, 305, 300, 600, 150, 'Cup');
+        this.table = new DiceZone(this, 430, 100, 500, 150, 'Table');
+        this.cup = new DiceZone(this, 430, 300, 500, 150, 'Cup');
 
         this.noMamesText = this.add.text(170, 180, "🚨🖕🚨 NO MAMES GUEY 🚨🖕🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
 
         this.firstpass = true;
 
-        this.cupRollButton = new TextButton(this, 610, 30, 'Roll', {
+        this.cupRollButton = new TextButton(this, 690, 30, 'Roll', {
             onClick: () => {
                 this.cup.roll();
                 this.cupRollButton.setEnabled(false);
@@ -82,7 +83,7 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.cupRollButton);
 
-        this.cupLookButton = new TextButton(this, 610, 60, 'Look', {
+        this.cupLookButton = new TextButton(this, 690, 60, 'Look', {
             onClick: () => {
                 this.cup.setVisible(true);
                 this.noMamesButton.setEnabled(false);
@@ -91,7 +92,7 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.cupLookButton);
 
-        this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass', {
+        this.nextPlayerButton = new TextButton(this, 690, 90, 'Pass', {
             onClick: () => {
                 this.server.passCup(this.clockwise);
             },
@@ -100,7 +101,7 @@ export class DiceScene extends Phaser.Scene {
         this.nextPlayerButton.setEnabled(false);
 
         this.clockwise = true;
-        this.passDirectionButton = new TextButton(this, 660, 90, '>',{
+        this.passDirectionButton = new TextButton(this, 740, 90, '>',{
             onClick: () => {
                 this.onPassDirectionChange(!this.clockwise);
             }
@@ -108,7 +109,7 @@ export class DiceScene extends Phaser.Scene {
         this.add.existing(this.passDirectionButton);
 
         
-        this.makeDeadButton = new TextButton(this, 610, 120, 'Die', {
+        this.makeDeadButton = new TextButton(this, 690, 120, 'Die', {
             onClick: () => {
                 this.scene.launch('popDieScene', { server: this.server});
             }
@@ -116,28 +117,28 @@ export class DiceScene extends Phaser.Scene {
         this.add.existing(this.makeDeadButton);
         this.makeDeadButton.setEnabled(false);
 
-        this.noMamesButton = new TextButton(this, 610, 150, 'No Mames!', {
+        this.noMamesButton = new TextButton(this, 690, 150, 'No Mames!', {
             onClick: () => {
                 this.server.noMames();
             }
         });
         this.add.existing(this.noMamesButton);
 
-        this.resetButton = new TextButton(this, 610, 180, 'Reset', {
+        this.resetButton = new TextButton(this, 690, 180, 'Reset', {
             onClick: () => {
                 this.scene.launch('popResetScene',{server: this.server});
             }
         });
         this.add.existing(this.resetButton);
 
-        this.lookedButton = new TextButton(this, 610, 250, 'Looked', {
+        this.lookedButton = new TextButton(this, 690, 250, 'Looked', {
             onClick: () => {
             }
         });
         this.add.existing(this.lookedButton);
         this.lookedButton.setEnabled(false);
 
-        this.rolledButton = new TextButton(this, 610, 280, 'Rolled', {
+        this.rolledButton = new TextButton(this, 690, 280, 'Rolled', {
             onClick: () => {
             }
         });
@@ -190,7 +191,7 @@ export class DiceScene extends Phaser.Scene {
         });
 
         let playersList = this.server.getPlayersList();
-        this.playersLabel = new PlayersLabel(this, 20, 400, playersList);
+        this.playersLabel = new PlayersLabel(this, 5, 30, playersList);
         this.add.existing(this.playersLabel);
 
         if (!playersList.getActivePlayer().isMe) {

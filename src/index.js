@@ -18,9 +18,13 @@ init({
 
 const gameConfig = {
     type: Phaser.AUTO,
-    width: 720,
+    width: 800,
     height: 480,
     parent: 'no-mames',
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    },
     dom: {
         createContainer: true
     },
