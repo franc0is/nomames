@@ -83,12 +83,13 @@ export class StartScene extends Phaser.Scene {
                         names.push(name[0].uuid);
                     }
                 });
-                this.server.playersList.orderByUUIDList(names);
-                this.server.startGame();
+                    this.server.playersList.orderByUUIDList(names);
+                    this.server.startGame();
             }
         });
         this.add.existing(this.startButton);
         this.startButton.setVisible(false);
+        this.startButton.setEnabled(false);
 
         let playersList = this.server.getPlayersList();
         this.playersLabel = new DraggableLabel(this, 20, 400, playersList);
@@ -129,6 +130,7 @@ export class StartScene extends Phaser.Scene {
             if (dropZone.getUuid().length === 0){
                 dropZone.add(gameObject);
                 dropZone.setHighlighted(false);
+                this.scene.startButton.setEnabled(true);
             } else {
                 gameObject.x = gameObject.input.dragStartX;
                 gameObject.y = gameObject.input.dragStartY;
@@ -153,10 +155,12 @@ export class StartScene extends Phaser.Scene {
                     let next_seat = emptySeats.splice(randomIndex, 1)[0];
                     next_seat.add(label);
                 });
+                this.startButton.setEnabled(true);
             }
         });
         this.randomizeButton.setVisible(false);
         this.add.existing(this.randomizeButton);
+
     }
 
 
