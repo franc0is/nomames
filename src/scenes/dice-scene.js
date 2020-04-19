@@ -4,7 +4,6 @@ import { DiceZone } from '../dice-zone';
 import { TextButton } from '../text-button';
 import { Action } from '../message';
 import { PlayersLabel } from '../playerslabel';
-import { Life } from '../life';
 import { NMAudioManager } from '../audio';
 
 const NUM_DICE = 5;
@@ -55,10 +54,6 @@ export class DiceScene extends Phaser.Scene {
     preload() {
         this.load.spritesheet('dice', 'assets/dice-pixel.png', { frameWidth: 64, frameHeight: 64});
         this.load.spritesheet('life', 'assets/life_spritesheet.png', { frameWidth: 90, frameHeight: 22});
-        this.load.image('heart','assets/heart.png');
-        this.load.image('crown','assets/crown.png');
-        this.load.image('harlequin', 'assets/harlequin.png');
-        this.load.image('skull','assets/skull.png');
         this.audioManager.preload();
     }
 
@@ -158,15 +153,6 @@ export class DiceScene extends Phaser.Scene {
             this.cup.add(d);
             this.dice.push(d);
         }
-        this.lives = [];
-        let k = 0
-        let pList = this.server.getPlayersList();
-        pList.getPlayers().forEach( player => {
-            let l = new Life(this, 89*k+44, 468, 3-player.numLives);
-            this.add.existing(l);
-            this.lives.push(l);
-            k++;
-        });
 
         this.dragging = false;
         this.input.on('drag', function(pointer, gameObject, dragX, dragY) {
