@@ -120,44 +120,7 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.passDirectionButton);
 
-        
-        this.makeDeadButton = new TextButton(this, 690, 120, 'Die', {
-            onClick: () => {
-                this.scene.launch('popDieScene', { server: this.server});
-            }
-        });
-        this.add.existing(this.makeDeadButton);
-        this.makeDeadButton.setEnabled(false);
-
-        this.noMamesButton = new TextButton(this, 690, 150, 'No Mames!', {
-            onClick: () => {
-                this.server.noMames();
-            }
-        });
-        this.add.existing(this.noMamesButton);
-
-        this.resetButton = new TextButton(this, 690, 180, 'Reset', {
-            onClick: () => {
-                this.scene.launch('popResetScene',{server: this.server});
-            }
-        });
-        this.add.existing(this.resetButton);
-
-        this.lookedButton = new TextButton(this, 690, 250, 'Looked', {
-            onClick: () => {
-            }
-        });
-        this.add.existing(this.lookedButton);
-        this.lookedButton.setEnabled(false);
-
-        this.rolledButton = new TextButton(this, 690, 280, 'Rolled', {
-            onClick: () => {
-            }
-        });
-        this.add.existing(this.rolledButton);
-        this.rolledButton.setEnabled(false);
-
-        this.fiverButton = new TextButton(this, 610, 340, 'Pass 5',{
+        this.fiverButton = new TextButton(this, 690, 120, 'Pass 5',{
             onClick: () => {
                 this.server.passCup(this.clockwise, true);
                 this.makeDeadButton.setEnabled(true);
@@ -165,6 +128,42 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.fiverButton);
         this.fiverButton.setEnabled(false)
+
+        this.makeDeadButton = new TextButton(this, 690, 150, 'Die', {
+            onClick: () => {
+                this.scene.launch('popDieScene', { server: this.server});
+            }
+        });
+        this.add.existing(this.makeDeadButton);
+        this.makeDeadButton.setEnabled(false);
+
+        this.noMamesButton = new TextButton(this, 690, 180, 'No Mames!', {
+            onClick: () => {
+                this.server.noMames();
+            }
+        });
+        this.add.existing(this.noMamesButton);
+
+        this.resetButton = new TextButton(this, 690, 210, 'Reset', {
+            onClick: () => {
+                this.scene.launch('popResetScene',{server: this.server});
+            }
+        });
+        this.add.existing(this.resetButton);
+
+        this.lookedButton = new TextButton(this, 690, 280, 'Looked', {
+            onClick: () => {
+            }
+        });
+        this.add.existing(this.lookedButton);
+        this.lookedButton.setEnabled(false);
+
+        this.rolledButton = new TextButton(this, 690, 310, 'Rolled', {
+            onClick: () => {
+            }
+        });
+        this.add.existing(this.rolledButton);
+        this.rolledButton.setEnabled(false);
 
         this.dice = [];
         for (let i=0; i< NUM_DICE; i++) {
