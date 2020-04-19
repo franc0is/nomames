@@ -5,6 +5,7 @@ import { TextButton } from '../text-button';
 import { Action } from '../message';
 import { PlayersLabel } from '../playerslabel';
 import { Life } from '../life';
+import { NMAudioManager } from '../audio';
 
 const NUM_DICE = 5;
 
@@ -19,6 +20,7 @@ export class DiceScene extends Phaser.Scene {
      */
     constructor() {
         super({ key: 'diceScene' });
+        this.audioManager = new NMAudioManager(this);
     }
 
     init(data) {
@@ -55,15 +57,19 @@ export class DiceScene extends Phaser.Scene {
         this.load.image('crown','assets/crown.png');
         this.load.image('harlequin', 'assets/harlequin.png');
         this.load.image('skull','assets/skull.png');
+        this.audioManager.preload();
     }
 
     create() {
+        this.audioManager.create();
+        this.scene.launch('muteScene', { audioManager: this.audioManager });
+
         this.nomames = false;
+        this.table = new DiceZone(this, 305, 100, 600, 150, 'Table');
         this.cup = new DiceZone(this, 305, 300, 600, 150, 'Cup');
         this.cup.setIndividualRoll(false);
-        this.table = new DiceZone(this, 305, 100, 600, 150, 'Table');
 
-        this.noMamesText = this.add.text(200, 180, "🚨🚨 NO MAMES 🚨🚨", { fill: 'red' });
+        this.noMamesText = this.add.text(170, 180, "🚨🖕🚨 NO MAMES GUEY 🚨🖕🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
 
         this.cupRollButton = new TextButton(this, 610, 30, 'Roll', {
@@ -172,8 +178,14 @@ export class DiceScene extends Phaser.Scene {
         });
 
         this.input.on('drop', function(pointer, gameObject, dropZone) {
-            dropZone.add(gameObject);
-            dropZone.setHighlighted(false);
+            if (gameObject instanceof Dice && gameObject.didRoll && dropZone.name === "Cup" ){
+                gameObject.x = gameObject.input.dragStartX;
+                gameObject.y = gameObject.input.dragStartY;
+                dropZone.setHighlighted(false);
+            } else {
+                dropZone.add(gameObject);
+                dropZone.setHighlighted(false);
+            }
         });
 
         this.input.on('dragend', function(pointer, gameObject, dropZone) {
@@ -235,6 +247,7 @@ export class DiceScene extends Phaser.Scene {
         this.lookedButton.setEnabled(this.cup.getVisible());
         this.rolledButton.setEnabled(this.cup.didRoll());
         this.noMamesButton.setEnabled(false);
+        this.audioManager.playAudioForAction(action);
         let update = {
             'action': action,
             'cup': {
@@ -287,6 +300,7 @@ export class DiceScene extends Phaser.Scene {
                 });
                 // FIXME we don't know which dice to animate
                 // when we roll the exact same...
+                // I don't think this matters since everyone's orders are different. -ac
                 if (new_value !== -1) {
                     table_dice[0].animate(function(target) {
                         target.setValue(new_value);
@@ -317,6 +331,8 @@ export class DiceScene extends Phaser.Scene {
             }
         }
 
+        this.audioManager.playAudioForAction(msg.action);
+
         this.rolledButton.setEnabled(msg.cup.rolled);
         this.lookedButton.setEnabled(msg.cup.visible);
 
@@ -330,13 +346,16 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onNoMames() {
+        if (!this.nomames) {
+            this.audioManager.playNoMames();
+        }
         this.nomames = true;
         this.setPlayable(true);
         this.cup.setVisible(true);
         this.noMamesText.setVisible(true);
         this.makeDeadButton.setEnabled(true);
         this.cupLookButton.setEnabled(false);
-        this.cupRollButton.setEnabled(false);
+        this.cupRollButton.setEnabled(true);
         this.noMamesButton.setEnabled(false);
         this.nextPlayerButton.setEnabled(false);
     }

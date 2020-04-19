@@ -1,15 +1,13 @@
-export class PlayersLabel extends Phaser.GameObjects.Container {
+export class DraggableLabel extends Phaser.GameObjects.Container {
     constructor(scene, x, y, playersList) {
         super(scene, x, y);
         this.scene = scene;
-        this.heading = scene.add.text(20, -10, 'Players: ', { color: 'white' });
+        this.heading = scene.add.text(20, 20, 'Players: ', { color: 'white' });
         this.add(this.heading);
         this.playerLabels = [];
         this.updateWithPlayers(playersList);
         this.setPosition(x, y);
-        this.container = scene.add.container();
     }
-
 
     updateWithPlayers(playersList) {
         this.playersList = playersList;
@@ -27,17 +25,16 @@ export class PlayersLabel extends Phaser.GameObjects.Container {
             if (player.isMe) {
                 playerName += '*';
             }
-            let c = player.isActive ? 'red' : 'white';
-            if (player.isDead) {
-                c = '#888888';
-            }
-            let x_coord = 100*(i % 7)
-            let y_coord = 20 + Math.floor(i/7)*30
-            let t = this.scene.add.text(x_coord, y_coord, playerName, { 'color': c })
+            let t = this.scene.add.text(100*i,
+                                        40,
+                                        playerName,
+                                        { 'color': 'white' });
+            t.uuid = player.uuid;
             this.add(t);
+            t.setInteractive();
+            this.scene.input.setDraggable(t);
             this.playerLabels.push(t);
             i++;
         });
     }
-
 }
