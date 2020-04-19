@@ -74,7 +74,7 @@ export class StartScene extends Phaser.Scene {
         this.directionText = this.add.text(50,350,'To set the order of players,\ndrag players to a seat or \nclick on "RANDOMIZE SEATING"', {color: '#0f0', fontsize: '24px'});
         this.directionText.setVisible(false);
 
-        this.startButton = new TextButton(this, 50, 250, '[ START ]', {
+        this.startButton = new TextButton(this, 90, 250, '[ START ]', {
             onClick: () => {
                 let names = [];
                 this.seats.forEach(seat => {

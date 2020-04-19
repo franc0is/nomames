@@ -18,7 +18,7 @@ export class MuteScene extends Phaser.Scene {
     }
 
     create() {
-        this.muteButton = new TextButton(this, 610, 210, 'Mute', {
+        this.muteButton = new TextButton(this, 690, 210, 'Mute', {
             onClick: () => {
                 this.audioManager.toggleMute();
                 this.updateText();

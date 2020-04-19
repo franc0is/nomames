@@ -4,7 +4,6 @@ export class Life extends Phaser.GameObjects.Sprite {
 
         this.setName('life');
         this.setTexture('life');
-        this.origin = 0;
         this.setPosition(x, y);
         this.setInteractive(new Phaser.Geom.Rectangle(x, y, 30, 22), Phaser.Geom.Rectangle.Contains);
         //this.on();
@@ -16,7 +15,7 @@ export class Life extends Phaser.GameObjects.Sprite {
         this.value = value;
        this.setFrame(value);
    }
-   
+
    getValue() {
        console.log(this.value);
        return this.value;

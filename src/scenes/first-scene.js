@@ -13,18 +13,18 @@ export class FirstScene extends Phaser.Scene {
     };
 
     create() {
-        this.add.image(360, 75, 'title');
-        this.add.image(360, 275,'cupanddice');
-        this.add.text(235, 450, 'Brought to you by 400B Studios',{ color: 'white', fontSize: '14px '});
+        this.add.image(400, 75, 'title');
+        this.add.image(400, 275,'cupanddice');
+        this.add.text(275, 450, 'Brought to you by 400B Studios',{ color: 'white', fontSize: '14px '});
 
-        this.startButton = new TextButton(this, 250, 420, '[ NEW ]', {
+        this.startButton = new TextButton(this, 290, 420, '[ NEW ]', {
             onClick: () => {
                 this.scene.start('startScene');
             }
         });
         this.add.existing(this.startButton);
 
-        this.joinButton = new TextButton(this, 395, 420, '[ JOIN ]', {
+        this.joinButton = new TextButton(this, 435, 420, '[ JOIN ]', {
             onClick: () => {
                 this.scene.start('joinScene');
             }
