@@ -20,6 +20,8 @@ export class DiceScene extends Phaser.Scene {
     constructor() {
         super({ key: 'diceScene' });
         this.audioManager = new NMAudioManager(this);
+        this.leftButtonAction = () => {};
+        this.rightButtonAction = () => {};
     }
 
     init(data) {
@@ -105,10 +107,10 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.passDirectionButton);
 
+        
         this.makeDeadButton = new TextButton(this, 610, 120, 'Die', {
             onClick: () => {
-                let playersList = this.server.getPlayersList();
-                this.server.killPlayer(playersList.getMe());
+                this.scene.launch('popDieScene', { server: this.server});
             }
         });
         this.add.existing(this.makeDeadButton);
