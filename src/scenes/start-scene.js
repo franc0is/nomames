@@ -60,6 +60,7 @@ export class StartScene extends Phaser.Scene {
                     this.nameText.setVisible(true);
                     this.startButton.setVisible(true);
                     this.directionText.setVisible(true);
+                    this.randomizeButton.setVisible(true);
                     for (let seat of this.seats) {
                         seat.setVisible(true);
                     }
@@ -70,10 +71,10 @@ export class StartScene extends Phaser.Scene {
 
         this.nameText = this.add.text(50,200, '',{color: '#0f0', fontsize: '36px'});
         this.nameText.setVisible(false);
-        this.directionText = this.add.text(50,350,'To set the order of players,\ndrag players to a seat', {color: '#0f0', fontsize: '24px'});
+        this.directionText = this.add.text(50,350,'To set the order of players,\ndrag players to a seat or \nclick on "RANDOMIZE SEATING"', {color: '#0f0', fontsize: '24px'});
         this.directionText.setVisible(false);
 
-        this.startButton = new TextButton(this, 50, 300, '[ START ]', {
+        this.startButton = new TextButton(this, 50, 250, '[ START ]', {
             onClick: () => {
                 let names = [];
                 this.seats.forEach(seat => {
@@ -128,7 +129,7 @@ export class StartScene extends Phaser.Scene {
             if (dropZone.getUuid().length === 0){
                 dropZone.add(gameObject);
                 dropZone.setHighlighted(false);
-            }else {
+            } else {
                 gameObject.x = gameObject.input.dragStartX;
                 gameObject.y = gameObject.input.dragStartY;
                 dropZone.setHighlighted(false);
@@ -142,12 +143,30 @@ export class StartScene extends Phaser.Scene {
             }
         });
 
-
+        this.randomizeButton = new TextButton(this, 50, 300, 'RANDOMIZE SEATING', {
+            onClick: () => {
+                // Make an array all the seats and randomly pick them off for each player
+                this.removeInactivePlayers() ; // FIXME normally for every player, there are ~2 additional inactive players. This manages to remove all of them
+                let emptySeats = [...this.seats];
+                this.playersLabel.playerLabels.forEach(label => {
+                    let randomIndex = Phaser.Math.RND.integerInRange(0, emptySeats.length-1);
+                    let next_seat = emptySeats.splice(randomIndex, 1)[0];
+                    next_seat.add(label);
+                });
+            }
+        });
+        this.randomizeButton.setVisible(false);
+        this.add.existing(this.randomizeButton);
     }
 
 
     onPlayersUpdate(playersList) {
         console.log("Players update!");
         this.playersLabel.updateWithPlayers(playersList);
+    }
+
+    // FIXME should ultimately remove
+    removeInactivePlayers() {
+        this.playersLabel.playerLabels = this.playersLabel.playerLabels.filter(label => label.active);
     }
 }
