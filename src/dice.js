@@ -10,7 +10,6 @@ export class Dice extends Phaser.GameObjects.Sprite {
         this.setPosition(x, y);
 
         this.setInteractive();
-        this.individualRoll = true;
         this.on('pointerdown', this.onClick, this);
 
         this.setValue(initial_value);
@@ -75,7 +74,7 @@ export class Dice extends Phaser.GameObjects.Sprite {
     }
 
     onClick() {
-        if ( this.rollCount === this.maxRoll) {
+        if (this.rollCount === this.maxRoll) {
             return;
         }
         // 350ms double click for rolling
@@ -91,7 +90,7 @@ export class Dice extends Phaser.GameObjects.Sprite {
     roll() {
         let n = Phaser.Math.RND.between(0, 5);
         this.setValue(n);
-        this.onRollCb(this);
         this.markRolled();
+        this.onRollCb(this);
     }
 }

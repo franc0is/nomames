@@ -17,22 +17,21 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         this.graphics = scene.add.graphics();
         this.graphics.lineStyle(2, 0xffff00);
         this.graphics.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width - 20, this.height - 20);
-        this.onUpdateCb = (action) => {};
-        this.onUpdateCb = () => {};
         this.rollCount = 0;
         this.maxRoll = 1;
+        this.onUpdateCb = (action, dice) => {};
     }
 
     reorder() {
         var objs = this.container.getAll();
-        var i = 1;
+        var i = 0;
         for (var obj of objs) {
-            obj.x = this.x - this.width / 2 + 96 * i++;
+            obj.x = this.x - (this.width / 2) + 96 * i++ + 45;
             obj.y = this.y;
         }
     }
 
-    getVisible(value) {
+    getVisible() {
         return this.container.visible;
     }
 
@@ -46,7 +45,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
 
     setVisible(value) {
         this.container.setVisible(value);
-        this.onUpdateCb(Action.SHOW_MANY);
+        this.onUpdateCb(Action.SHOW_MANY, this.getDice());
     }
 
     reset() {
@@ -59,6 +58,10 @@ export class DiceZone extends Phaser.GameObjects.Zone {
     }
 
     roll() {
+        // disable onupdatecb so we don't get updates for individual rolls
+        let cb = this.onUpdateCb;
+        this.onUpdateCb = (action, dice) => {};
+
         var dice = this.container.getAll();
         for (var die of dice) {
             die.roll();
@@ -66,7 +69,9 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         }
         this.setVisible(false);
         this.rollCount++;
-        this.onUpdateCb(Action.ROLL_MANY);
+        // re-enable onupdatecb
+        this.onUpdateCb = cb;
+        this.onUpdateCb(Action.ROLL_MANY, this.getDice());
     }
 
     setPublic(value) {
@@ -75,16 +80,17 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         });
     }
 
+
     add(die) {
         die.x = this.x;
         die.y = this.y;
         die.setOnRoll((d) => {
             this.onDieRoll(d);
         });
-        
+
         this.container.add(die);
         this.reorder();
-        this.onUpdateCb(Action.MOVE_ONE);
+        this.onUpdateCb(Action.MOVE_ONE, [die]);
     }
 
     remove(die) {
@@ -103,6 +109,6 @@ export class DiceZone extends Phaser.GameObjects.Zone {
     }
 
     onDieRoll(die) {
-        this.onUpdateCb(Action.ROLL_ONE);
+        this.onUpdateCb(Action.ROLL_ONE, [die]);
     }
 }

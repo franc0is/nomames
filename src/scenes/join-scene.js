@@ -1,6 +1,6 @@
 import { Server } from '../server';
 import { TextButton } from '../text-button';
-import { PlayersLabel } from '../playerslabel';
+import { DraggableLabel } from '../draggable-label';
 
 export class JoinScene extends Phaser.Scene {
     constructor() {
@@ -68,7 +68,7 @@ export class JoinScene extends Phaser.Scene {
 
 
         let playersList = this.server.getPlayersList();
-        this.playersLabel = new PlayersLabel(this, 20, 400, playersList);
+        this.playersLabel = new DraggableLabel(this, 5, 400, playersList);
         this.add.existing(this.playersLabel);
         this.playersLabel.setVisible(false);
     }

@@ -198,12 +198,11 @@ export class Server {
                     player.isActive = true;
                 } else if (!this.widowUsed){
                     this.widowUsed = true;
+                    player.numLives = 0;
                     this.playersList.getActivePlayer().isActive= false;
                     player.isActive = true;
-                    // Alter player name to make fun of them
-                    player.name = '💩' + player.name.substring(1);
                 } else {
-                    player.numLives = 0;
+                    player.numLives = -1;
                     player.isDead = true;
                     if (player.isActive) {
                         this.playersList.setPreviousPlayerActive();
