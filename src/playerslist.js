@@ -106,48 +106,23 @@ export class PlayersList {
     }
 
     setNextCounterClockwise() {
-        let next = false;
-        let i = this.players.length - 1;
-        let activeIdx = -1;
-        do {
-            let player = this.players[i];
-            if (next && !player.isDead) {
-                player.isActive = true;
-                return;
-            }
-            if (player.isActive) {
-                player.isActive = false;
-                next = true;
-                activeIdx = i;
-            }
-            i--;
-            if (i < 0) {
-                i = this.players.length - 1;
-            }
-        } while (i != activeIdx);
-        // else
-        this.players[0].isActive = true;
+        let player = this.getNextCounterClockwise();
+        if (player !== undefined){
+            this.getActivePlayer().isActive = false;
+            player.isActive = true;
+        } else {
+            this.players[0].isActive = true;
+        }
     }
 
     setNextClockwise() {
-        let next = false;
-        let i = 0;
-        let activeIdx = 0;
-        do {
-            let player = this.players[i];
-            if (next && !player.isDead) {
-                player.isActive = true;
-                return;
-            }
-            if (player.isActive) {
-                player.isActive = false;
-                next = true;
-                activeIdx = i;
-            }
-            i = (i + 1) % this.players.length;
-        } while (i != activeIdx);
-        // else
-        this.players[0].isActive = true;
+        let player = this.getNextClockwise();
+        if (player !== undefined){
+            this.getActivePlayer().isActive = false;
+            player.isActive = true;
+        } else {
+            this.players[0].isActive = true;
+        }
     }
 
     getNextClockwise() {
@@ -157,7 +132,7 @@ export class PlayersList {
         do {
             let player = this.players[i];
             if (next && !player.isDead) {
-                return player.name;
+                return player;
             }
             if (player.isActive) {
                 next = true;
@@ -174,7 +149,7 @@ export class PlayersList {
         do {
             let player = this.players[i];
             if (next && !player.isDead) {
-                return player.name;
+                return player;
             }
             if (player.isActive) {
                 next = true;

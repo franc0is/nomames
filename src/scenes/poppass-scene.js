@@ -28,7 +28,7 @@ export class PopPassScene extends Phaser.Scene {
 
         let text = this.add.text(190,150,'Who would you like to pass to?',{ color: 'white', fontSize: '20px '});
 
-        this.leftButton = new TextButton(this, 220, 240, '[ '+this.server.playersList.getNextClockwise()+ ' ]', {
+        this.leftButton = new TextButton(this, 220, 240, '[ '+this.server.playersList.getNextClockwise().name+ ' ]', {
             onClick: () =>  {
             this.server.passCup(true);
             this.scene.stop('popPassScene');
@@ -36,10 +36,10 @@ export class PopPassScene extends Phaser.Scene {
         });
         this.add.existing(this.leftButton);
 
-        this.rightButton = new TextButton(this, 400, 240, '[ '+ this.server.playersList.getNextCounterClockwise() +' ]', {
+        this.rightButton = new TextButton(this, 400, 240, '[ '+ this.server.playersList.getNextCounterClockwise().name +' ]', {
             onClick: () => {
                 this.server.passCup(false);
-                this.scene.stop('popDieScene');
+                this.scene.stop('popPassScene');
             }
         });
         this.add.existing(this.rightButton);
