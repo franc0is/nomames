@@ -5,6 +5,8 @@ import { TextButton } from '../text-button';
 import { Action } from '../message';
 import { PlayersLabel } from '../playerslabel';
 import { NMAudioManager } from '../audio';
+import { PopUpScene } from './popup-scene';
+import { PopResetScene } from './popreset-scene';
 
 const NUM_DICE = 5;
 
@@ -146,8 +148,25 @@ export class DiceScene extends Phaser.Scene {
 
         this.resetButton = new TextButton(this, 690, 210, 'Reset', {
             onClick: () => {
-                this.scene.launch('popResetScene',{server: this.server});
-            }
+                let popReset = new PopUpScene('Continue with game reset?',{
+                    label: '[ continue ]',
+                    callback: {
+                        onClick: () => {
+                            this.scene.remove(popReset);
+                            this.server.reset();
+                        }
+                    }
+                },
+                {
+                    label: '[ cancel ]',
+                    callback: {
+                        onClick: () => {
+                            this.scene.remove(popReset);
+                        }
+                    }
+                });
+                this.scene.add('ResetScene', popReset,true);
+            } 
         });
         this.add.existing(this.resetButton);
 
