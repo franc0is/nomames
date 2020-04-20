@@ -255,8 +255,10 @@ export class DiceScene extends Phaser.Scene {
         });
         if (!this.fiverPass){
             this.nextPlayerButton.setEnabled(playable);
+            this.fiverButton.setEnabled(playable);
         } else {
             this.nextPlayerButton.setEnabled(false);
+            this.fiverButton.setEnabled(false);
             this.dice.forEach(dice => {
                 dice.resetRoll();
             });
@@ -285,8 +287,10 @@ export class DiceScene extends Phaser.Scene {
             let allrolled = this.dice.reduce((previous, die) => previous && die.didRoll,
                                              true /* initial value */);
             this.nextPlayerButton.setEnabled(allrolled);
+            this.fiverButton.setEnabled(allrolled);
         } else {
             this.nextPlayerButton.setEnabled(!this.fiverPass);
+            this.fiverButton.setEnabled(!this.fiverPass);
         }
 
         // we've taken an action that changes dice,
@@ -325,11 +329,9 @@ export class DiceScene extends Phaser.Scene {
                 return
             }
             this.setPlayable(true);
-            this.fiverButton.setEnabled(!this.fiverPass);
         }
         if (!playersList.getActivePlayer().isMe){
             this.setPlayable(false)
-            this.fiverButton.setEnabled(false)
         }
         if (this.nomames) {
             this.onNoMames();
@@ -342,7 +344,6 @@ export class DiceScene extends Phaser.Scene {
             d.maxRoll = 5;
         });
         this.cup.maxRoll = 5;
-        this.fiverButton.setEnabled(false);
     };
 
     onDiceUpdate(msg) {
@@ -434,6 +435,7 @@ export class DiceScene extends Phaser.Scene {
         this.cupRollButton.setEnabled(true);
         this.noMamesButton.setEnabled(false);
         this.nextPlayerButton.setEnabled(false);
+        this.fiverButton.setEnabled(false);
     }
 
     onReset() {
