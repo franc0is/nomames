@@ -6,7 +6,7 @@ import { Action } from '../message';
 import { PlayersLabel } from '../playerslabel';
 import { NMAudioManager } from '../audio';
 import { PopUpScene } from './popup-scene';
-import { PopResetScene } from './popreset-scene';
+
 
 const NUM_DICE = 5;
 
@@ -166,6 +166,7 @@ export class DiceScene extends Phaser.Scene {
                     }
                 });
                 this.scene.add('ResetScene', popReset,true);
+
             } 
         });
         this.add.existing(this.resetButton);

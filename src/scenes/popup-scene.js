@@ -9,8 +9,7 @@ export class PopUpScene extends Phaser.Scene {
         this.rB = rB 
     }
 
-    init(data) {
-
+    init() {
     }
 
 
