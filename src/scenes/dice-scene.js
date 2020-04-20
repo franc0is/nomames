@@ -149,25 +149,28 @@ export class DiceScene extends Phaser.Scene {
         this.resetButton = new TextButton(this, 690, 210, 'Reset', {
             onClick: () => {
                 this.scene.remove('popUpScene');
-                let popReset = new PopUpScene('  Continue with game reset?',{
-                    label: '[ continue ]',
-                    callback: {
-                        onClick: () => {
-                            this.scene.stop('popUpScene');
-                            this.server.reset();
+                let popReset = new PopUpScene(
+                    '  Continue with game reset?',
+                    {
+                        label: '[ continue ]',
+                        callbacks: {
+                            onClick: () => {
+                                this.scene.stop('popUpScene');
+                                this.server.reset();
+                            }
+                        }
+                    },
+                    {
+                        label: '[ cancel ]',
+                        callbacks: {
+                            onClick: () => {
+                                this.scene.stop('popUpScene');
+                            }
                         }
                     }
-                },
-                {
-                    label: '[ cancel ]',
-                    callback: {
-                        onClick: () => {
-                            this.scene.stop('popUpScene');
-                        }
-                    }
-                });
+                );
                 this.scene.add('',popReset,true);
-            } 
+            }
         });
         this.add.existing(this.resetButton);
 
