@@ -65,7 +65,6 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         var dice = this.container.getAll();
         for (var die of dice) {
             die.roll();
-            die.setPublic(false)
         }
         this.setVisible(false);
         this.rollCount++;
@@ -73,13 +72,6 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         this.onUpdateCb = cb;
         this.onUpdateCb(Action.ROLL_MANY, this.getDice());
     }
-
-    setPublic(value) {
-        this.getDice().forEach(d => {
-            d.isPublic = value;
-        });
-    }
-
 
     add(die) {
         die.x = this.x;

@@ -14,7 +14,6 @@ export class Dice extends Phaser.GameObjects.Sprite {
 
         this.setValue(initial_value);
         this.onRollCb = () => {};
-        this.isPublic = true;
         this.rollCount = 0;
         this.maxRoll = 1;
 
@@ -56,10 +55,6 @@ export class Dice extends Phaser.GameObjects.Sprite {
 
     resetRoll() {
         this.rollCount = 0;
-    }
-
-    setPublic(value){
-        this.isPublic = value;
     }
 
     markRolled() {

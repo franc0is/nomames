@@ -286,7 +286,7 @@ export class DiceScene extends Phaser.Scene {
                                              true /* initial value */);
             this.nextPlayerButton.setEnabled(allrolled);
         } else {
-            this.nextPlayerButton.setEnabled(true);
+            this.nextPlayerButton.setEnabled(!this.fiverPass);
         }
 
         // we've taken an action that changes dice,
@@ -308,31 +308,7 @@ export class DiceScene extends Phaser.Scene {
                 'dice': this.table.getDice().map(d => d.getValue())
             }
         };
-        this.table.getDice().forEach(d =>{
-            d.isPublic = true;
-        });
         this.server.updateDice(update);
-        this.updateFiver();
-    }
-
-    updateFiver() {
-        let firstVal = -1;
-        let okFive = true;
-        this.dice.forEach(d =>{
-            if (d.isPublic){
-                if (firstVal === -1){
-                    firstVal = d.getValue();
-                }
-                if (d.getValue() !== firstVal){
-                    okFive = false;
-                }
-            }
-        });
-        if (this.fiverPass){
-            this.fiverButton.setEnabled(false)
-            return
-        }
-        this.fiverButton.setEnabled(okFive);
     }
 
     onPlayersUpdate(playersList) {
@@ -349,7 +325,7 @@ export class DiceScene extends Phaser.Scene {
                 return
             }
             this.setPlayable(true);
-            this.updateFiver();
+            this.fiverButton.setEnabled(!this.fiverPass);
         }
         if (!playersList.getActivePlayer().isMe){
             this.setPlayable(false)
@@ -423,7 +399,6 @@ export class DiceScene extends Phaser.Scene {
             case Action.ROLL_MANY: {
                 for (const [i, die] of msg.cup.dice.entries()) {
                     this.cup.getDice()[i].setValue(die);
-                    this.cup.setPublic(false);
                 }
                 break;
             }
