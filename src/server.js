@@ -133,11 +133,11 @@ export class Server {
         this.publish(msg);
     }
 
-    passCup(isClockwise) {
+    passCup(isClockwise, fiverPass) {
         this.playersList.setDirection(isClockwise);
         this.playersList.setNextPlayerActive();
         let activePlayer = this.playersList.getActivePlayer();
-        let msg = new PassCupMessage(activePlayer.uuid,isClockwise);
+        let msg = new PassCupMessage(activePlayer.uuid,isClockwise,fiverPass);
         this.publish(msg);
     }
 
@@ -185,6 +185,7 @@ export class Server {
                 let uuid = deserialized.activePlayerUUID;
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
+                this.callbacks.onFiver(deserialized.fiverPass);
                 this.callbacks.onPlayersUpdate(this.playersList);
                 break;
             }

@@ -14,7 +14,8 @@ export class Dice extends Phaser.GameObjects.Sprite {
 
         this.setValue(initial_value);
         this.onRollCb = () => {};
-        this.didRoll = false;
+        this.rollCount = 0;
+        this.maxRoll = 1;
 
         this.tween = scene.tweens.add({
             targets: this,
@@ -28,12 +29,12 @@ export class Dice extends Phaser.GameObjects.Sprite {
         });
     }
 
-    setIndividualRoll(enabled) {
-        this.individualRoll = enabled;
-    }
-
     setOnRoll(onRollCb) {
         this.onRollCb = onRollCb;
+    }
+
+    didRoll(){
+        return (this.rollCount >= this.maxRoll);
     }
 
     setValue(value) {
@@ -53,11 +54,11 @@ export class Dice extends Phaser.GameObjects.Sprite {
     }
 
     resetRoll() {
-        this.didRoll = false;
+        this.rollCount = 0;
     }
 
     markRolled() {
-        this.didRoll = true;
+        this.rollCount++;
     }
 
     animate(cb) {
@@ -68,7 +69,7 @@ export class Dice extends Phaser.GameObjects.Sprite {
     }
 
     onClick() {
-        if (this.didRoll) {
+        if (this.rollCount === this.maxRoll) {
             return;
         }
         // 350ms double click for rolling
