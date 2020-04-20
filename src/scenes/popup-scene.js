@@ -3,7 +3,7 @@ import { TextButton } from '../text-button';
 
 export class PopUpScene extends Phaser.Scene {
     constructor(message,lB,rB) {
-        super(message,lB,rB);
+        super({key: 'popUpScene'},message,lB,rB);
         this.message = message;
         this.lB = lB
         this.rB = rB 

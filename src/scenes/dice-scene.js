@@ -148,11 +148,12 @@ export class DiceScene extends Phaser.Scene {
 
         this.resetButton = new TextButton(this, 690, 210, 'Reset', {
             onClick: () => {
-                let popReset = new PopUpScene('Continue with game reset?',{
+                this.scene.remove('popUpScene');
+                let popReset = new PopUpScene('  Continue with game reset?',{
                     label: '[ continue ]',
                     callback: {
                         onClick: () => {
-                            this.scene.remove(popReset);
+                            this.scene.stop('popUpScene');
                             this.server.reset();
                         }
                     }
@@ -161,12 +162,11 @@ export class DiceScene extends Phaser.Scene {
                     label: '[ cancel ]',
                     callback: {
                         onClick: () => {
-                            this.scene.remove(popReset);
+                            this.scene.stop('popUpScene');
                         }
                     }
                 });
-                this.scene.add('ResetScene', popReset,true);
-
+                this.scene.add('',popReset,true);
             } 
         });
         this.add.existing(this.resetButton);
