@@ -7,7 +7,6 @@ import { StartScene } from './scenes/start-scene';
 import { FirstScene } from './scenes/first-scene';
 import { MuteScene } from './scenes/mute-scene';
 import { init } from '@sentry/browser';
-import { PopPassScene } from './scenes/poppass-scene';
 
 /* Sentry */
 init({

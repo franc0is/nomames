@@ -28,7 +28,7 @@ export class PopUpScene extends Phaser.Scene {
 
         this.graphics.fillRect(160, 120, 400, 200);
 
-        let text = this.add.text(200,150,this.message,{ color: 'white', fontSize: '20px '});
+        let text = this.add.text(185,150,this.message,{ color: 'white', fontSize: '20px '});
 
         this.leftButton = new TextButton(this, 220,240,this.lB.label,this.lB.callbacks);
         this.add.existing(this.leftButton);
