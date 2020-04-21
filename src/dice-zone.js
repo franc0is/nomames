@@ -17,16 +17,16 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         this.graphics = scene.add.graphics();
         this.graphics.lineStyle(2, 0xffff00);
         this.graphics.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width - 20, this.height - 20);
-
+        this.rollCount = 0;
+        this.maxRoll = 1;
         this.onUpdateCb = (action, dice) => {};
-        this.rolled = false;
     }
 
     reorder() {
         var objs = this.container.getAll();
-        var i = 1;
+        var i = 0;
         for (var obj of objs) {
-            obj.x = this.x - this.width / 2 + 96 * i++;
+            obj.x = this.x - (this.width / 2) + 96 * i++ + 45;
             obj.y = this.y;
         }
     }
@@ -49,12 +49,12 @@ export class DiceZone extends Phaser.GameObjects.Zone {
     }
 
     reset() {
-        this.rolled = false;
+        this.rollCount = 0;
         this.setVisible(false);
     }
 
     didRoll() {
-        return this.rolled;
+        return (this.rollCount >= this.maxRoll)
     }
 
     roll() {
@@ -67,18 +67,15 @@ export class DiceZone extends Phaser.GameObjects.Zone {
             die.roll();
         }
         this.setVisible(false);
-        this.rolled = true;
-
+        this.rollCount++;
         // re-enable onupdatecb
         this.onUpdateCb = cb;
         this.onUpdateCb(Action.ROLL_MANY, this.getDice());
     }
 
-
     add(die) {
         die.x = this.x;
         die.y = this.y;
-
         die.setOnRoll((d) => {
             this.onDieRoll(d);
         });

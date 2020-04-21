@@ -133,11 +133,11 @@ export class Server {
         this.publish(msg);
     }
 
-    passCup(isClockwise) {
+    passCup(isClockwise, fiverPass) {
         this.playersList.setDirection(isClockwise);
         this.playersList.setNextPlayerActive();
         let activePlayer = this.playersList.getActivePlayer();
-        let msg = new PassCupMessage(activePlayer.uuid,isClockwise);
+        let msg = new PassCupMessage(activePlayer.uuid,isClockwise,fiverPass);
         this.publish(msg);
     }
 
@@ -185,6 +185,7 @@ export class Server {
                 let uuid = deserialized.activePlayerUUID;
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
+                this.callbacks.onFiver(deserialized.fiverPass);
                 this.callbacks.onPlayersUpdate(this.playersList);
                 break;
             }
@@ -197,12 +198,11 @@ export class Server {
                     player.isActive = true;
                 } else if (!this.widowUsed){
                     this.widowUsed = true;
+                    player.numLives = 0;
                     this.playersList.getActivePlayer().isActive= false;
                     player.isActive = true;
-                    // Alter player name to make fun of them
-                    player.name = '💩' + player.name.substring(1);
                 } else {
-                    player.numLives = 0;
+                    player.numLives = -1;
                     player.isDead = true;
                     if (player.isActive) {
                         this.playersList.setPreviousPlayerActive();

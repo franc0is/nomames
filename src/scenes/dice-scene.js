@@ -5,6 +5,8 @@ import { TextButton } from '../text-button';
 import { Action } from '../message';
 import { PlayersLabel } from '../playerslabel';
 import { NMAudioManager } from '../audio';
+import { PopUpScene } from './popup-scene';
+
 
 const NUM_DICE = 5;
 
@@ -20,6 +22,8 @@ export class DiceScene extends Phaser.Scene {
     constructor() {
         super({ key: 'diceScene' });
         this.audioManager = new NMAudioManager(this);
+        this.leftButtonAction = () => {};
+        this.rightButtonAction = () => {};
     }
 
     init(data) {
@@ -45,22 +49,27 @@ export class DiceScene extends Phaser.Scene {
             },
             onResume: () => {
                 this.onResume();
+            },
+            onFiver: (fp) => {
+                this.onFiver(fp);
             }
         });
     }
 
     preload() {
         this.load.spritesheet('dice', 'assets/dice-pixel.png', { frameWidth: 64, frameHeight: 64});
+        this.load.spritesheet('life', 'assets/life_spritesheet.png', { frameWidth: 90, frameHeight: 22});
         this.audioManager.preload();
-    };
+    }
 
     create() {
         this.audioManager.create();
         this.scene.launch('muteScene', { audioManager: this.audioManager });
 
         this.nomames = false;
-        this.table = new DiceZone(this, 305, 100, 600, 150, 'Table');
-        this.cup = new DiceZone(this, 305, 300, 600, 150, 'Cup');
+        this.fiverPass = false;
+        this.table = new DiceZone(this, 430, 100, 500, 150, 'Table');
+        this.cup = new DiceZone(this, 430, 300, 500, 150, 'Cup');
 
         this.noMamesText = this.add.text(170, 180, "🚨🖕🚨 NO MAMES GUEY 🚨🖕🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
@@ -68,29 +77,37 @@ export class DiceScene extends Phaser.Scene {
         this.firstpass = true;
         this.clockwise = true;
 
-        this.cupRollButton = new TextButton(this, 610, 30, 'Roll', {
+        this.cupRollButton = new TextButton(this, 690, 30, 'Roll', {
             onClick: () => {
                 this.cup.roll();
                 this.cupRollButton.setEnabled(false);
                 this.noMamesButton.setEnabled(false);
                 this.cupLookButton.setEnabled(true);
-                if (this.nomames) {
-                    this.onNoMames();
-                }
             }
         });
         this.add.existing(this.cupRollButton);
 
-        this.cupLookButton = new TextButton(this, 610, 60, 'Look', {
+        this.cupLookButton = new TextButton(this, 690, 60, 'Look', {
             onClick: () => {
                 this.cup.setVisible(true);
                 this.noMamesButton.setEnabled(false);
                 this.cupLookButton.setEnabled(false);
+                if (this.fiverPass){
+                    this.makeDeadButton.setEnabled(true)
+                    this.cup.getDice().forEach(d=>{
+                        if (d.didRoll()){
+                            this.table.add(d);
+                        }
+                    });
+                }
+                if (!this.cup.didRoll()){
+                    this.cupRollButton.setEnabled(true);
+                } 
             }
         });
         this.add.existing(this.cupLookButton);
 
-        this.nextPlayerButton = new TextButton(this, 610, 90, 'Pass', {
+        this.nextPlayerButton = new TextButton(this, 690, 90, 'Pass', {
             onClick: () => {
                 if (!this.firstpass) {
                     this.server.passCup(this.clockwise);
@@ -102,37 +119,96 @@ export class DiceScene extends Phaser.Scene {
         this.add.existing(this.nextPlayerButton);
         this.nextPlayerButton.setEnabled(false);
 
-        this.makeDeadButton = new TextButton(this, 610, 120, 'Die', {
+        this.clockwise = true;
+        this.passDirectionButton = new TextButton(this, 740, 90, '>',{
             onClick: () => {
-                let playersList = this.server.getPlayersList();
-                this.server.killPlayer(playersList.getMe());
+                this.onPassDirectionChange(!this.clockwise);
+            }
+        });
+        this.add.existing(this.passDirectionButton);
+
+        this.fiverButton = new TextButton(this, 690, 120, 'Pass 5',{
+            onClick: () => {
+                this.server.passCup(this.clockwise, true);
+                this.makeDeadButton.setEnabled(true);
+            }
+        });
+        this.add.existing(this.fiverButton);
+        this.fiverButton.setEnabled(false)
+
+        this.makeDeadButton = new TextButton(this, 690, 150, 'Die', {
+            onClick: () => {
+                this.scene.remove('popUpScene');
+                let popDie = new PopUpScene(
+                    'You are about to loose a life',
+                    {
+                        label: '[ confirm ]',
+                        callbacks: {
+                            onClick: () => {
+                                this.scene.stop('popUpScene');
+                                let playersList = this.server.getPlayersList();
+                                this.server.killPlayer(playersList.getMe());
+                            }
+                        }
+                    },
+                    {
+                        label: '[ cancel ]',
+                        callbacks: {
+                            onClick: () => {
+                                this.scene.stop('popUpScene');
+                            }
+                        }
+                    }
+                );
+                this.scene.add('',popDie,true);
             }
         });
         this.add.existing(this.makeDeadButton);
         this.makeDeadButton.setEnabled(false);
 
-        this.noMamesButton = new TextButton(this, 610, 150, 'No Mames!', {
+        this.noMamesButton = new TextButton(this, 690, 180, 'No Mames!', {
             onClick: () => {
                 this.server.noMames();
             }
         });
         this.add.existing(this.noMamesButton);
 
-        this.resetButton = new TextButton(this, 610, 180, 'Reset', {
+        this.resetButton = new TextButton(this, 690, 210, 'Reset', {
             onClick: () => {
-                this.server.reset()
+                this.scene.remove('popUpScene');
+                let popReset = new PopUpScene(
+                    '  Continue with game reset?',
+                    {
+                        label: '[ continue ]',
+                        callbacks: {
+                            onClick: () => {
+                                this.scene.stop('popUpScene');
+                                this.server.reset();
+                            }
+                        }
+                    },
+                    {
+                        label: '[ cancel ]',
+                        callbacks: {
+                            onClick: () => {
+                                this.scene.stop('popUpScene');
+                            }
+                        }
+                    }
+                );
+                this.scene.add('',popReset,true);
             }
         });
         this.add.existing(this.resetButton);
 
-        this.lookedButton = new TextButton(this, 610, 250, 'Looked', {
+        this.lookedButton = new TextButton(this, 690, 280, 'Looked', {
             onClick: () => {
             }
         });
         this.add.existing(this.lookedButton);
         this.lookedButton.setEnabled(false);
 
-        this.rolledButton = new TextButton(this, 610, 280, 'Rolled', {
+        this.rolledButton = new TextButton(this, 690, 310, 'Rolled', {
             onClick: () => {
             }
         });
@@ -164,7 +240,7 @@ export class DiceScene extends Phaser.Scene {
         });
 
         this.input.on('drop', function(pointer, gameObject, dropZone) {
-            if (gameObject instanceof Dice && gameObject.didRoll && dropZone.name === "Cup" ){
+            if (gameObject instanceof Dice && gameObject.didRoll() && dropZone.name === "Cup" ){
                 gameObject.x = gameObject.input.dragStartX;
                 gameObject.y = gameObject.input.dragStartY;
                 dropZone.setHighlighted(false);
@@ -185,7 +261,7 @@ export class DiceScene extends Phaser.Scene {
         });
 
         let playersList = this.server.getPlayersList();
-        this.playersLabel = new PlayersLabel(this, 20, 400, playersList);
+        this.playersLabel = new PlayersLabel(this, 5, 30, playersList);
         this.add.existing(this.playersLabel);
 
         if (!playersList.getActivePlayer().isMe) {
@@ -212,6 +288,11 @@ export class DiceScene extends Phaser.Scene {
 
     }
 
+    onFiver(fp){
+        this.fiverPass = fp;
+        this.passDirectionButton.setEnabled(false);
+    }
+
     setPlayable(playable) {
         this.input.enabled = playable;
         this.cup.reset();
@@ -219,10 +300,19 @@ export class DiceScene extends Phaser.Scene {
         this.cupRollButton.setEnabled(playable);
         this.noMamesButton.setEnabled(playable);
         this.resetButton.setEnabled(playable);
-        this.nextPlayerButton.setEnabled(playable);
         this.dice.forEach(dice => {
             dice.resetRoll();
         });
+        if (!this.fiverPass){
+            this.nextPlayerButton.setEnabled(playable);
+            this.fiverButton.setEnabled(playable);
+        } else {
+            this.nextPlayerButton.setEnabled(false);
+            this.fiverButton.setEnabled(false);
+            this.dice.forEach(dice => {
+                dice.resetRoll();
+            });
+        }
         if (!playable) {
             this.lookedButton.setEnabled(false);
             this.rolledButton.setEnabled(false);
@@ -246,8 +336,10 @@ export class DiceScene extends Phaser.Scene {
             let allrolled = this.dice.reduce((previous, die) => previous && die.didRoll,
                                              true /* initial value */);
             this.nextPlayerButton.setEnabled(allrolled);
+            this.fiverButton.setEnabled(allrolled);
         } else {
-            this.nextPlayerButton.setEnabled(true);
+            this.nextPlayerButton.setEnabled(!this.fiverPass);
+            this.fiverButton.setEnabled(!this.fiverPass);
         }
 
         // we've taken an action that changes dice,
@@ -269,7 +361,6 @@ export class DiceScene extends Phaser.Scene {
                 'dice': this.table.getDice().map(d => d.getValue())
             }
         };
-
         this.server.updateDice(update);
     }
 
@@ -281,6 +372,10 @@ export class DiceScene extends Phaser.Scene {
         this.playersLabel.updateWithPlayers(playersList);
         if (!this.input.enabled && playersList.getActivePlayer().isMe) {
             // this player is now active
+            if (this.fiverPass){
+                this.onFiverReceipt();
+                return
+            }
             this.setPlayable(true);
         }
         if (!playersList.getActivePlayer().isMe){
@@ -290,6 +385,14 @@ export class DiceScene extends Phaser.Scene {
             this.onNoMames();
         }
     }
+
+    onFiverReceipt(){
+        this.setPlayable(true);
+        this.dice.forEach(d=> {
+            d.maxRoll = 5;
+        });
+        this.cup.maxRoll = 5;
+    };
 
     onDiceUpdate(msg) {
         this.cup.setOnUpdateCb((action, dice) => {});
@@ -354,6 +457,9 @@ export class DiceScene extends Phaser.Scene {
 
         this.rolledButton.setEnabled(msg.cup.rolled);
         this.lookedButton.setEnabled(msg.cup.visible);
+        if (this.fiverPass){
+            this.cup.setVisible(msg.cup.visible);
+        }
 
         this.cup.setOnUpdateCb((action, dice) => {
             this.updateCup(action, dice)
@@ -377,6 +483,7 @@ export class DiceScene extends Phaser.Scene {
         this.cupRollButton.setEnabled(true);
         this.noMamesButton.setEnabled(false);
         this.nextPlayerButton.setEnabled(false);
+        this.fiverButton.setEnabled(false);
     }
 
     onReset() {
