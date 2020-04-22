@@ -26,8 +26,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         var objs = this.container.getAll();
         var i = 0;
         for (var obj of objs) {
-            obj.x = this.x - (this.width / 2) + 96 * i++ + 45;
-            obj.y = this.y;
+            obj.setLocation(this.x - (this.width / 2) + 96 * i++ + 45, this.y);
         }
     }
 
@@ -45,6 +44,10 @@ export class DiceZone extends Phaser.GameObjects.Zone {
 
     setVisible(value) {
         this.container.setVisible(value);
+        var dice = this.container.getAll();
+        for (var die of dice){
+            die.setVisible(value);
+        }
         this.onUpdateCb(Action.SHOW_MANY, this.getDice());
     }
 
@@ -74,12 +77,11 @@ export class DiceZone extends Phaser.GameObjects.Zone {
     }
 
     add(die) {
-        die.x = this.x;
-        die.y = this.y;
+        die.setLocation(this.x, this.y);
         die.setOnRoll((d) => {
             this.onDieRoll(d);
         });
-
+        die.setVisible(this.getVisible());
         this.container.add(die);
         this.reorder();
         this.onUpdateCb(Action.MOVE_ONE, [die]);

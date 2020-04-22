@@ -221,8 +221,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.dragging = false;
         this.input.on('drag', function(pointer, gameObject, dragX, dragY) {
-            gameObject.x = dragX;
-            gameObject.y = dragY;
+            gameObject.setLocation(dragX,dragY);
         });
 
         this.input.on('dragenter', function(pointer, gameObject, dropZone) {
@@ -286,6 +285,14 @@ export class DiceScene extends Phaser.Scene {
     onFiver(fp){
         this.fiverPass = fp;
         this.passDirectionButton.setEnabled(false);
+        if (fp){
+            this.dice.forEach(d=> {
+                d.rollCount = 0;
+                d.passFive = true;
+                console.log('fiver updated');
+            });
+        }
+        this.table.reorder();
     }
 
     setPlayable(playable) {
@@ -329,7 +336,7 @@ export class DiceScene extends Phaser.Scene {
 
     updateDice(action) {
         if (this.firstpass) {
-            let allrolled = this.dice.reduce((previous, die) => previous && die.didRoll,
+            let allrolled = this.dice.reduce((previous, die) => previous && die.didRoll(),
                                              true /* initial value */);
             this.nextPlayerButton.setEnabled(allrolled);
             this.fiverButton.setEnabled(allrolled);
