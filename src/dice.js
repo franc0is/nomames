@@ -28,6 +28,7 @@ export class Dice extends Phaser.GameObjects.Container {
 
         this.setValue(initial_value);
         this.onRollCb = () => {};
+        this.onMoveCb = () => {};
 
         this.tween = this.die.tween;
         this.die.setValue = (value) => {this.setValue(value)};
@@ -47,6 +48,10 @@ export class Dice extends Phaser.GameObjects.Container {
 
     setOnRoll(onRollCb) {
         this.onRollCb = onRollCb;
+    }
+
+    setOnMove(cb) {
+        this.onMoveCb = cb;
     }
 
     didRoll(){
@@ -98,6 +103,9 @@ export class Dice extends Phaser.GameObjects.Container {
         let clickDelay = this.scene.time.now - this.lastClickTime;
         this.lastClickTime = this.scene.time.now;
         if (clickDelay < 350) {
+            let n = Phaser.Math.RND.between(0, 5);
+            this.setValue(n)
+            this.onMoveCb(this);
             this.animate(function(target) {
                 target.roll();
             });
@@ -147,9 +155,5 @@ class DiceSprite extends Phaser.GameObjects.Sprite {
     setVal(value) {
         // FIXME frames do not match neatly to values
         this.setFrame(value);
-    }
-
-    onSetValue(cb) {
-
     }
 }

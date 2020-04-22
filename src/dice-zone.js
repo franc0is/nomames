@@ -20,6 +20,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         this.rollCount = 0;
         this.maxRoll = 1;
         this.onUpdateCb = (action, dice) => {};
+        this.onMoveCb = (action, dice) => {};
         this.fiver = false;
 
         this.fpText = scene.add.text(this.x+this.width/2-50,this.y + this.height/2-15,'0/5',{color: 'yellow', fontsize: '6px'});
@@ -45,6 +46,10 @@ export class DiceZone extends Phaser.GameObjects.Zone {
 
     setOnUpdateCb(onUpdateCb) {
         this.onUpdateCb = onUpdateCb;
+    }
+
+    setOnMoveCb(cb) {
+        this.onMoveCb = cb;
     }
 
     setVisible(value) {
@@ -90,6 +95,10 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         die.setOnRoll((d) => {
             this.onDieRoll(d);
         });
+        die.setOnMove((d) => {
+            this.onDieMove(d);
+        });
+        
         die.setVisible(this.getVisible());
         this.container.add(die);
         this.reorder();
@@ -113,6 +122,10 @@ export class DiceZone extends Phaser.GameObjects.Zone {
 
     onDieRoll(die) {
         this.onUpdateCb(Action.ROLL_ONE, [die]);
+    }
+
+    onDieMove(die) {
+        this.onMoveCb(Action.ROLL_ONE, [die]);
     }
 
     incRoll(){

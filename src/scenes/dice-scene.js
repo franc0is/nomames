@@ -95,12 +95,17 @@ export class DiceScene extends Phaser.Scene {
                 this.noMamesButton.setEnabled(false);
                 this.cupLookButton.setEnabled(false);
                 if (this.fiverPass){
-                    this.makeDeadButton.setEnabled(true)
+                    this.cupLookButton.setEnabled(true);
+                    this.makeDeadButton.setEnabled(true);
                     this.cup.getDice().forEach(d=>{
                         if (d.didRoll()){
                             this.table.add(d);
                         }
                     });
+                    let unlock = this.dice.reduce( (previous,die) => previous && die.didRoll());
+                    if (unlock) {
+                        this.server.noMames();
+                    }
                 }
                 if (!this.cup.didRoll()){
                     this.cupRollButton.setEnabled(true);
@@ -270,6 +275,10 @@ export class DiceScene extends Phaser.Scene {
             this.updateCup(action, dice)
         });
 
+        this.cup.setOnMoveCb((action, dice) => {
+            this.moveCup(action, dice);
+        })
+
         this.table.setOnUpdateCb((action, dice) => {
             this.updateTable(action, dice);
         });
@@ -326,9 +335,14 @@ export class DiceScene extends Phaser.Scene {
 
     updateCup(action, dice) {
         if (action === Action.ROLL_ONE) {
-            this.table.add(dice[0]);
+            console.log('this should not have happened - roll_one inside cup')
+            return
         }
         this.updateDice(action);
+    }
+
+    moveCup(action, dice) {
+        this.table.add(dice[0]);
     }
 
 
@@ -407,36 +421,23 @@ export class DiceScene extends Phaser.Scene {
         switch (msg.action) {
             case Action.ROLL_ONE: {
                 let table_dice = Array.from(this.table.getDice());
-                console.log({table_dice});
                 let new_value = -1;
                 let new_rollCount = -1;
-                let i = 0;
-                let j = 0;
                 msg.table.dice.forEach(die => {
-                    let match = false;
-                    table_dice.forEach(d => {
-                        console.log('if d.getV: ' +(d.getValue() === die[0]));
-                        console.log('d.getValue: ' + d.getValue());
-                        console.log('die[0]: '+ die[0]);
-                        
-                        if (d.getValue() === die[0]){
-                            if(match === false){
-                                table_dice.splice(i,1);
-                            }
-                            match = true;
-                        }
-                        i++;
-                    })
-                    if (match === false){
+                    let idx = table_dice.findIndex(d => d.getValue() === die[0]);
+                    if (idx === -1) {
+                        console.assert(new_value === -1);
                         new_value = die[0];
                         new_rollCount = die[1];
+                    } else {
+                        table_dice.splice(idx, 1);
                     }
                 });
                 // FIXME we don't know which dice to animate
                 // when we roll the exact same...
                 // I don't think this matters since everyone's orders are different. -ac
                 if (new_value !== -1) {
-                    table_dice[0].die.animate(function(target) {
+                    table_dice[0].animate(function(target) {
                         target.setValue(new_value);
                     });
                     table_dice[0].setRoll(new_rollCount);
@@ -497,14 +498,18 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onNoMames() {
-        if (!this.nomames) {
+        let unlock = this.dice.reduce( (previous,die) => previous && die.didRoll(),this.fiverPass);
+        if (!this.nomames && !unlock) {
             this.audioManager.playNoMames();
         }
-        this.fiverText.setVisible(false);
+        if (!unlock){
+            this.fiverPass = false;
+            this.fiverText.setVisible(false);
+            this.noMamesText.setVisible(true);
+        }
         this.nomames = true;
         this.setPlayable(true);
         this.cup.setVisible(true);
-        this.noMamesText.setVisible(true);
         this.makeDeadButton.setEnabled(true);
         this.cupLookButton.setEnabled(false);
         this.cupRollButton.setEnabled(true);
