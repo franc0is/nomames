@@ -76,6 +76,7 @@ export class Dice extends Phaser.GameObjects.Container {
 
     setRoll(value) {
         this.rollCount = value;
+        this.dieTag.setText(value);
     }
 
     markRolled() {
@@ -134,6 +135,13 @@ class DiceSprite extends Phaser.GameObjects.Sprite {
             repeat: 0,
             paused: true
         });
+    }
+
+    animate(cb) {
+        // looks like there's phaser bug here
+        // if I don't specify arguments, it crashes
+        this.tween.setCallback('onLoop', cb, [this], this);
+        this.tween.play();
     }
 
     setVal(value) {

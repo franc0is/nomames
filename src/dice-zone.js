@@ -114,4 +114,9 @@ export class DiceZone extends Phaser.GameObjects.Zone {
     onDieRoll(die) {
         this.onUpdateCb(Action.ROLL_ONE, [die]);
     }
+
+    incRoll(){
+        this.rollCount++
+        this.fpText.setText(this.rollCount + '/5');
+    }
 }

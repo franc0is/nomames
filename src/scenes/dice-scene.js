@@ -74,7 +74,7 @@ export class DiceScene extends Phaser.Scene {
         this.noMamesText = this.add.text(170, 180, "🚨🖕🚨 NO MAMES GUEY 🚨🖕🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
 
-        this.fiverText = this.add.text(170,180, '!!FIVE OF A KIND!!',{color: '#0f0',fontsixe: '20px'});
+        this.fiverText = this.add.text(220,180, '🎲🎲🎲🎲🎲 !! FIVE OF A KIND !! 🎲🎲🎲🎲🎲',{color: '#0f0',fontsixe: '20px'});
         this.fiverText.setVisible(false);
 
         this.firstpass = true;
@@ -127,9 +127,6 @@ export class DiceScene extends Phaser.Scene {
 
         this.fiverButton = new TextButton(this, 690, 120, 'Pass 5',{
             onClick: () => {
-                this.dice.forEach(dice => {
-                    dice.resetRoll();
-                });
                 this.server.passCup(this.clockwise, true);
                 this.makeDeadButton.setEnabled(true);
             }
@@ -294,7 +291,7 @@ export class DiceScene extends Phaser.Scene {
         this.passDirectionButton.setEnabled(false);
         if (fp){
             this.dice.forEach(d=> {
-                //d.resetRoll();
+                d.resetRoll();
                 d.passFive = true;
             });
         this.table.setVisible(true);
@@ -410,27 +407,39 @@ export class DiceScene extends Phaser.Scene {
         switch (msg.action) {
             case Action.ROLL_ONE: {
                 let table_dice = Array.from(this.table.getDice());
+                console.log({table_dice});
                 let new_value = -1;
                 let new_rollCount = -1;
+                let i = 0;
+                let j = 0;
                 msg.table.dice.forEach(die => {
-                    let idx = table_dice.findIndex(d => d.getValue() === die[0]);
-                    if (idx === -1) {
-                        console.assert(new_value === -1);
+                    let match = false;
+                    table_dice.forEach(d => {
+                        console.log('if d.getV: ' +(d.getValue() === die[0]));
+                        console.log('d.getValue: ' + d.getValue());
+                        console.log('die[0]: '+ die[0]);
+                        
+                        if (d.getValue() === die[0]){
+                            if(match === false){
+                                table_dice.splice(i,1);
+                            }
+                            match = true;
+                        }
+                        i++;
+                    })
+                    if (match === false){
                         new_value = die[0];
-                        new_rollCount = die[1]
-                    } else {
-                        table_dice.splice(idx, 1);
-                        //table_dice[1].setRoll(die[1]);
+                        new_rollCount = die[1];
                     }
                 });
                 // FIXME we don't know which dice to animate
                 // when we roll the exact same...
                 // I don't think this matters since everyone's orders are different. -ac
                 if (new_value !== -1) {
-                    table_dice[0].animate(function(target) {
-                        target.setRoll(new_rollCount);
+                    table_dice[0].die.animate(function(target) {
                         target.setValue(new_value);
                     });
+                    table_dice[0].setRoll(new_rollCount);
                 }
                 break;
             }
@@ -461,6 +470,7 @@ export class DiceScene extends Phaser.Scene {
                 break;
             }
             case Action.ROLL_MANY: {
+                this.cup.incRoll();
                 for (const [i, die] of msg.cup.dice.entries()) {
                     this.cup.getDice()[i].setValue(die[0]);
                     this.cup.getDice()[i].setRoll(die[1]);
@@ -490,6 +500,7 @@ export class DiceScene extends Phaser.Scene {
         if (!this.nomames) {
             this.audioManager.playNoMames();
         }
+        this.fiverText.setVisible(false);
         this.nomames = true;
         this.setPlayable(true);
         this.cup.setVisible(true);
