@@ -2,18 +2,23 @@ export class Dice extends Phaser.GameObjects.Container {
 
     constructor(scene, x, y, initial_value) {
         super(scene, x, y);
-
+        this.x = x;
+        this.y = y;
+        
+        scene.add.existing(this);
         this.lastClickTime = 0;
 
         this.setName('diceContainer');
-        this.setPosition(x, y);
-        this.setSize(100,150);
-        this.setInteractive();
+        //this.setPosition(x, y);
 
         this.on('pointerdown', this.onClick, this);
 
+
         this.die = new DiceSprite(scene, x, y, initial_value);
         scene.add.existing(this.die);
+
+        this.setSize(this.die.width,this.die.height+50);
+        this.setInteractive();
 
         this.dieTag = scene.add.text(x-5,y+36,0,{color: 'yellow', fontsize: '6px'});
         this.dieTag.setVisible(false);
@@ -25,9 +30,12 @@ export class Dice extends Phaser.GameObjects.Container {
         this.onRollCb = () => {};
 
         this.tween = this.die.tween;
+        this.die.setValue = (value) => {this.setValue(value)};
+        this.die.setRoll = (val) => {this.setRoll(val)};
 
         this.passFive = false;
-
+        this.add(this.die);
+        this.add(this.dieTag);
     }
 
     setVisible(visibility) {
@@ -47,7 +55,7 @@ export class Dice extends Phaser.GameObjects.Container {
 
     setValue(value) {
         this.value = value;
-        this.die.setValue(value);
+        this.die.setVal(value);
         this.dieTag.setText(this.rollCount);
     }
 
@@ -63,6 +71,11 @@ export class Dice extends Phaser.GameObjects.Container {
 
     resetRoll() {
         this.rollCount = 0;
+        this.dieTag.setText(0);
+    }
+
+    setRoll(value) {
+        this.rollCount = value;
     }
 
     markRolled() {
@@ -96,24 +109,6 @@ export class Dice extends Phaser.GameObjects.Container {
         this.setValue(n);
         this.onRollCb(this);
     }
-
-    setX(x){
-        this.x = x;
-        this.die.x = x;
-        this.dieTag.x = x-5;
-    }
-
-    setY(y) {
-        this.y = y;
-        this.die.y = y;
-        this.dieTag.y = y+36;
-    }
-    
-    setLocation(x,y) {
-        this.setPosition(x,y);
-        this.die.setPosition(x,y);
-        this.dieTag.setPosition(x-5,y+36);
-    }
 }
 
 class DiceSprite extends Phaser.GameObjects.Sprite {
@@ -124,7 +119,10 @@ class DiceSprite extends Phaser.GameObjects.Sprite {
         this.setTexture('dice');
         this.setPosition(x, y);
         
-        this.setValue(initial_value);
+        this.setRoll = (value) => {};
+        this.setValue = (value) => {};
+
+        this.setVal(initial_value);
 
         this.tween = scene.tweens.add({
             targets: this,
@@ -138,9 +136,12 @@ class DiceSprite extends Phaser.GameObjects.Sprite {
         });
     }
 
-    setValue(value) {
+    setVal(value) {
         // FIXME frames do not match neatly to values
-        this.value = value;
         this.setFrame(value);
+    }
+
+    onSetValue(cb) {
+
     }
 }

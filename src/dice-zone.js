@@ -20,13 +20,18 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         this.rollCount = 0;
         this.maxRoll = 1;
         this.onUpdateCb = (action, dice) => {};
+        this.fiver = false;
+
+        this.fpText = scene.add.text(this.x+this.width/2-50,this.y + this.height/2-15,'0/5',{color: 'yellow', fontsize: '6px'});
+        this.fpText.setVisible(false);
     }
 
     reorder() {
         var objs = this.container.getAll();
         var i = 0;
         for (var obj of objs) {
-            obj.setLocation(this.x - (this.width / 2) + 96 * i++ + 45, this.y);
+            obj.x = this.x - (this.width / 2) + 96 * i++ + 45
+            obj.y = this.y;
         }
     }
 
@@ -44,6 +49,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
 
     setVisible(value) {
         this.container.setVisible(value);
+        this.fpText.setVisible(this.fiver);
         var dice = this.container.getAll();
         for (var die of dice){
             die.setVisible(value);
@@ -54,6 +60,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
     reset() {
         this.rollCount = 0;
         this.setVisible(false);
+        this.fpText.setText('0/5');
     }
 
     didRoll() {
@@ -71,13 +78,15 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         }
         this.setVisible(false);
         this.rollCount++;
+        this.fpText.setText(this.rollCount + '/5');
         // re-enable onupdatecb
         this.onUpdateCb = cb;
         this.onUpdateCb(Action.ROLL_MANY, this.getDice());
     }
 
     add(die) {
-        die.setLocation(this.x, this.y);
+        die.x = this.x;
+        die.y = this.y;
         die.setOnRoll((d) => {
             this.onDieRoll(d);
         });

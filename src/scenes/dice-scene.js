@@ -74,6 +74,9 @@ export class DiceScene extends Phaser.Scene {
         this.noMamesText = this.add.text(170, 180, "🚨🖕🚨 NO MAMES GUEY 🚨🖕🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
 
+        this.fiverText = this.add.text(170,180, '!!FIVE OF A KIND!!',{color: '#0f0',fontsixe: '20px'});
+        this.fiverText.setVisible(false);
+
         this.firstpass = true;
 
         this.cupRollButton = new TextButton(this, 690, 30, 'Roll', {
@@ -124,6 +127,9 @@ export class DiceScene extends Phaser.Scene {
 
         this.fiverButton = new TextButton(this, 690, 120, 'Pass 5',{
             onClick: () => {
+                this.dice.forEach(dice => {
+                    dice.resetRoll();
+                });
                 this.server.passCup(this.clockwise, true);
                 this.makeDeadButton.setEnabled(true);
             }
@@ -221,7 +227,8 @@ export class DiceScene extends Phaser.Scene {
 
         this.dragging = false;
         this.input.on('drag', function(pointer, gameObject, dragX, dragY) {
-            gameObject.setLocation(dragX,dragY);
+            gameObject.x = dragX;
+            gameObject.y = dragY;
         });
 
         this.input.on('dragenter', function(pointer, gameObject, dropZone) {
@@ -287,12 +294,12 @@ export class DiceScene extends Phaser.Scene {
         this.passDirectionButton.setEnabled(false);
         if (fp){
             this.dice.forEach(d=> {
-                d.rollCount = 0;
+                //d.resetRoll();
                 d.passFive = true;
-                console.log('fiver updated');
             });
+        this.table.setVisible(true);
+        this.cup.fiver = true;
         }
-        this.table.reorder();
     }
 
     setPlayable(playable) {
@@ -302,18 +309,16 @@ export class DiceScene extends Phaser.Scene {
         this.cupRollButton.setEnabled(playable);
         this.noMamesButton.setEnabled(playable);
         this.resetButton.setEnabled(playable);
-        this.dice.forEach(dice => {
-            dice.resetRoll();
-        });
         if (!this.fiverPass){
             this.nextPlayerButton.setEnabled(playable);
             this.fiverButton.setEnabled(playable);
-        } else {
-            this.nextPlayerButton.setEnabled(false);
-            this.fiverButton.setEnabled(false);
             this.dice.forEach(dice => {
                 dice.resetRoll();
             });
+        } else {
+            this.nextPlayerButton.setEnabled(false);
+            this.fiverButton.setEnabled(false);
+            this.fiverText.setVisible(true)
         }
         if (!playable) {
             this.passDirectionButton.setEnabled(false);
@@ -358,10 +363,10 @@ export class DiceScene extends Phaser.Scene {
             'cup': {
                 'rolled': this.cup.didRoll(),
                 'visible': this.cup.getVisible(),
-                'dice': this.cup.getDice().map(d => d.getValue())
+                'dice': this.cup.getDice().map(d => [d.getValue(),d.rollCount])
             },
             'table': {
-                'dice': this.table.getDice().map(d => d.getValue())
+                'dice': this.table.getDice().map(d => [d.getValue(),d.rollCount])
             }
         };
         this.server.updateDice(update);
@@ -406,13 +411,16 @@ export class DiceScene extends Phaser.Scene {
             case Action.ROLL_ONE: {
                 let table_dice = Array.from(this.table.getDice());
                 let new_value = -1;
+                let new_rollCount = -1;
                 msg.table.dice.forEach(die => {
-                    let idx = table_dice.findIndex(d => d.getValue() === die);
+                    let idx = table_dice.findIndex(d => d.getValue() === die[0]);
                     if (idx === -1) {
                         console.assert(new_value === -1);
-                        new_value = die;
+                        new_value = die[0];
+                        new_rollCount = die[1]
                     } else {
                         table_dice.splice(idx, 1);
+                        //table_dice[1].setRoll(die[1]);
                     }
                 });
                 // FIXME we don't know which dice to animate
@@ -420,6 +428,7 @@ export class DiceScene extends Phaser.Scene {
                 // I don't think this matters since everyone's orders are different. -ac
                 if (new_value !== -1) {
                     table_dice[0].animate(function(target) {
+                        target.setRoll(new_rollCount);
                         target.setValue(new_value);
                     });
                 }
@@ -437,12 +446,14 @@ export class DiceScene extends Phaser.Scene {
                 //refill all dice per message
                 let i = 0;
                 msg.cup.dice.forEach(die => {
-                    this.dice[i].setValue(die);
+                    this.dice[i].setRoll(die[1]);
+                    this.dice[i].setValue(die[0]);
                     this.cup.add(this.dice[i]);
                     i++
                 });
                 msg.table.dice.forEach(die => {
-                    this.dice[i].setValue(die);
+                    this.dice[i].setValue(die[0]);
+                    this.dice[i].setRoll(die[1]);
                     this.table.add(this.dice[i]);
                     i++
                 });
@@ -451,7 +462,8 @@ export class DiceScene extends Phaser.Scene {
             }
             case Action.ROLL_MANY: {
                 for (const [i, die] of msg.cup.dice.entries()) {
-                    this.cup.getDice()[i].setValue(die);
+                    this.cup.getDice()[i].setValue(die[0]);
+                    this.cup.getDice()[i].setRoll(die[1]);
                 }
                 break;
             }
