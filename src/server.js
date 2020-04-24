@@ -1,5 +1,5 @@
 import PubNub from 'pubnub';
-import { Message, StartGameMessage, DiceUpdateMessage,
+import { Message, StartGameMessage, DiceUpdateMessage, seatPlayerMessage,
          PassCupMessage, KillPlayerMessage, NoMamesMessage,
          ResetMessage } from './message';
 import { PlayersList } from './playerslist'
@@ -138,6 +138,11 @@ export class Server {
         this.playersList.setNextPlayerActive();
         let activePlayer = this.playersList.getActivePlayer();
         let msg = new PassCupMessage(activePlayer.uuid,isClockwise,fiverPass);
+        this.publish(msg);
+    }
+
+    seatPlayer(update) {
+        let msg = new SeatPlayerMessage(update);
         this.publish(msg);
     }
 

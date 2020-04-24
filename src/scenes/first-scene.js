@@ -26,7 +26,7 @@ export class FirstScene extends Phaser.Scene {
 
         this.joinButton = new TextButton(this, 435, 420, '[ JOIN ]', {
             onClick: () => {
-                this.scene.start('joinScene');
+                this.scene.start('startScene');
             }
         });
         this.add.existing(this.joinButton);

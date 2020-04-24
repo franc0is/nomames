@@ -7,6 +7,7 @@ export class Message {
         return {
             [StartGameMessage.getType()]: StartGameMessage,
             [DiceUpdateMessage.getType()]: DiceUpdateMessage,
+            [SeatPlayerMessage.getType()]: SeatPlayerMessage,
             [PassCupMessage.getType()]: PassCupMessage,
             [KillPlayerMessage.getType()]: KillPlayerMessage,
             [NoMamesMessage.getType()]: NoMamesMessage,
@@ -77,6 +78,22 @@ export class DiceUpdateMessage extends Message {
         return new this(msg);
     }
 }
+
+export class SeatPlayerMessage extends Message {
+    constructor(update) {
+        super('seatPlayer');
+        this.seats = update['seats'];
+    }
+
+    static getType() {
+        return 'seatPlayer';
+    }
+
+    static deserialize(msg) {
+        return new this(msg);
+    }
+}
+
 
 export class KillPlayerMessage extends Message {
     constructor(uuid) {
