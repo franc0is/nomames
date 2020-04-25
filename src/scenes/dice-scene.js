@@ -3,6 +3,7 @@ import { Dice } from '../dice';
 import { DiceZone } from '../dice-zone';
 import { TextButton } from '../text-button';
 import { Action } from '../message';
+import { NMType } from '../message';
 import { PlayersLabel } from '../playerslabel';
 import { NMAudioManager } from '../audio';
 import { PopUpScene } from './popup-scene';
@@ -80,6 +81,9 @@ export class DiceScene extends Phaser.Scene {
         this.fiverTryText = this.add.text(220,180, 'ROLLIN ROLLIN ROLLIN - GOING FOR IT!!',{color: 'yellow'});
         this.fiverTryText.setVisible(false);
 
+        this.fiverFailText = this.add.text(220 , 180, '😢😭😢 BETTER LUCK NEXT TIME 😢😭😢', {color: 'yellow'});
+        this.fiverFailText.setVisible(false);
+
         this.firstpass = true;
 
         this.cupRollButton = new TextButton(this, 690, 30, 'Roll', {
@@ -103,18 +107,6 @@ export class DiceScene extends Phaser.Scene {
                 if (this.fiverPass){
                     this.cupLookButton.setEnabled(true);
                     this.makeDeadButton.setEnabled(true);
-                    if (this.allFive()) {
-                        this.fiverText.setVisible(true);
-                        this.fiverTryText.setVisible(false);
-                    } else {
-                        this.fiverText.setVisible(false);
-                        this.fiverTryText.setVisible(true);
-                    }
-                    this.cup.getDice().forEach(d=>{
-                        if (d.didRoll()){
-                            this.table.add(d);
-                        }
-                    });
                 }
             }
         });
@@ -177,7 +169,8 @@ export class DiceScene extends Phaser.Scene {
 
         this.noMamesButton = new TextButton(this, 690, 180, 'No Mames!', {
             onClick: () => {
-                this.server.noMames();
+                let even = Phaser.Math.RND.between(0, 1);
+                this.server.noMames(NMType.NO_MAMES, even);
             }
         });
         this.add.existing(this.noMamesButton);
@@ -223,6 +216,17 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.rolledButton);
         this.rolledButton.setEnabled(false);
+
+        this.cheaterButton = new TextButton(this, 690, 370, 'Cheat', {
+            onClick: () => {
+                if (this.fiverPass){
+                    for (let i = 0; i<4;i++){
+                        this.dice[i].setValue(3);
+                    }
+                }
+            }
+        });
+        this.add.existing(this.cheaterButton);
 
         this.dice = [];
         for (let i=0; i< NUM_DICE; i++) {
@@ -316,6 +320,10 @@ export class DiceScene extends Phaser.Scene {
     }
 
     setPlayable(playable) {
+        this.cup.setOnUpdateCb((action, dice) => {});
+        this.table.setOnUpdateCb((action, dice) => {});
+        this.cup.setOnMoveCb((action, dice) => {});
+
         this.input.enabled = playable;
         this.cup.reset();
         this.cupLookButton.setEnabled(playable);
@@ -335,19 +343,38 @@ export class DiceScene extends Phaser.Scene {
             this.lookedButton.setEnabled(false);
             this.rolledButton.setEnabled(false);
         }
+
+        this.cup.setOnUpdateCb((action, dice) => {
+            this.updateCup(action, dice)
+        });
+
+        this.table.setOnUpdateCb((action, dice) => {
+            this.updateTable(action, dice);
+        });
+
+        this.cup.setOnMoveCb((action, dice) => {
+            this.moveCup(action, dice);
+        })
     }
 
     updateCup(action, dice) {
         if (action === Action.ROLL_ONE) {
             console.log('this should not have happened - roll_one inside cup')
-            this.table.add(dice[0]);
+            //this.table.add(dice[0]);
             return
         }
         this.updateDice(action);
     }
 
     moveCup(action, dice) {
+        this.table.setOnUpdateCb((action, dice) => {});
+        
         this.table.add(dice[0]);
+
+        this.table.setOnUpdateCb((action, dice) => {
+            this.updateTable(action, dice);
+        })
+
     }
 
 
@@ -356,18 +383,38 @@ export class DiceScene extends Phaser.Scene {
     }
 
     updateDice(action) {
+        console.log('updateing dice: '+ action);
+        this.cup.setOnUpdateCb((action, dice) => {});
+        this.table.setOnUpdateCb((action, dice) => {});
+        this.cup.setOnMoveCb((action, dice) => {});
+
+        if (this.fiverPass) {
+            this.cup.getDice().forEach(d=>{
+                if (d.didRoll()){
+                    this.table.add(d);
+                }
+            });
+        }
+
+        this.cup.setOnUpdateCb((action, dice) => {
+            this.updateCup(action, dice)
+        });
+
+        this.table.setOnUpdateCb((action, dice) => {
+            this.updateTable(action, dice);
+        });
+
+        this.cup.setOnMoveCb((action, dice) => {
+            this.moveCup(action, dice);
+        })
+
         if (this.firstpass) {
-            let allrolled = this.dice.reduce((previous, die) => previous && die.didRoll(),
-                                             true /* initial value */);
+            let allrolled = this.allRolled(1);
             this.nextPlayerButton.setEnabled(allrolled);
             this.fiverButton.setEnabled(allrolled);
         } else {
             this.nextPlayerButton.setEnabled(!this.fiverPass);
             this.fiverButton.setEnabled(!this.fiverPass);
-        }
-
-        if(this.fiverPass && this.allFive() && !this.noMames){
-            this.server.noMames()
         }
 
         // we've taken an action that changes dice,
@@ -390,6 +437,20 @@ export class DiceScene extends Phaser.Scene {
             }
         };
         this.server.updateDice(update);
+        if (this.fiverPass && !this.noMames){
+            if(this.allFive()){
+                this.server.noMames(NMType.ROLLED_5, 0);
+                console.log('rolled 5');
+            } else if (this.allRolled(5)) {
+                this.server.noMames(NMType.FAILED_5, 0);
+                console.log('failed 5');
+            }
+            if (this.cup.visible && !this.fiverTryText.visible){
+                this.fiverText.setVisible(false);
+                this.fiverTryText.setVisible(true);
+                console.log('cup is visible in updateDice');
+            }
+        }
     }
 
     onPlayersUpdate(playersList) {
@@ -426,6 +487,8 @@ export class DiceScene extends Phaser.Scene {
     onDiceUpdate(msg) {
         this.cup.setOnUpdateCb((action, dice) => {});
         this.table.setOnUpdateCb((action, dice) => {});
+        this.cup.setOnMoveCb((action, dice) => {});
+        console.log({msg});
 
         switch (msg.action) {
             case Action.ROLL_ONE: {
@@ -494,15 +557,12 @@ export class DiceScene extends Phaser.Scene {
         this.rolledButton.setEnabled(msg.cup.rolled);
         this.lookedButton.setEnabled(msg.cup.visible);
         if (this.fiverPass){
-            this.table.setVisible(true);
             this.cup.setVisible(msg.cup.visible);
             if (msg.cup.visible){
-                if(this.allFive()){
-                    this.fiverText.setVisible(true);
-                    this.fiverTryText.setVisible(false);
-                } else {
+                if(this.fiverText.visible){
                     this.fiverText.setVisible(false);
                     this.fiverTryText.setVisible(true);
+                    console.log('cup visible in onDiceUpdate');
                 }
             }
         }
@@ -514,19 +574,43 @@ export class DiceScene extends Phaser.Scene {
         this.table.setOnUpdateCb((action, dice) => {
             this.updateTable(action, dice);
         });
+
+        this.cup.setOnMoveCb((action, dice) => {
+            this.moveCup(action, dice);
+        })
     }
 
-    onNoMames() {
-        if (!this.nomames && !this.allFive()) {
-            this.audioManager.playNoMames();
-            this.fiverPass = false;
-            this.fiverText.setVisible(false);
-            this.noMamesText.setVisible(true);
-        }
-        if (this.allFive()){
-            this.fiverTryText.setVisible(false);
-            this.fiverText.setVisible(false);
-        }
+    onNoMames(nmtype, audionum) {
+        this.cup.setOnUpdateCb((action, dice) => {});
+        this.table.setOnUpdateCb((action, dice) => {});
+        this.cup.setOnMoveCb((action, dice) => {});
+        
+        //added switch to address multiple types of endings and add audio sync capabilities
+        switch (nmtype){
+            case NMType.NO_MAMES: {
+                if (!this.nomames){
+                    this.audioManager.playNoMames(audionum);
+                    this.noMamesText.setVisible(true); 
+                    console.log('no mames, no mames');
+                }
+                break;
+            }
+            case NMType.FAILED_5: {
+                this.fiverTryText.setVisible(false);
+                this.fiverFailText.setVisible(true);
+                console.log('no mames, failed 5');
+                break;
+            }
+            case NMType.ROLLED_5: {
+                this.fiverTryText.setVisible(false);
+                this.fiverText.setVisible(true);
+                console.log('no mames, rolled 5');
+                break;
+            }
+        };
+        let d = this.dice;
+        console.log({d});
+
         this.nomames = true;
         this.setPlayable(true);
         this.cup.setVisible(true);
@@ -553,9 +637,12 @@ export class DiceScene extends Phaser.Scene {
 
     allFive() {
         let d = this.dice[0];
-        let rolled = this.dice.reduce((previous, die) => (previous && die.rollCount >=1), true)
-        let fiveSame = this.dice.reduce((previous,die) => (previous && d.value === die.value), rolled);
+        let fiveSame = this.dice.reduce((previous,die) => (previous && d.value === die.value), this.allRolled(1));
         console.log(fiveSame);
         return fiveSame;
+    }
+
+    allRolled(num) {
+        return this.dice.reduce((previous, die) => (previous && die.rollCount >=num), true)
     }
 }

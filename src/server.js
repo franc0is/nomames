@@ -151,8 +151,8 @@ export class Server {
         this.publish(msg);
     }
 
-    noMames() {
-        let msg = new NoMamesMessage();
+    noMames(nmtype, audionum) {
+        let msg = new NoMamesMessage(nmtype, audionum);
         this.publish(msg);
     }
 
@@ -213,7 +213,7 @@ export class Server {
                 break;
             }
             case NoMamesMessage.getType(): {
-                this.callbacks.onNoMames();
+                this.callbacks.onNoMames(deserialized);
                 break;
             }
             case ResetMessage.getType(): {

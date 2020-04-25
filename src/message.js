@@ -93,9 +93,18 @@ export class KillPlayerMessage extends Message {
     }
 }
 
+
+export const NMType = {
+    NO_MAMES: 'nomames',
+    FAILED_5: 'failed5',
+    ROLLED_5: 'rolled5'
+}
+
 export class NoMamesMessage extends Message {
-    constructor() {
+    constructor(nmtype,audionum) {
         super('noMames');
+        this.nmtype = nmtype;
+        this.audionum = audionum;
     }
 
     static getType() {
@@ -103,7 +112,7 @@ export class NoMamesMessage extends Message {
     }
 
     static deserialize(msg) {
-        return new this();
+        return new this(msg['nmtype'],msg['audionum']);
     }
 }
 
