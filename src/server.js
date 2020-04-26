@@ -213,7 +213,7 @@ export class Server {
                 break;
             }
             case NoMamesMessage.getType(): {
-                this.callbacks.onNoMames(deserialized);
+                this.callbacks.onNoMames(deserialized.nmtype, deserialized.audionum);
                 break;
             }
             case ResetMessage.getType(): {

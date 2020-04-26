@@ -112,7 +112,7 @@ export class NoMamesMessage extends Message {
     }
 
     static deserialize(msg) {
-        return new this(msg['nmtype'],msg['audionum']);
+        return new this(msg['nmtype'], msg['audionum']);
     }
 }
 

@@ -103,8 +103,7 @@ export class Dice extends Phaser.GameObjects.Container {
         let clickDelay = this.scene.time.now - this.lastClickTime;
         this.lastClickTime = this.scene.time.now;
         if (clickDelay < 350) {
-            let n = Phaser.Math.RND.between(0, 5);
-            this.setValue(n)
+            this.setValue(0)
             this.onMoveCb(this);
             this.animate(function(target) {
                 target.roll();
