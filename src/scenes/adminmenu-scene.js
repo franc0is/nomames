@@ -1,7 +1,6 @@
 import { TextButton } from '../text-button';
 import { Server } from '../server';
 import { PopUpScene } from './popup-scene';
-import { AdminZone } from '../admin-zone';
 
 
 export class AdminMenuScene extends Phaser.Scene {
@@ -102,5 +101,23 @@ export class AdminMenuScene extends Phaser.Scene {
         this.updateText();
 
         this.menu.setVisible(false);
+    }
+}
+
+export class AdminZone extends Phaser.GameObjects.Container {
+
+    constructor(scene, x, y) {
+        super(scene, x, y);
+        scene.add.existing(this);
+        
+        this.setName('adminZone');
+        this.text = scene.add.text(20,35,'Admin Menu',{ color: 'white', fontSize: '16px '});        
+    }
+
+    setVisible(value){
+        this.text.setVisible(value);
+        this.getAll().forEach(obj => {
+            obj.setVisible(value);
+        });
     }
 }
