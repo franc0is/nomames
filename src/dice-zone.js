@@ -31,7 +31,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         var objs = this.container.getAll();
         var i = 0;
         for (var obj of objs) {
-            obj.x = this.x - (this.width / 2) + 96 * i++ + 45
+            obj.x = this.x - (this.width / 2) + 96 * i++ + 45;
             obj.y = this.y;
         }
     }

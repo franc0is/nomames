@@ -88,6 +88,7 @@ export class DiceScene extends Phaser.Scene {
         this.fiverWinText.setVisible(false);
 
         this.firstpass = true;
+        this.clockwise = true;
 
         this.cupRollButton = new TextButton(this, 690, 30, 'Roll', {
             onClick: () => {
@@ -117,19 +118,37 @@ export class DiceScene extends Phaser.Scene {
 
         this.nextPlayerButton = new TextButton(this, 690, 90, 'Pass', {
             onClick: () => {
-                this.server.passCup(this.clockwise, false);
+                if (!this.firstpass) {
+                    this.server.passCup(this.clockwise);
+                } else {
+                        this.scene.remove('popUpScene');
+                        let popDie = new PopUpScene(
+                            'Who would you like to pass to?',
+                            {
+                                label: '[ '+this.server.playersList.getNextClockwise().name+' ]',
+                                callbacks: {
+                                    onClick: () => {
+                                        this.scene.stop('popUpScene');
+                                        this.server.passCup(true);
+                                    }
+                                }
+                            },
+                            {
+                                label: '[ '+this.server.playersList.getNextCounterClockwise().name+' ]',
+                                callbacks: {
+                                    onClick: () => {
+                                        this.scene.stop('popUpScene');
+                                        this.server.passCup(false);
+                                    }
+                                }
+                            }
+                        );
+                        this.scene.add('',popDie,true);
+                }
             },
         });
         this.add.existing(this.nextPlayerButton);
         this.nextPlayerButton.setEnabled(false);
-
-        this.clockwise = true;
-        this.passDirectionButton = new TextButton(this, 740, 90, '>',{
-            onClick: () => {
-                this.onPassDirectionChange(!this.clockwise);
-            }
-        });
-        this.add.existing(this.passDirectionButton);
 
         this.fiverButton = new TextButton(this, 690, 120, 'Pass 5',{
             onClick: () => {
@@ -178,34 +197,6 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.noMamesButton);
 
-        this.resetButton = new TextButton(this, 690, 210, 'Reset', {
-            onClick: () => {
-                this.scene.remove('popUpScene');
-                let popReset = new PopUpScene(
-                    'Continue with game reset?',
-                    {
-                        label: '[ continue ]',
-                        callbacks: {
-                            onClick: () => {
-                                this.scene.stop('popUpScene');
-                                this.server.reset();
-                            }
-                        }
-                    },
-                    {
-                        label: '[ cancel ]',
-                        callbacks: {
-                            onClick: () => {
-                                this.scene.stop('popUpScene');
-                            }
-                        }
-                    }
-                );
-                this.scene.add('',popReset,true);
-            }
-        });
-        this.add.existing(this.resetButton);
-
         this.lookedButton = new TextButton(this, 690, 280, 'Looked', {
             onClick: () => {
             }
@@ -219,6 +210,13 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.rolledButton);
         this.rolledButton.setEnabled(false);
+
+        this.adminButton = new TextButton(this,3,3,'[+]',{
+            onClick:() => {
+                this.scene.launch('adminMenuScene',{server: this.server});
+            }
+        });
+        this.add.existing(this.adminButton);
 
         this.dice = [];
         for (let i=0; i< NUM_DICE; i++) {
@@ -299,16 +297,13 @@ export class DiceScene extends Phaser.Scene {
 
     onFiver(fp){
         this.fiverPass = fp;
-        
-        //disable the pass direction button on first pass
-        this.passDirectionButton.setEnabled(false);
-
         //reset all of the dice's rollcounts and tell dice and cup if 5 dice were passed
         this.dice.forEach(d=> {
             d.resetRoll();
             d.passFive = fp;
         });
         this.cup.fiver = fp;
+        this.firstpass = false;
     }
 
     setPlayable(playable) {
@@ -321,7 +316,6 @@ export class DiceScene extends Phaser.Scene {
         this.cupLookButton.setEnabled(playable);
         this.cupRollButton.setEnabled(playable);
         this.noMamesButton.setEnabled(playable);
-        this.resetButton.setEnabled(playable);
         if (!this.fiverPass){
             this.nextPlayerButton.setEnabled(playable);
             this.fiverButton.setEnabled(playable);
@@ -331,7 +325,6 @@ export class DiceScene extends Phaser.Scene {
             this.fiverText.setVisible(true)
         }
         if (!playable) {
-            this.passDirectionButton.setEnabled(false);
             this.lookedButton.setEnabled(false);
             this.rolledButton.setEnabled(false);
         }
@@ -394,7 +387,8 @@ export class DiceScene extends Phaser.Scene {
 
 
         if (this.firstpass) {
-            let allrolled = this.dice.reduce((previous, die) => (previous && die.rollCount >=1), true);
+            let allrolled = this.dice.reduce((previous, die) => (previous && die.didRoll()),
+                                             true /* initial value */);
             this.nextPlayerButton.setEnabled(allrolled);
             this.fiverButton.setEnabled(allrolled);
         } else {
@@ -453,11 +447,6 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onPlayersUpdate(playersList) {
-        // XXX this is not completely correct.
-        // in the event a player joins or leaves the game, it will
-        // disable the pass direction button
-        this.firstpass = false;
-        this.passDirectionButton.setEnabled(false);
         this.playersLabel.updateWithPlayers(playersList);
         if (!this.input.enabled && playersList.getActivePlayer().isMe) {
             // this player is now active
@@ -623,11 +612,6 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onPassDirectionChange(isClockwise) {
-        if (isClockwise) {
-            this.passDirectionButton.setText('>');
-        } else {
-            this.passDirectionButton.setText('<');
-        }
         this.clockwise = isClockwise;
     }
 }
