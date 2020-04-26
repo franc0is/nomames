@@ -179,7 +179,7 @@ export class DiceScene extends Phaser.Scene {
             onClick: () => {
                 this.scene.remove('popUpScene');
                 let popReset = new PopUpScene(
-                    '  Continue with game reset?',
+                    'Continue with game reset?',
                     {
                         label: '[ continue ]',
                         callbacks: {
@@ -493,28 +493,34 @@ export class DiceScene extends Phaser.Scene {
 
         switch (msg.action) {
             case Action.ROLL_ONE: {
-                let table_dice = Array.from(this.table.getDice());
-                let new_value = -1;
-                let new_rollCount = -1;
-                msg.table.dice.forEach(die => {
-                    let idx = table_dice.findIndex(d => d.getValue() === die[0]);
-                    if (idx === -1) {
-                        console.assert(new_value === -1);
-                        new_value = die[0];
-                        new_rollCount = die[1];
-                    } else {
-                        table_dice.splice(idx, 1);
-                    }
+                //remove all dice
+                this.cup.getDice().forEach(d => {
+                    this.cup.remove(d);
                 });
-                // FIXME we don't know which dice to animate
-                // when we roll the exact same...
-                // I don't think this matters since everyone's orders are different. -ac
-                if (new_value !== -1) {
-                    table_dice[0].animate(function(target) {
-                        target.setValue(new_value);
-                    });
-                    table_dice[0].setRoll(new_rollCount);
-                }
+                this.table.getDice().forEach(d => {
+                    this.table.remove(d);
+                });
+
+                //refill all dice per message
+                let i = 0;
+                msg.cup.dice.forEach(die => {
+                    this.dice[i].setValue(die);
+                    this.cup.add(this.dice[i]);
+                    i++
+                });
+                msg.table.dice.forEach(die => {
+                    this.dice[i].setValue(die);
+                    this.table.add(this.dice[i]);
+                    i++
+                });
+                console.assert(i === 5);
+
+                let new_value = this.dice[4].getValue()
+                this.dice[4].setValue(0);
+                this.dice[4].animate(function(target) {
+                    target.setValue(new_value);
+                });
+                
                 break;
             }
             case Action.MOVE_ONE: {
