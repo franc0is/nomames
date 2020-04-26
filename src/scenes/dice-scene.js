@@ -436,6 +436,7 @@ export class DiceScene extends Phaser.Scene {
                 'dice': this.table.getDice().map(d => [d.getValue(),d.rollCount])
             }
         };
+        console.log(update);
         this.server.updateDice(update);
         if (this.fiverPass && !this.noMames){
             if(this.allFive()){
