@@ -347,7 +347,7 @@ export class DiceScene extends Phaser.Scene {
 
     updateDice(action) {
         if (this.firstpass) {
-            let allrolled = this.dice.reduce((previous, die) => {previous && die.didRoll},
+            let allrolled = this.dice.reduce((previous, die) => (previous && die.didRoll()),
                                              true /* initial value */);
             this.nextPlayerButton.setEnabled(allrolled);
             this.fiverButton.setEnabled(allrolled);
