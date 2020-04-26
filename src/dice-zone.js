@@ -20,6 +20,11 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         this.rollCount = 0;
         this.maxRoll = 1;
         this.onUpdateCb = (action, dice) => {};
+        this.onMoveCb = (action, dice) => {};
+        this.fiver = false;
+
+        this.fpText = scene.add.text(this.x+this.width/2-50,this.y + this.height/2-15,'0/5',{color: 'yellow', fontsize: '6px'});
+        this.fpText.setVisible(false);
     }
 
     reorder() {
@@ -43,14 +48,24 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         this.onUpdateCb = onUpdateCb;
     }
 
+    setOnMoveCb(cb) {
+        this.onMoveCb = cb;
+    }
+
     setVisible(value) {
         this.container.setVisible(value);
+        this.fpText.setVisible(this.fiver);
+        var dice = this.container.getAll();
+        for (var die of dice){
+            die.setVisible(value);
+        }
         this.onUpdateCb(Action.SHOW_MANY, this.getDice());
     }
 
     reset() {
         this.rollCount = 0;
         this.setVisible(false);
+        this.fpText.setText('0/5');
     }
 
     didRoll() {
@@ -68,6 +83,7 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         }
         this.setVisible(false);
         this.rollCount++;
+        this.fpText.setText(this.rollCount + '/5');
         // re-enable onupdatecb
         this.onUpdateCb = cb;
         this.onUpdateCb(Action.ROLL_MANY, this.getDice());
@@ -79,7 +95,11 @@ export class DiceZone extends Phaser.GameObjects.Zone {
         die.setOnRoll((d) => {
             this.onDieRoll(d);
         });
-
+        die.setOnMove((d) => {
+            this.onDieMove(d);
+        });
+        
+        die.setVisible(this.getVisible());
         this.container.add(die);
         this.reorder();
         this.onUpdateCb(Action.MOVE_ONE, [die]);
@@ -102,5 +122,14 @@ export class DiceZone extends Phaser.GameObjects.Zone {
 
     onDieRoll(die) {
         this.onUpdateCb(Action.ROLL_ONE, [die]);
+    }
+
+    onDieMove(die) {
+        this.onMoveCb(Action.ROLL_ONE, [die]);
+    }
+
+    incRoll(){
+        this.rollCount++
+        this.fpText.setText(this.rollCount + '/5');
     }
 }
