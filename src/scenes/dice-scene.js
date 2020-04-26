@@ -317,13 +317,23 @@ export class DiceScene extends Phaser.Scene {
 
     updateCup(action, dice) {
         if (action === Action.ROLL_ONE) {
+            this.table.setOnUpdateCb((action, dice) => {});
+
             this.table.add(dice[0]);
+
+            this.table.setOnUpdateCb((action, dice) => {
+                this.updateTable(action, dice);
+            });
         }
         this.updateDice(action);
     }
 
 
     updateTable(action, dice) {
+        if (action === Action.ROLL_ONE) {
+            this.table.remove(dice[0]);
+            this.table.add(dice[0]);
+        }
         this.updateDice(action);
     }
 
