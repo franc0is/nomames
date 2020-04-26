@@ -191,7 +191,7 @@ export class DiceScene extends Phaser.Scene {
             onClick: () => {
                 this.scene.remove('popUpScene');
                 let popReset = new PopUpScene(
-                    '  Continue with game reset?',
+                    'Continue with game reset?',
                     {
                         label: '[ continue ]',
                         callbacks: {
