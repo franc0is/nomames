@@ -53,7 +53,10 @@ export class DiceScene extends Phaser.Scene {
             },
             onFiver: (fp) => {
                 this.onFiver(fp);
-            }
+            }//,
+            //listen: () => {
+            //    this.events.on('pass', this.server.onPass);
+            //}
         });
     }
 
@@ -66,6 +69,8 @@ export class DiceScene extends Phaser.Scene {
     create() {
         this.audioManager.create();
         this.scene.launch('muteScene', { audioManager: this.audioManager });
+
+        this.server.callbacks.listen();
 
         this.nomames = false;
         this.fiverPass = false;
@@ -118,33 +123,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.nextPlayerButton = new TextButton(this, 690, 90, 'Pass', {
             onClick: () => {
-                if (!this.firstpass) {
-                    this.server.passCup(this.clockwise);
-                } else {
-                        this.scene.remove('popUpScene');
-                        let popDie = new PopUpScene(
-                            'Who would you like to pass to?',
-                            {
-                                label: '[ '+this.server.playersList.getNextClockwise().name+' ]',
-                                callbacks: {
-                                    onClick: () => {
-                                        this.scene.stop('popUpScene');
-                                        this.server.passCup(true);
-                                    }
-                                }
-                            },
-                            {
-                                label: '[ '+this.server.playersList.getNextCounterClockwise().name+' ]',
-                                callbacks: {
-                                    onClick: () => {
-                                        this.scene.stop('popUpScene');
-                                        this.server.passCup(false);
-                                    }
-                                }
-                            }
-                        );
-                        this.scene.add('',popDie,true);
-                }
+                this.events.emit('pass');
             },
         });
         this.add.existing(this.nextPlayerButton);

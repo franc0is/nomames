@@ -4,6 +4,7 @@ import { Message, StartGameMessage, DiceUpdateMessage,
          ResetMessage } from './message';
 import { PlayersList } from './playerslist'
 import { Player } from './player'
+import { Scene } from 'phaser';
 
 
 /*
@@ -18,6 +19,11 @@ export class Server {
         this.playersList = new PlayersList(this.myUUID);
         this.widowUsed = false;
         this.lastTimetoken = 0;
+
+        this.firstpass = false;
+        this.clockwise = true;
+        
+        this.events.on('pass', this.onPass());
 
         this.pubnub = new PubNub({
             subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',
@@ -180,8 +186,9 @@ export class Server {
                 break;
             }
             case PassCupMessage.getType(): {
+                this.firstpass = false;
+                this.clockwise = deserialized.isClockwise;
                 this.playersList.setDirection(deserialized.isClockwise);
-                this.callbacks.onPassDirectionChange(deserialized.isClockwise);
                 let uuid = deserialized.activePlayerUUID;
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
@@ -245,5 +252,37 @@ export class Server {
         console.log('Received ', presenceEvent['action'], ' with state ',
             presenceEvent['state'], ' playersList is now ' ,this.playersList);
         this.callbacks.onPlayersUpdate(this.playersList);
+    }
+
+    onPass(){
+        console.log(this);
+        if (!this.firstpass) {
+            this.passCup(this.clockwise, false);
+        } else {
+                this.firstpass = true;
+                this.scene.remove('popUpScene');
+                let popDie = new PopUpScene(
+                    'Who would you like to pass to?',
+                    {
+                        label: '[ '+this.playersList.getNextClockwise().name+' ]',
+                        callbacks: {
+                            onClick: () => {
+                                this.scene.stop('popUpScene');
+                                this.passCup(true, false);
+                            }
+                        }
+                    },
+                    {
+                        label: '[ '+this.playersList.getNextCounterClockwise().name+' ]',
+                        callbacks: {
+                            onClick: () => {
+                                this.scene.stop('popUpScene');
+                                this.passCup(false, false);
+                            }
+                        }
+                    }
+                );
+                this.scene.add('',popDie,true);
+        }
     }
 }
