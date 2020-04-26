@@ -71,7 +71,7 @@ export class DiceScene extends Phaser.Scene {
         this.table = new DiceZone(this, 430, 100, 500, 150, 'Table');
         this.cup = new DiceZone(this, 430, 300, 500, 150, 'Cup');
 
-        this.noMamesText = this.add.text(170, 180, "🚨🖕🚨 NO MAMES GUEY 🚨🖕🚨", { fill: 'red' });
+        this.noMamesText = this.add.text(250, 180, "🚨🖕🚨 NO MAMES GUEY 🚨🖕🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
 
         this.firstpass = true;
@@ -187,34 +187,6 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.noMamesButton);
 
-        this.resetButton = new TextButton(this, 690, 210, 'Reset', {
-            onClick: () => {
-                this.scene.remove('popUpScene');
-                let popReset = new PopUpScene(
-                    'Continue with game reset?',
-                    {
-                        label: '[ continue ]',
-                        callbacks: {
-                            onClick: () => {
-                                this.scene.stop('popUpScene');
-                                this.server.reset();
-                            }
-                        }
-                    },
-                    {
-                        label: '[ cancel ]',
-                        callbacks: {
-                            onClick: () => {
-                                this.scene.stop('popUpScene');
-                            }
-                        }
-                    }
-                );
-                this.scene.add('',popReset,true);
-            }
-        });
-        this.add.existing(this.resetButton);
-
         this.lookedButton = new TextButton(this, 690, 280, 'Looked', {
             onClick: () => {
             }
@@ -228,6 +200,13 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.rolledButton);
         this.rolledButton.setEnabled(false);
+
+        this.adminButton = new TextButton(this,3,3,'[+]',{
+            onClick:() => {
+                this.scene.launch('adminMenuScene',{server: this.server});
+            }
+        });
+        this.add.existing(this.adminButton);
 
         this.dice = [];
         for (let i=0; i< NUM_DICE; i++) {
@@ -313,7 +292,6 @@ export class DiceScene extends Phaser.Scene {
         this.cupLookButton.setEnabled(playable);
         this.cupRollButton.setEnabled(playable);
         this.noMamesButton.setEnabled(playable);
-        this.resetButton.setEnabled(playable);
         this.dice.forEach(dice => {
             dice.resetRoll();
         });
