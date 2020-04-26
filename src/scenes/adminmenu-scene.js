@@ -24,8 +24,7 @@ export class AdminMenuScene extends Phaser.Scene {
             add: true
         });
         this.graphics.fillRect(8, 3, 120, 352);
-        
-        
+
         this.graphics.lineStyle(2, 0x00ff00);
         this.graphics.strokeRect(8, 25, 120, 335);
 

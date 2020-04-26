@@ -2,6 +2,7 @@ import { Server } from '../server';
 import { TextButton } from '../text-button';
 import { DraggableLabel } from '../draggable-label';
 import { SeatZone } from '../seatzone';
+import { PopUpScene } from './popup-scene';
 
 export class StartScene extends Phaser.Scene {
     constructor() {
@@ -76,15 +77,35 @@ export class StartScene extends Phaser.Scene {
 
         this.startButton = new TextButton(this, 90, 250, '[ START ]', {
             onClick: () => {
-                let names = [];
-                this.seats.forEach(seat => {
-                    let name = seat.getUuid()
-                    if (name[0] !== undefined){
-                        names.push(name[0].uuid);
-                    }
-                });
+                if (this.getUnseated()){
+                    this.scene.remove('popUpScene');
+                        let popReset = new PopUpScene(
+                            'There are unseated players',
+                            {
+                                label: '[ start anyway ]',
+                                callbacks: {
+                                    onClick: () => {
+                                        this.scene.stop('popUpScene');
+                                        let names = this.getSeated();
+                                        this.server.playersList.orderByUUIDList(names);
+                                        this.server.startGame();
+                                    }
+                                }
+                            },
+                            {
+                                label: '[ cancel ]',
+                                callbacks: {
+                                    onClick: () => {
+                                        this.scene.stop('popUpScene');
+                                    }
+                                }
+                            });
+                    this.scene.add('',popReset,true);
+                }else {
+                    let names = this.getSeated();
                     this.server.playersList.orderByUUIDList(names);
                     this.server.startGame();
+                }
             }
         });
         this.add.existing(this.startButton);
@@ -145,7 +166,7 @@ export class StartScene extends Phaser.Scene {
             }
         });
 
-        this.randomizeButton = new TextButton(this, 50, 300, 'RANDOMIZE SEATING', {
+        this.randomizeButton = new TextButton(this, 50, 300, '[RANDOMIZE SEATING]', {
             onClick: () => {
                 // Make an array all the seats and randomly pick them off for each player
                 this.removeInactivePlayers() ; // FIXME normally for every player, there are ~2 additional inactive players. This manages to remove all of them
@@ -172,5 +193,23 @@ export class StartScene extends Phaser.Scene {
     // FIXME should ultimately remove
     removeInactivePlayers() {
         this.playersLabel.playerLabels = this.playersLabel.playerLabels.filter(label => label.active);
+    }
+    getSeated(){
+        let names = [];
+        this.seats.forEach(seat => {
+            let name = seat.getUuid()
+            if (name[0] !== undefined){
+                names.push(name[0].uuid);
+            }
+        });
+        return names
+    }
+
+    getUnseated(){
+        this.removeInactivePlayers();
+        let names = this.getSeated();
+        console.log(this.playersLabel.playerLabels)
+        console.log({names})
+        return (this.playersLabel.playerLabels.length !== names.length);
     }
 }
