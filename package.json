@@ -7,6 +7,7 @@
   "dependencies": {
     "@azerion/phaser-input": "^2.0.5",
     "@sentry/browser": "^5.15.4",
+    "human-readable-ids": "^1.0.4",
     "phaser": "3.22.0",
     "pubnub": "^4.27.4"
   },

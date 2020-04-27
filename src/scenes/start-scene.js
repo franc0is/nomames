@@ -3,6 +3,7 @@ import { TextButton } from '../text-button';
 import { DraggableLabel } from '../draggable-label';
 import { SeatZone } from '../seatzone';
 import { PopUpScene } from './popup-scene';
+import { humanReadableIds } from 'human-readable-ids'
 
 export class StartScene extends Phaser.Scene {
     constructor() {
@@ -25,30 +26,11 @@ export class StartScene extends Phaser.Scene {
             }
         });
 
-        let text = this.add.text(50,30,'Welcome! \n\nTo start, enter a game ID\nThis will create a game.',{ color: 'white', fontSize: '20px '});
-
-        this.hostJoinEl = this.add.dom(360, 150).createFromCache('hoststartform');
-        this.hostJoinEl.addListener('click');
-        this.hostJoinEl.on('click', (event) => {
-            if (event.target.name === 'playButton') {
-                let inputText = this.hostJoinEl.getChildByName('gameIdField');
-                if (inputText.value !== '') {
-                    this.hostJoinEl.removeListener('click');
-                    this.server.connect(inputText.value);
-                    this.nameEl.setVisible(true);
-                    this.hostJoinEl.setVisible(false);
-                    this.channelText.setVisible(true);
-                    this.channelText.setText('GameID: ' + inputText.value);
-                    this.playersLabel.setVisible(true);
-                }
-            }
-        });
-
-        this.channelText = this.add.text(50, 150, '', { color: '#0f0', fontsize: '36px' });
-        this.channelText.setVisible(false);
+        this.welcomeText = this.add.text(50,30,
+                                         'Welcome! \n\nShare this game ID with other players\n',
+                                         { color: 'white', fontSize: '20px '});
 
         this.nameEl = this.add.dom(360, 200).createFromCache('nameform');
-        this.nameEl.setVisible(false);
         this.nameEl.addListener('click');
         this.nameEl.on('click', (event) => {
             if (event.target.name === 'playButton') {
@@ -58,6 +40,7 @@ export class StartScene extends Phaser.Scene {
                     this.nameEl.setVisible(false);
                     this.server.setName(inputText.value);
                     this.nameText.setText('Name: ' +inputText.value);
+                    this.welcomeText.setVisible(false);
                     this.nameText.setVisible(true);
                     this.startButton.setVisible(true);
                     this.directionText.setVisible(true);
@@ -67,7 +50,6 @@ export class StartScene extends Phaser.Scene {
                     }
                 }
             }
-
         });
 
         this.nameText = this.add.text(50,200, '',{color: '#0f0', fontsize: '36px'});
@@ -114,9 +96,7 @@ export class StartScene extends Phaser.Scene {
 
         let playersList = this.server.getPlayersList();
         this.playersLabel = new DraggableLabel(this, 5, 400, playersList);
-
         this.add.existing(this.playersLabel);
-        this.playersLabel.setVisible(false);
 
         this.seats = [
             new SeatZone(this, 500, 100, 100, 100, 'Seat 1'),
@@ -182,6 +162,10 @@ export class StartScene extends Phaser.Scene {
         this.randomizeButton.setVisible(false);
         this.add.existing(this.randomizeButton);
 
+        let game_id = humanReadableIds.random();
+        this.server.connect(game_id);
+        this.channelText = this.add.text(50, 120, 'GameID: ' + game_id,
+                                         { color: '#0f0', fontsize: '36px' });
     }
 
 
