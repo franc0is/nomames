@@ -6,6 +6,7 @@ import { PlayersList } from './playerslist'
 import { Player } from './player'
 import { DiceScene } from './scenes/dice-scene';
 import { PopUpScene } from './scenes/popup-scene';
+import { Game } from 'phaser';
 
 
 /*
@@ -257,10 +258,11 @@ export class Server {
 
     onGameStart(){
         this.diceScene = new DiceScene ();
-        this.scene.scene.start(this.diceScene, { server: this });
-        this.diceScene.addEventListener('pass', this.onPass());
-
+        this.scene.scene.add('diceScene',this.diceScene, false);
+        this.scene.scene.start(this.diceScene, {server: this});
         this.scene = this.diceScene;
+        this.ee = this.scene.events;
+        this.ee.on('pass', this.onPass(),this);
     }
 
     onPass(){
@@ -269,14 +271,14 @@ export class Server {
             this.server.passCup(this.clockwise, false);
         } else {
                 this.scene.scene.remove('popUpScene');
-                let popDie = new PopUpScene(
+                let popPass = new PopUpScene(
                     'Who would you like to pass to?',
                     {
                         label: '[ '+this.playersList.getNextClockwise().name+' ]',
                         callbacks: {
                             onClick: () => {
-                                this.scene.stop('popUpScene');
-                                this.server.passCup(true, false);
+                                this.scene.scene.stop('popUpScene');
+                                this.passCup(true, false);
                             }
                         }
                     },
@@ -290,7 +292,7 @@ export class Server {
                         }
                     }
                 );
-                this.scene.scene.add('',popDie,true);
+                this.scene.scene.add('',popPass,true);
         }
     }
 }
