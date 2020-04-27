@@ -62,6 +62,10 @@ export class Server {
         this.callbacks = callbacks;
     }
 
+    resync() {
+        this.connect(this.channel);
+    }
+
     connect(channel) {
         this.channel = channel;
 
@@ -239,7 +243,12 @@ export class Server {
                 break;
             case 'timeout':
             case 'leave':
-                this.playersList.removePlayerByUUID(uuid);
+                let player = this.playersList.getPlayerByUUID(uuid);
+                player.numLives = -1;
+                player.isDead = true;
+                if (player.isActive) {
+                    this.playersList.setNextPlayerActive();
+                }
                 break;
         }
         console.log('Received ', presenceEvent['action'], ' with state ',

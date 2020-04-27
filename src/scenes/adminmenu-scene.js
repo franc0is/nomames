@@ -98,8 +98,16 @@ export class AdminMenuScene extends Phaser.Scene {
         });
         this.add.existing(this.muteButton);
         this.menu.add(this.muteButton);
-        this.updateText();
 
+        this.resyncButton = new TextButton(this, 20, 100, 'Re-Sync', {
+            onClick: () => {
+                this.server.resync();
+            }
+        });
+        this.add.existing(this.resyncButton);
+        this.menu.add(this.resyncButton);
+
+        this.updateText();
         this.menu.setVisible(false);
     }
 }
