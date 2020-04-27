@@ -18,6 +18,9 @@ export class StartScene extends Phaser.Scene {
             onPlayersUpdate: (players) => {
                 this.onPlayersUpdate(players);
             },
+            onSeatPlayer: (seats) => {
+                this.onSeatPlayer(seats)
+            },
             onGameStart: (msg) => {
                 this.scene.start('diceScene', { server: this.server });
                 this.scene.start('muteScene', { server: this.server });
@@ -167,6 +170,11 @@ export class StartScene extends Phaser.Scene {
     onPlayersUpdate(playersList) {
         console.log("Players update!");
         this.playersLabel.updateWithPlayers(playersList);
+    }
+
+    // A bit confused about what to do here
+    onSeatPlayer(seats) {
+        this.seats(playersList);
     }
 
     // FIXME should ultimately remove
