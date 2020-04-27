@@ -64,6 +64,8 @@ export class DiceScene extends Phaser.Scene {
     }
 
     create() {
+        this.ee = this.events;
+        this.ee.on('pass',this.server.onPass())
         this.audioManager.create();
         this.scene.launch('muteScene', { audioManager: this.audioManager });
 
