@@ -15,14 +15,13 @@ export class StartScene extends Phaser.Scene {
     };
 
     create() {
-        this.server = new Server({
+        this.server = new Server(this, {
             onPlayersUpdate: (players) => {
                 this.onPlayersUpdate(players);
             },
-            onGameStart: (msg) => {
-                this.scene.start('diceScene', { server: this.server });
-                this.scene.start('muteScene', { server: this.server });
-            }
+            //onGameStart: (msg) => {
+            //    this.scene.start('diceScene', { server: this.server });
+            //}
         });
 
         let text = this.add.text(50,30,'Welcome! \n\nTo start, enter a game ID\nThis will create a game.',{ color: 'white', fontSize: '20px '});

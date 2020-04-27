@@ -4,6 +4,8 @@ import { Message, StartGameMessage, DiceUpdateMessage,
          ResetMessage } from './message';
 import { PlayersList } from './playerslist'
 import { Player } from './player'
+import { DiceScene } from './scenes/dice-scene';
+import { PopUpScene } from './scenes/popup-scene';
 
 
 /*
@@ -11,13 +13,17 @@ import { Player } from './player'
  */
 
 export class Server {
-    constructor(callbacks) {
+    constructor(scene,callbacks) {
         // TODO change this to a map uuid => player
+        this.scene = scene;
         this.setCallbacks(callbacks);
         this.myUUID = PubNub.generateUUID();
         this.playersList = new PlayersList(this.myUUID);
         this.widowUsed = false;
         this.lastTimetoken = 0;
+
+        this.firstpass = true;
+        this.clockwise = true;
 
         this.pubnub = new PubNub({
             subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',
@@ -170,7 +176,7 @@ export class Server {
                 let player = this.playersList.getPlayerByUUID(uuid);
                 player.isActive = true;
                 this.playersList.orderByUUIDList(deserialized.uuidList);
-                this.callbacks.onGameStart(deserialized);
+                this.onGameStart();
                 break;
             }
             case DiceUpdateMessage.getType(): {
@@ -180,8 +186,9 @@ export class Server {
                 break;
             }
             case PassCupMessage.getType(): {
+                this.firstpass = false;
                 this.playersList.setDirection(deserialized.isClockwise);
-                this.callbacks.onPassDirectionChange(deserialized.isClockwise);
+                this.clockwise = deserialized.isClockwise;
                 let uuid = deserialized.activePlayerUUID;
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
@@ -217,6 +224,7 @@ export class Server {
                 break;
             }
             case ResetMessage.getType(): {
+                this.firstpass = true;
                 let uuid = deserialized.uuid;
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
@@ -245,5 +253,44 @@ export class Server {
         console.log('Received ', presenceEvent['action'], ' with state ',
             presenceEvent['state'], ' playersList is now ' ,this.playersList);
         this.callbacks.onPlayersUpdate(this.playersList);
+    }
+
+    onGameStart(){
+        this.diceScene = new DiceScene ();
+        this.scene.scene.start(this.diceScene, { server: this });
+        this.diceScene.addEventListener('pass', this.onPass());
+
+        this.scene = this.diceScene;
+    }
+
+    onPass(){
+        console.log('passing');
+        if (!this.firstpass) {
+            this.server.passCup(this.clockwise, false);
+        } else {
+                this.scene.scene.remove('popUpScene');
+                let popDie = new PopUpScene(
+                    'Who would you like to pass to?',
+                    {
+                        label: '[ '+this.playersList.getNextClockwise().name+' ]',
+                        callbacks: {
+                            onClick: () => {
+                                this.scene.stop('popUpScene');
+                                this.server.passCup(true, false);
+                            }
+                        }
+                    },
+                    {
+                        label: '[ '+this.playersList.getNextCounterClockwise().name+' ]',
+                        callbacks: {
+                            onClick: () => {
+                                this.scene.scene.stop('popUpScene');
+                                this.passCup(false, false);
+                            }
+                        }
+                    }
+                );
+                this.scene.scene.add('',popDie,true);
+        }
     }
 }

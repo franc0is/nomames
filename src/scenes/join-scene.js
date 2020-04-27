@@ -13,13 +13,13 @@ export class JoinScene extends Phaser.Scene {
     }
 
     create() {
-        this.server = new Server({
+        this.server = new Server(this, {
             onPlayersUpdate: (players) => {
                 this.onPlayersUpdate(players);
             },
-            onGameStart: (msg) => {
-                this.scene.start('diceScene', { server: this.server });
-            }
+            //onGameStart: (msg) => {
+            //    this.scene.start('diceScene', { server: this.server });
+            //}
         });
 
 

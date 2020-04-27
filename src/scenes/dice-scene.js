@@ -118,7 +118,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.nextPlayerButton = new TextButton(this, 690, 90, 'Pass', {
             onClick: () => {
-                if (!this.firstpass) {
+                /*if (!this.firstpass) {
                     this.server.passCup(this.clockwise);
                 } else {
                         this.scene.remove('popUpScene');
@@ -144,8 +144,8 @@ export class DiceScene extends Phaser.Scene {
                             }
                         );
                         this.scene.add('',popDie,true);
-                }
-            },
+                }*/
+            }
         });
         this.add.existing(this.nextPlayerButton);
         this.nextPlayerButton.setEnabled(false);
