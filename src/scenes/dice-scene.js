@@ -65,7 +65,7 @@ export class DiceScene extends Phaser.Scene {
 
     create() {
         this.audioManager.create();
-        this.scene.launch('muteScene', { audioManager: this.audioManager });
+        this.scene.launch('adminMenuScene', { audioManager: this.audioManager, server: this.server });
 
         this.nomames = false;
         this.fiverPass = false;
@@ -210,13 +210,6 @@ export class DiceScene extends Phaser.Scene {
         });
         this.add.existing(this.rolledButton);
         this.rolledButton.setEnabled(false);
-
-        this.adminButton = new TextButton(this,3,3,'[+]',{
-            onClick:() => {
-                this.scene.launch('adminMenuScene',{server: this.server});
-            }
-        });
-        this.add.existing(this.adminButton);
 
         this.dice = [];
         for (let i=0; i< NUM_DICE; i++) {
