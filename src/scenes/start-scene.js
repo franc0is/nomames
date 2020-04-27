@@ -12,7 +12,6 @@ export class StartScene extends Phaser.Scene {
 
     preload() {
         this.load.html('nameform', 'assets/nameform.html');
-        this.load.html('hoststartform', 'assets/hoststartform.html');
     };
 
     create() {
