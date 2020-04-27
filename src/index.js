@@ -5,7 +5,6 @@ import { JoinScene } from './scenes/join-scene';
 import { PauseScene } from './scenes/pause-scene';
 import { StartScene } from './scenes/start-scene';
 import { FirstScene } from './scenes/first-scene';
-import { MuteScene } from './scenes/mute-scene';
 import { init } from '@sentry/browser';
 import { AdminMenuScene } from './scenes/adminmenu-scene';
 
@@ -27,7 +26,7 @@ const gameConfig = {
     dom: {
         createContainer: true
     },
-    scene: [ FirstScene, StartScene, JoinScene, DiceScene, PauseScene, MuteScene, AdminMenuScene]
+    scene: [ FirstScene, StartScene, JoinScene, DiceScene, PauseScene, AdminMenuScene]
 };
 
 var game = new Phaser.Game(gameConfig);
