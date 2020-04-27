@@ -570,13 +570,13 @@ export class DiceScene extends Phaser.Scene {
         this.cup.setOnUpdateCb((action, dice) => {});
         this.table.setOnUpdateCb((action, dice) => {});
         this.cup.setOnMoveCb((action, dice) => {});
-
+        this.setPlayable(true);
         //added switch to address multiple types of endings and added audio sync capabilities
         switch (nmt){
             case NMType.NO_MAMES: {
+                this.cup.setVisible(true);
                 this.audioManager.playNoMames(audionum);
                 this.noMamesText.setVisible(true); 
-                this.cup.setVisible(true);
                 break;
             }
             case NMType.FAILED_5: {
@@ -590,8 +590,6 @@ export class DiceScene extends Phaser.Scene {
                 break;
             }
         };
-
-        this.setPlayable(true);
         this.makeDeadButton.setEnabled(true);
         this.cupLookButton.setEnabled(false);
         this.cupRollButton.setEnabled(false);
