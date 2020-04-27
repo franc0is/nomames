@@ -65,5 +65,12 @@ export class AdminMenuScene extends Phaser.Scene {
             }
         });
         this.add.existing(this.resetButton);
+
+        this.resyncButton = new TextButton(this, 20, 60, 'Re-Sync', {
+            onClick: () => {
+                this.server.resync();
+            }
+        });
+        this.add.existing(this.resyncButton);
     }
 }
