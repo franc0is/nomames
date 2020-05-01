@@ -36,6 +36,7 @@ export class StartScene extends Phaser.Scene {
                 let inputText = this.nameEl.getChildByName('nameField');
                 if (inputText.value !== '') {
                     this.nameEl.removeListener('click');
+                    this.nameEl.removeListener('keypress');
                     this.nameEl.setVisible(false);
                     this.server.setName(inputText.value);
                     this.nameText.setText('Name: ' +inputText.value);
@@ -47,6 +48,27 @@ export class StartScene extends Phaser.Scene {
                     for (let seat of this.seats) {
                         seat.setVisible(true);
                     }
+                }
+            }
+        });
+
+        this.nameEl.addListener('keypress')
+        this.nameEl.on('keypress', (e) => {
+            if (e.key === 'Enter') {
+                // code for enter
+                let inputText = this.nameEl.getChildByName('nameField');
+
+                if (inputText.value !== '') {
+                    this.nameEl.removeListener('click');
+                    this.nameEl.removeListener('keypress');
+                    this.nameEl.setVisible(false);
+                    this.server.setName(inputText.value);
+                    this.nameText.setText('Name: ' +inputText.value);
+                    this.welcomeText.setVisible(false);
+                    this.nameText.setVisible(true);
+                    this.startButton.setVisible(true);
+                    this.directionText.setVisible(true);
+                    this.randomizeButton.setVisible(true);
                 }
             }
         });
