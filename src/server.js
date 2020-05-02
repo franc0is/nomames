@@ -50,12 +50,12 @@ export class Server {
                 }
                 if (statusEvent.category === "PNNetworkDownCategory") {
                     // no internet
-                    this.callbacks.onPause('Disconnected :-(');
+                    this.scene.onPause('Disconnected :-(');
                 }
                 if (statusEvent.category === "PNNetworkUpCategory") {
                     // internet back
                     this.connect(this.channel);
-                    this.callbacks.onResume();
+                    this.scene.onResume();
                 }
                 if (statusEvent.category === "PNTimeoutCategory") {
                     // network timeout
@@ -306,7 +306,6 @@ export class Server {
                 this.firstPass = false;
                 this.clockwise = deserialized.isClockwise;
                 this.playersList.setDirection(deserialized.isClockwise);
-                //this.callbacks.onPassDirectionChange(deserialized.isClockwise);
                 let uuid = deserialized.activePlayerUUID;
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
@@ -374,6 +373,6 @@ export class Server {
         }
         console.log('Received ', presenceEvent['action'], ' with state ',
             presenceEvent['state'], ' playersList is now ' ,this.playersList);
-        this.callbacks.onPlayersUpdate(this.playersList);
+        this.scene.onPlayersUpdate(this.playersList);
     }
 }
