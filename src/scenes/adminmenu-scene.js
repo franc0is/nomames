@@ -1,6 +1,4 @@
 import { TextButton } from '../text-button';
-import { Server } from '../server';
-import { PopUpScene } from './popup-scene';
 
 
 export class AdminMenuScene extends Phaser.Scene {

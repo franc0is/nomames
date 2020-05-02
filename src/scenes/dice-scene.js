@@ -6,8 +6,7 @@ import { Action } from '../message';
 import { NMType } from '../message';
 import { PlayersLabel } from '../playerslabel';
 import { NMAudioManager } from '../audio';
-import { PopUpScene } from './popup-scene';
-import { AdminMenuScene } from './adminmenu-scene';
+
 
 
 const NUM_DICE = 5;
