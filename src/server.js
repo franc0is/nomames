@@ -264,7 +264,6 @@ export class Server {
 
                 this.adminScene.events.addListener('roll',(event) => {
                     this.diceScene.roll();
-                    this.adminScene.cupRollButton.setEnabled(false)
                 });
 
                 this.adminScene.events.addListener('look',(event) => {
