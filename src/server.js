@@ -5,6 +5,7 @@ import { Message, StartGameMessage, DiceUpdateMessage,
 import { PlayersList } from './playerslist'
 import { Player } from './player'
 import { DiceScene } from './scenes/dice-scene';
+import { PopUpScene } from './scenes/popup-scene';
 
 
 /*
@@ -20,6 +21,8 @@ export class Server {
         this.widowUsed = false;
         this.lastTimetoken = 0;
         this.diceScene = new DiceScene();
+        this.firstPass = true;
+        this.clockwise = true;
 
         this.pubnub = new PubNub({
             subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',
@@ -177,22 +180,54 @@ export class Server {
                 player.isActive = true;
                 this.playersList.orderByUUIDList(deserialized.uuidList);
                 this.callbacks.onGameStart(this.diceScene);
+
+                this.diceScene.events.addListener('pass',(event) => {
+                    if (!this.firstPass) {
+                        this.passCup(this.clockwise);
+                    } else {
+                            this.diceScene.scene.remove('popUpScene');
+                            let popDie = new PopUpScene(
+                                'Who would you like to pass to?',
+                                {
+                                    label: '[ '+this.playersList.getNextClockwise().name+' ]',
+                                    callbacks: {
+                                        onClick: () => {
+                                            this.diceScene.scene.stop('popUpScene');
+                                            this.passCup(true, false);
+                                        }
+                                    }
+                                },
+                                {
+                                    label: '[ '+this.playersList.getNextCounterClockwise().name+' ]',
+                                    callbacks: {
+                                        onClick: () => {
+                                            this.diceScene.scene.stop('popUpScene');
+                                            this.passCup(false, false);
+                                        }
+                                    }
+                                }
+                            );
+                            this.diceScene.scene.add('',popDie,true);
+                    }
+                });
                 break;
             }
             case DiceUpdateMessage.getType(): {
                 if (!fromMe) {
-                    this.callbacks.onDiceUpdate(deserialized);
+                    this.diceScene.onDiceUpdate(deserialized);
                 }
                 break;
             }
             case PassCupMessage.getType(): {
+                this.firstPass = false;
+                this.clockwise = deserialized.isClockwise;
                 this.playersList.setDirection(deserialized.isClockwise);
-                this.callbacks.onPassDirectionChange(deserialized.isClockwise);
+                //this.callbacks.onPassDirectionChange(deserialized.isClockwise);
                 let uuid = deserialized.activePlayerUUID;
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
-                this.callbacks.onFiver(deserialized.fiverPass);
-                this.callbacks.onPlayersUpdate(this.playersList);
+                this.diceScene.onFiver(deserialized.fiverPass);
+                this.diceScene.onPlayersUpdate(this.playersList);
                 break;
             }
             case KillPlayerMessage.getType(): {
@@ -215,11 +250,11 @@ export class Server {
                     }
                 }
                 this.playersList.setDirection(true);
-                this.callbacks.onReset();
+                this.diceScene.onReset();
                 break;
             }
             case NoMamesMessage.getType(): {
-                this.callbacks.onNoMames(deserialized.nmtype, deserialized.audionum);
+                this.diceScene.onNoMames(deserialized.nmtype, deserialized.audionum);
                 break;
             }
             case ResetMessage.getType(): {
@@ -227,7 +262,7 @@ export class Server {
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
                 this.playersList.setDirection(true);
-                this.callbacks.onReset();
+                this.diceScene.onReset();
                 break;
             }
         }

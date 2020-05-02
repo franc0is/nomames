@@ -7,6 +7,7 @@ import { NMType } from '../message';
 import { PlayersLabel } from '../playerslabel';
 import { NMAudioManager } from '../audio';
 import { PopUpScene } from './popup-scene';
+import { AdminMenuScene } from './adminmenu-scene';
 
 
 const NUM_DICE = 5;
@@ -29,32 +30,9 @@ export class DiceScene extends Phaser.Scene {
 
     init(data) {
         this.server = data.server;
-        this.server.setCallbacks({
-            onPlayersUpdate: (players) => {
-                this.onPlayersUpdate(players);
-            },
-            onDiceUpdate: (msg) => {
-                this.onDiceUpdate(msg);
-            },
-            onNoMames: (nmtype, audionum) => {
-                this.onNoMames(nmtype, audionum);
-            },
-            onReset: () => {
-                this.onReset();
-            },
-            onPassDirectionChange: (isClockwise) => {
-                this.onPassDirectionChange(isClockwise);
-            },
-            onPause: (pauseText) => {
-                this.onPause(pauseText);
-            },
-            onResume: () => {
-                this.onResume();
-            },
-            onFiver: (fp) => {
-                this.onFiver(fp);
-            }
-        });
+        
+        let adminScene = new AdminMenuScene();
+        this.scene.add('',adminScene);
     }
 
     preload() {
@@ -118,34 +96,8 @@ export class DiceScene extends Phaser.Scene {
 
         this.nextPlayerButton = new TextButton(this, 690, 90, 'Pass', {
             onClick: () => {
-                if (!this.firstpass) {
-                    this.server.passCup(this.clockwise);
-                } else {
-                        this.scene.remove('popUpScene');
-                        let popDie = new PopUpScene(
-                            'Who would you like to pass to?',
-                            {
-                                label: '[ '+this.server.playersList.getNextClockwise().name+' ]',
-                                callbacks: {
-                                    onClick: () => {
-                                        this.scene.stop('popUpScene');
-                                        this.server.passCup(true);
-                                    }
-                                }
-                            },
-                            {
-                                label: '[ '+this.server.playersList.getNextCounterClockwise().name+' ]',
-                                callbacks: {
-                                    onClick: () => {
-                                        this.scene.stop('popUpScene');
-                                        this.server.passCup(false);
-                                    }
-                                }
-                            }
-                        );
-                        this.scene.add('',popDie,true);
-                }
-            },
+                this.scene.scene.events.emit('pass',[]);
+            }
         });
         this.add.existing(this.nextPlayerButton);
         this.nextPlayerButton.setEnabled(false);
@@ -601,10 +553,7 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onReset() {
+        this.scene.remove('adminMenuScene');
         this.scene.restart();
-    }
-
-    onPassDirectionChange(isClockwise) {
-        this.clockwise = isClockwise;
     }
 }

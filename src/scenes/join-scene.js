@@ -18,7 +18,8 @@ export class JoinScene extends Phaser.Scene {
                 this.onPlayersUpdate(players);
             },
             onGameStart: (scene) => {
-                this.scene.start(scene, { server: this.server });
+                this.scene.add('',scene,false);
+                this.scene.start('diceScene', { server: this.server });
             }
         });
 
