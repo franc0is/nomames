@@ -63,52 +63,52 @@ export class DiceScene extends Phaser.Scene {
         this.firstpass = true;
         this.clockwise = true;
 
-        this.cupRollButton = new TextButton(this, 690, 30, 'Roll', {
+        /*this.cupRollButton = new TextButton(this, 690, 30, 'Roll', {
             onClick: () => {
                 this.events.emit('roll',[]);
             }
         });
-        this.add.existing(this.cupRollButton);
+        this.add.existing(this.cupRollButton);*/
 
-        this.cupLookButton = new TextButton(this, 690, 60, 'Look', {
+        /*this.cupLookButton = new TextButton(this, 690, 60, 'Look', {
             onClick: () => {
                 this.events.emit('look',[]);
             }
         });
-        this.add.existing(this.cupLookButton);
+        this.add.existing(this.cupLookButton);*/
 
-        this.nextPlayerButton = new TextButton(this, 690, 90, 'Pass', {
+        /*this.nextPlayerButton = new TextButton(this, 690, 90, 'Pass', {
             onClick: () => {
                 this.events.emit('pass',[false]);
             }
         });
         this.add.existing(this.nextPlayerButton);
-        this.nextPlayerButton.setEnabled(false);
+        this.nextPlayerButton.setEnabled(false);*/
 
-        this.fiverButton = new TextButton(this, 690, 120, 'Pass 5',{
+        /*this.fiverButton = new TextButton(this, 690, 120, 'Pass 5',{
             onClick: () => {
                 this.events.emit('pass',[true]);
                 this.makeDeadButton.setEnabled(true);
             }
         });
         this.add.existing(this.fiverButton);
-        this.fiverButton.setEnabled(false)
+        this.fiverButton.setEnabled(false);*/
 
-        this.makeDeadButton = new TextButton(this, 690, 150, 'Die', {
+        /*this.makeDeadButton = new TextButton(this, 690, 150, 'Die', {
             onClick: () => {
                 this.events.emit('killPlayer',[]);
             }
         });
         this.add.existing(this.makeDeadButton);
-        this.makeDeadButton.setEnabled(false);
+        this.makeDeadButton.setEnabled(false);*/
 
-        this.noMamesButton = new TextButton(this, 690, 180, 'No Mames!', {
+        /*this.noMamesButton = new TextButton(this, 690, 180, 'No Mames!', {
             onClick: () => {
                 let even = Phaser.Math.RND.between(0, 1);
                 this.events.emit('noMames',[NMType.NO_MAMES, even]);
             }
         });
-        this.add.existing(this.noMamesButton);
+        this.add.existing(this.noMamesButton);*/
 
         this.lookedButton = new TextButton(this, 690, 280, 'Looked', {
             onClick: () => {
@@ -222,15 +222,15 @@ export class DiceScene extends Phaser.Scene {
 
         this.input.enabled = playable;
         this.cup.reset();
-        this.cupLookButton.setEnabled(playable);
-        this.cupRollButton.setEnabled(playable);
-        this.noMamesButton.setEnabled(playable);
+        //this.cupLookButton.setEnabled(playable);
+        //this.cupRollButton.setEnabled(playable);
+        //this.noMamesButton.setEnabled(playable);
         if (!this.fiverPass){
-            this.nextPlayerButton.setEnabled(playable);
-            this.fiverButton.setEnabled(playable);
+            //this.nextPlayerButton.setEnabled(playable);
+            //this.fiverButton.setEnabled(playable);
         } else {
-            this.nextPlayerButton.setEnabled(false);
-            this.fiverButton.setEnabled(false);
+            //this.nextPlayerButton.setEnabled(false);
+            //this.fiverButton.setEnabled(false);
             this.fiverText.setVisible(true)
         }
         if (!playable) {
@@ -298,11 +298,11 @@ export class DiceScene extends Phaser.Scene {
         if (this.firstpass) {
             let allrolled = this.dice.reduce((previous, die) => (previous && die.didRoll()),
                                              true /* initial value */);
-            this.nextPlayerButton.setEnabled(allrolled);
-            this.fiverButton.setEnabled(allrolled);
+            //this.nextPlayerButton.setEnabled(allrolled);
+            //this.fiverButton.setEnabled(allrolled);
         } else {
-            this.nextPlayerButton.setEnabled(!this.fiverPass);
-            this.fiverButton.setEnabled(!this.fiverPass);
+            //this.nextPlayerButton.setEnabled(!this.fiverPass);
+            //this.fiverButton.setEnabled(!this.fiverPass);
         }
 
         // we've taken an action that changes dice,
@@ -311,7 +311,7 @@ export class DiceScene extends Phaser.Scene {
         this.table.reorder();
         this.lookedButton.setEnabled(this.cup.getVisible());
         this.rolledButton.setEnabled(this.cup.didRoll());
-        this.noMamesButton.setEnabled(false);
+        //this.noMamesButton.setEnabled(false);
         this.audioManager.playAudioForAction(action);
         let update = {
             'action': action,
@@ -508,12 +508,12 @@ export class DiceScene extends Phaser.Scene {
         };
 
         this.setPlayable(true);
-        this.makeDeadButton.setEnabled(true);
-        this.cupLookButton.setEnabled(false);
-        this.cupRollButton.setEnabled(false);
-        this.noMamesButton.setEnabled(false);
-        this.nextPlayerButton.setEnabled(false);
-        this.fiverButton.setEnabled(false);
+        //this.makeDeadButton.setEnabled(true);
+        //this.cupLookButton.setEnabled(false);
+        //this.cupRollButton.setEnabled(false);
+        //this.noMamesButton.setEnabled(false);
+        //this.nextPlayerButton.setEnabled(false);
+        //this.fiverButton.setEnabled(false);
     }
 
     onReset() {
@@ -522,21 +522,21 @@ export class DiceScene extends Phaser.Scene {
 
     roll(){
         this.cup.roll();
-        this.cupRollButton.setEnabled(false);
-        this.noMamesButton.setEnabled(false);
-        this.cupLookButton.setEnabled(true);
+        //this.cupRollButton.setEnabled(false);
+        //this.noMamesButton.setEnabled(false);
+        //this.cupLookButton.setEnabled(true);
     };
 
     look(){
         this.cup.setVisible(true);
-        this.noMamesButton.setEnabled(false);
-        this.cupLookButton.setEnabled(false);
+        //this.noMamesButton.setEnabled(false);
+        //this.cupLookButton.setEnabled(false);
         if (!this.cup.didRoll()){
-            this.cupRollButton.setEnabled(true);
+            //this.cupRollButton.setEnabled(true);
         } 
         if (this.fiverPass){
-            this.cupLookButton.setEnabled(true);
-            this.makeDeadButton.setEnabled(true);
+            //this.cupLookButton.setEnabled(true);
+            //this.makeDeadButton.setEnabled(true);
         }
     }
 }

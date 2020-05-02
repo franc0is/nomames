@@ -21,14 +21,14 @@ export class AdminMenuScene extends Phaser.Scene {
     create() {
         this.adminButton = new TextButton(this,3,3,'[+]',{
             onClick:() => {
-                this.menu.setVisible(true);
+                this.adminMenu.setVisible(true);
                 this.adminButton.setVisible(false);
             }
         });
         this.add.existing(this.adminButton);
 
 
-        this.menu = new AdminZone(this,0,0,200,400);
+        this.adminMenu = new AdminZone(this,0,0,200,400);
 
         this.graphics = this.add.graphics({
             x: 0,
@@ -44,26 +44,26 @@ export class AdminMenuScene extends Phaser.Scene {
         this.graphics.lineStyle(2, 0x00ff00);
         this.graphics.strokeRect(8, 25, 120, 335);
 
-        this.menu.add(this.graphics);
+        this.adminMenu.add(this.graphics);
 
         this.closeButton = new TextButton(this,3,3,'[-]',{
             onClick:() => {
-                this.menu.setVisible(false);
+                this.adminMenu.setVisible(false);
                 this.adminButton.setVisible(true);
             }
         });
         this.add.existing(this.closeButton);
-        this.menu.add(this.closeButton);
+        this.adminMenu.add(this.closeButton);
 
         this.resetButton = new TextButton(this, 20, 60, 'Reset', {
             onClick: () => {
-                this.menu.setVisible(false);
+                this.adminMenu.setVisible(false);
                 this.adminButton.setVisible(true);
                 this.events.emit('reset',[]);
             }
         });
         this.add.existing(this.resetButton);
-        this.menu.add(this.resetButton);
+        this.adminMenu.add(this.resetButton);
 
         this.muteButton = new TextButton(this, 20, 80, 'Mute', {
             onClick: () => {
@@ -72,7 +72,7 @@ export class AdminMenuScene extends Phaser.Scene {
             }
         });
         this.add.existing(this.muteButton);
-        this.menu.add(this.muteButton);
+        this.adminMenu.add(this.muteButton);
 
         this.resyncButton = new TextButton(this, 20, 100, 'Re-Sync', {
             onClick: () => {
@@ -80,10 +80,68 @@ export class AdminMenuScene extends Phaser.Scene {
             }
         });
         this.add.existing(this.resyncButton);
-        this.menu.add(this.resyncButton);
+        this.adminMenu.add(this.resyncButton);
+
+        this.actionMenu = new AdminZone(this, 690,0);
+        this.actionMenu.text.setText('');
+
+        this.cupRollButton = new TextButton(this, 0, 30, 'Roll', {
+            onClick: () => {
+                this.events.emit('roll',[]);
+            }
+        });
+        this.add.existing(this.cupRollButton);
+        this.actionMenu.add(this.cupRollButton);
+
+        this.cupLookButton = new TextButton(this, 0, 60, 'Look', {
+            onClick: () => {
+                this.events.emit('look',[]);
+            }
+        });
+        this.add.existing(this.cupLookButton);
+        this.actionMenu.add(this.cupLookButton);
+
+        this.nextPlayerButton = new TextButton(this, 0, 90, 'Pass', {
+            onClick: () => {
+                this.events.emit('pass',[false]);
+            }
+        });
+        this.add.existing(this.nextPlayerButton);
+        this.nextPlayerButton.setEnabled(false);
+        this.actionMenu.add(this.nextPlayerButton);
+
+        this.fiverButton = new TextButton(this, 0, 120, 'Pass 5',{
+            onClick: () => {
+                this.events.emit('pass',[true]);
+                this.makeDeadButton.setEnabled(true);
+            }
+        });
+        this.add.existing(this.fiverButton);
+        this.fiverButton.setEnabled(false);
+        this.actionMenu.add(this.fiverButton);
+
+        this.makeDeadButton = new TextButton(this, 0, 150, 'Die', {
+            onClick: () => {
+                this.events.emit('killPlayer',[]);
+            }
+        });
+        this.add.existing(this.makeDeadButton);
+        this.makeDeadButton.setEnabled(false);
+        this.actionMenu.add(this.makeDeadButton);
+
+        this.noMamesButton = new TextButton(this, 0, 180, 'No Mames!', {
+            onClick: () => {
+                let even = Phaser.Math.RND.between(0, 1);
+                this.events.emit('noMames',[NMType.NO_MAMES, even]);
+            }
+        });
+        this.add.existing(this.noMamesButton);
+        this.actionMenu.add(this.noMamesButton);
 
         this.updateText();
-        this.menu.setVisible(false);
+        this.adminMenu.setVisible(false);
+        this.actionMenu.setVisible(true);
+
     }
 }
 
