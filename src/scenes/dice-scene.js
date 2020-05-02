@@ -361,7 +361,7 @@ export class DiceScene extends Phaser.Scene {
             }
         };
 
-        this.server.updateDice(update);
+        this.scene.scene.events.emit('diceUpdate',[update]);
         if (this.fiverPass && !this.nomames){
             if (this.fiverText.visible){
                 this.fiverText.setVisible(false);
