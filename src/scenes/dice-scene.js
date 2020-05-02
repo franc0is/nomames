@@ -77,16 +77,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.cupLookButton = new TextButton(this, 690, 60, 'Look', {
             onClick: () => {
-                this.cup.setVisible(true);
-                this.noMamesButton.setEnabled(false);
-                this.cupLookButton.setEnabled(false);
-                if (!this.cup.didRoll()){
-                    this.cupRollButton.setEnabled(true);
-                } 
-                if (this.fiverPass){
-                    this.cupLookButton.setEnabled(true);
-                    this.makeDeadButton.setEnabled(true);
-                }
+                this.events.emit('look',[]);
             }
         });
         this.add.existing(this.cupLookButton);
@@ -538,4 +529,17 @@ export class DiceScene extends Phaser.Scene {
         this.noMamesButton.setEnabled(false);
         this.cupLookButton.setEnabled(true);
     };
+
+    look(){
+        this.cup.setVisible(true);
+        this.noMamesButton.setEnabled(false);
+        this.cupLookButton.setEnabled(false);
+        if (!this.cup.didRoll()){
+            this.cupRollButton.setEnabled(true);
+        } 
+        if (this.fiverPass){
+            this.cupLookButton.setEnabled(true);
+            this.makeDeadButton.setEnabled(true);
+        }
+    }
 }
