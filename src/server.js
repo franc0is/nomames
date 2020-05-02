@@ -223,6 +223,32 @@ export class Server {
                 this.diceScene.events.addListener('noMames',(event) => {
                     this.noMames(event[0], event[1]);
                 });
+
+                this.diceScene.events.addListener('killPlayer', (event) => {
+                    this.diceScene.scene.remove('popUpScene');
+                    let popDie = new PopUpScene(
+                        'You are about to loose a life',
+                        {
+                            label: '[ confirm ]',
+                            callbacks: {
+                                onClick: () => {
+                                    this.diceScene.scene.stop('popUpScene');
+                                    let playersList = this.getPlayersList();
+                                    this.killPlayer(playersList.getMe());
+                                }
+                            }
+                        },
+                        {
+                            label: '[ cancel ]',
+                            callbacks: {
+                                onClick: () => {
+                                    this.diceScene.scene.stop('popUpScene');
+                                }
+                            }
+                        }
+                    );
+                    this.diceScene.scene.add('',popDie,true);
+                });
                 break;
             }
             case DiceUpdateMessage.getType(): {

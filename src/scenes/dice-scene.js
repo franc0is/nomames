@@ -113,7 +113,8 @@ export class DiceScene extends Phaser.Scene {
 
         this.makeDeadButton = new TextButton(this, 690, 150, 'Die', {
             onClick: () => {
-                this.scene.remove('popUpScene');
+                this.events.emit('killPlayer',[]);
+                /*this.scene.remove('popUpScene');
                 let popDie = new PopUpScene(
                     'You are about to loose a life',
                     {
@@ -135,7 +136,7 @@ export class DiceScene extends Phaser.Scene {
                         }
                     }
                 );
-                this.scene.add('',popDie,true);
+                this.scene.add('',popDie,true);*/
             }
         });
         this.add.existing(this.makeDeadButton);
