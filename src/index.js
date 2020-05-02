@@ -26,7 +26,7 @@ const gameConfig = {
     dom: {
         createContainer: true
     },
-    scene: [ FirstScene, StartScene, JoinScene, DiceScene, PauseScene, AdminMenuScene]
+    scene: [ FirstScene, StartScene, JoinScene, PauseScene, AdminMenuScene]
 };
 
 var game = new Phaser.Game(gameConfig);

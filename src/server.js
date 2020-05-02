@@ -4,6 +4,7 @@ import { Message, StartGameMessage, DiceUpdateMessage,
          ResetMessage } from './message';
 import { PlayersList } from './playerslist'
 import { Player } from './player'
+import { DiceScene } from './scenes/dice-scene';
 
 
 /*
@@ -18,6 +19,7 @@ export class Server {
         this.playersList = new PlayersList(this.myUUID);
         this.widowUsed = false;
         this.lastTimetoken = 0;
+        this.diceScene = new DiceScene();
 
         this.pubnub = new PubNub({
             subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',
@@ -174,7 +176,7 @@ export class Server {
                 let player = this.playersList.getPlayerByUUID(uuid);
                 player.isActive = true;
                 this.playersList.orderByUUIDList(deserialized.uuidList);
-                this.callbacks.onGameStart(deserialized);
+                this.callbacks.onGameStart(this.diceScene);
                 break;
             }
             case DiceUpdateMessage.getType(): {
