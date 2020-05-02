@@ -27,9 +27,9 @@ export class DiceScene extends Phaser.Scene {
     }
 
     init(data) {
-        this.server = data.server;
         this.audioManager = data.audioManager;
         this.scene.launch('adminMenuScene', { audioManager: data.audioManager});
+        this.playersList = data.playersList;
     }
 
     preload() {
@@ -170,10 +170,10 @@ export class DiceScene extends Phaser.Scene {
             }
         });
 
-        let playersList = this.server.getPlayersList();
-        let isMe = playersList.getActivePlayer().isMe;
+        
+        let isMe = this.playersList.getActivePlayer().isMe;
 
-        this.playersLabel = new PlayersLabel(this, 5, 30, playersList);
+        this.playersLabel = new PlayersLabel(this, 5, 30, this.playersList);
         this.add.existing(this.playersLabel)
 
         if(!isMe) {

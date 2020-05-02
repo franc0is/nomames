@@ -188,7 +188,7 @@ export class Server {
                 let player = this.playersList.getPlayerByUUID(uuid);
                 player.isActive = true;
                 this.playersList.orderByUUIDList(deserialized.uuidList);
-                this.callbacks.onGameStart(this.diceScene, this.adminScene, this.audioManager);
+                this.callbacks.onGameStart(this.diceScene, this.adminScene, this.audioManager, this.playersList);
                 this.scene = this.diceScene;
                 
 
@@ -267,7 +267,7 @@ export class Server {
                 });
 
                 this.adminScene.events.addListener('reset', (event) => {
-                    this.scene.remove('popUpScene');
+                    this.diceScene.scene.remove('popUpScene');
                     let popReset = new PopUpScene(
                         '  Continue with game reset?',
                         {
