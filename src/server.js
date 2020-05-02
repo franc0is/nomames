@@ -7,7 +7,7 @@ import { Player } from './player'
 import { DiceScene } from './scenes/dice-scene';
 import { PopUpScene } from './scenes/popup-scene';
 import { NMAudioManager } from './audio';
-import { AdminMenuScene } from './scenes/adminmenu-scene';
+import { AdminMenuScene, MenuState } from './scenes/adminmenu-scene';
 
 
 /*
@@ -298,6 +298,10 @@ export class Server {
                 this.adminScene.events.addListener('resync', (event) => {
                     this.resync();
                 });
+
+                if(this.playersList.getActivePlayer().isMe){
+                    this.adminScene.actionMenu.setVis(true);
+                }
                 break;
             }
             case DiceUpdateMessage.getType(): {
@@ -313,6 +317,9 @@ export class Server {
                 let uuid = deserialized.activePlayerUUID;
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
+                if (this.playersList.getActivePlayer().isMe){
+                    this.adminScene.setMenuState(MenuState.START_TURN);
+                }
                 this.diceScene.onFiver(deserialized.fiverPass);
                 this.diceScene.onPlayersUpdate(this.playersList);
                 break;
@@ -342,6 +349,7 @@ export class Server {
             }
             case NoMamesMessage.getType(): {
                 this.diceScene.onNoMames(deserialized.nmtype, deserialized.audionum);
+                this.adminScene.setMenuState(MenuState.DEATH);
                 break;
             }
             case ResetMessage.getType(): {

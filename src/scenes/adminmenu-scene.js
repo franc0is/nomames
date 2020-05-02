@@ -6,6 +6,12 @@ export class AdminMenuScene extends Phaser.Scene {
         super({key: 'adminMenuScene'});
     }
 
+    preload(){
+        this.startMenu = new AdminZone(this, 690, 0);
+        this.actionMenu = new AdminZone(this, 690,0);
+        this.deathMenu = new AdminZone(this, 690,0);
+    }
+
     init(data) {
         this.audioManager = data.audioManager;
     }
@@ -19,9 +25,13 @@ export class AdminMenuScene extends Phaser.Scene {
     }
 
     create() {
+        this.startMenu.text.setText('');
+        this.actionMenu.text.setText('');
+        this.deathMenu.text.setText('');
+
         this.adminButton = new TextButton(this,3,3,'[+]',{
             onClick:() => {
-                this.adminMenu.setVisible(true);
+                this.adminMenu.setVis(true);
                 this.adminButton.setVisible(false);
             }
         });
@@ -48,7 +58,7 @@ export class AdminMenuScene extends Phaser.Scene {
 
         this.closeButton = new TextButton(this,3,3,'[-]',{
             onClick:() => {
-                this.adminMenu.setVisible(false);
+                this.adminMenu.setVis(false);
                 this.adminButton.setVisible(true);
             }
         });
@@ -57,7 +67,7 @@ export class AdminMenuScene extends Phaser.Scene {
 
         this.resetButton = new TextButton(this, 20, 60, 'Reset', {
             onClick: () => {
-                this.adminMenu.setVisible(false);
+                this.adminMenu.setVis(false);
                 this.adminButton.setVisible(true);
                 this.events.emit('reset',[]);
             }
@@ -81,10 +91,7 @@ export class AdminMenuScene extends Phaser.Scene {
         });
         this.add.existing(this.resyncButton);
         this.adminMenu.add(this.resyncButton);
-
-        this.actionMenu = new AdminZone(this, 690,0);
-        this.actionMenu.text.setText('');
-
+        
         this.cupRollButton = new TextButton(this, 0, 30, 'Roll', {
             onClick: () => {
                 this.events.emit('roll',[]);
@@ -120,28 +127,64 @@ export class AdminMenuScene extends Phaser.Scene {
         this.fiverButton.setEnabled(false);
         this.actionMenu.add(this.fiverButton);
 
-        this.makeDeadButton = new TextButton(this, 0, 150, 'Die', {
+        this.makeDeadButton = new TextButton(this, 0, 30, 'Die', {
             onClick: () => {
                 this.events.emit('killPlayer',[]);
             }
         });
         this.add.existing(this.makeDeadButton);
         this.makeDeadButton.setEnabled(false);
-        this.actionMenu.add(this.makeDeadButton);
+        this.deathMenu.add(this.makeDeadButton);
 
-        this.noMamesButton = new TextButton(this, 0, 180, 'No Mames!', {
+        this.noMamesButton = new TextButton(this, 0, 60, 'No Mames!', {
             onClick: () => {
                 let even = Phaser.Math.RND.between(0, 1);
                 this.events.emit('noMames',[NMType.NO_MAMES, even]);
             }
         });
         this.add.existing(this.noMamesButton);
-        this.actionMenu.add(this.noMamesButton);
+        this.startMenu.add(this.noMamesButton);
+
+        this.acceptButton = new TextButton(this, 0, 30, 'Accept', {
+            onClick: () => {
+                this.setMenuState(MenuState.ACTIONS);
+                this.actionMenu.allActive();
+            }
+        });
+        this.add.existing(this.noMamesButton);
+        this.startMenu.add(this.noMamesButton);
 
         this.updateText();
-        this.adminMenu.setVisible(false);
-        this.actionMenu.setVisible(true);
+        this.startMenu.setVis(false);
+        this.adminMenu.setVis(false);
+        this.actionMenu.setVis(false);
+        this.deathMenu.setVis(false);
 
+    }
+
+    setMenuState(state){
+        this.startMenu.setVis(false);
+        this.actionMenu.setVis(false);
+        this.deathMenu.setVis(false);
+
+        switch (state){
+            case MenuState.START_TURN:{
+                this.startMenu.setVis(true);
+                break;
+            }
+            case MenuState.ACTIONS: {
+                this.actionMenu.setVis(true);
+                break;
+            }
+            case MenuState.INACTIVE: {
+
+                break;
+            }
+            case MenuState.DEATH: {
+                this.deathMenu.setVis(true);
+                break;
+            }
+        }
     }
 }
 
@@ -155,10 +198,23 @@ export class AdminZone extends Phaser.GameObjects.Container {
         this.text = scene.add.text(20,35,'Admin Menu',{ color: 'white', fontSize: '16px '});        
     }
 
-    setVisible(value){
+    setVis(value){
         this.text.setVisible(value);
         this.getAll().forEach(obj => {
             obj.setVisible(value);
         });
     }
+
+    allActive() {
+        this.getAll().forEach( obj => {
+            obj.setEnabled(true);
+        })
+    }
+}
+
+export const MenuState = {
+    START_TURN: 'start-turn',
+    ACTIONS: 'action_menu',
+    INACTIVE: 'inactive',
+    DEATH: 'death'
 }
