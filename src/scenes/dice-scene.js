@@ -70,10 +70,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.cupRollButton = new TextButton(this, 690, 30, 'Roll', {
             onClick: () => {
-                this.cup.roll();
-                this.cupRollButton.setEnabled(false);
-                this.noMamesButton.setEnabled(false);
-                this.cupLookButton.setEnabled(true);
+                this.events.emit('roll',[]);
             }
         });
         this.add.existing(this.cupRollButton);
@@ -114,29 +111,6 @@ export class DiceScene extends Phaser.Scene {
         this.makeDeadButton = new TextButton(this, 690, 150, 'Die', {
             onClick: () => {
                 this.events.emit('killPlayer',[]);
-                /*this.scene.remove('popUpScene');
-                let popDie = new PopUpScene(
-                    'You are about to loose a life',
-                    {
-                        label: '[ confirm ]',
-                        callbacks: {
-                            onClick: () => {
-                                this.scene.stop('popUpScene');
-                                let playersList = this.server.getPlayersList();
-                                this.server.killPlayer(playersList.getMe());
-                            }
-                        }
-                    },
-                    {
-                        label: '[ cancel ]',
-                        callbacks: {
-                            onClick: () => {
-                                this.scene.stop('popUpScene');
-                            }
-                        }
-                    }
-                );
-                this.scene.add('',popDie,true);*/
             }
         });
         this.add.existing(this.makeDeadButton);
@@ -557,4 +531,11 @@ export class DiceScene extends Phaser.Scene {
         this.scene.remove('adminMenuScene');
         this.scene.restart();
     }
+
+    roll(){
+        this.cup.roll();
+        this.cupRollButton.setEnabled(false);
+        this.noMamesButton.setEnabled(false);
+        this.cupLookButton.setEnabled(true);
+    };
 }
