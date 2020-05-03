@@ -96,7 +96,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.nextPlayerButton = new TextButton(this, 690, 90, 'Pass', {
             onClick: () => {
-                this.scene.scene.events.emit('pass',[false]);
+                this.scene.scene.events.emit('pass',[false] /* pass 5 */);
             }
         });
         this.add.existing(this.nextPlayerButton);
@@ -104,7 +104,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.fiverButton = new TextButton(this, 690, 120, 'Pass 5',{
             onClick: () => {
-                this.scene.scene.events.emit('pass',[true]);
+                this.scene.scene.events.emit('pass',[true] /* pass 5 */);
                 this.makeDeadButton.setEnabled(true);
             }
         });
