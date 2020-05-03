@@ -253,6 +253,10 @@ export class Server {
                     this.diceScene.roll();
                 });
 
+                this.diceScene.events.addListener('look',(event) => {
+                    this.diceScene.look();
+                });
+
                 break;
             }
             case DiceUpdateMessage.getType(): {
