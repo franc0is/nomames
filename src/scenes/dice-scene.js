@@ -96,7 +96,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.nextPlayerButton = new TextButton(this, 690, 90, 'Pass', {
             onClick: () => {
-                this.scene.scene.events.emit('pass',[false] /* pass 5 */);
+                this.events.emit('pass',[false] /* pass 5 */);
             }
         });
         this.add.existing(this.nextPlayerButton);
@@ -104,7 +104,7 @@ export class DiceScene extends Phaser.Scene {
 
         this.fiverButton = new TextButton(this, 690, 120, 'Pass 5',{
             onClick: () => {
-                this.scene.scene.events.emit('pass',[true] /* pass 5 */);
+                this.events.emit('pass',[true] /* pass 5 */);
                 this.makeDeadButton.setEnabled(true);
             }
         });
@@ -144,7 +144,7 @@ export class DiceScene extends Phaser.Scene {
         this.noMamesButton = new TextButton(this, 690, 180, 'No Mames!', {
             onClick: () => {
                 let even = Phaser.Math.RND.between(0, 1);
-                this.server.noMames(NMType.NO_MAMES, even);
+                this.events.emit('noMames',[NMType.NO_MAMES, even]);
             }
         });
         this.add.existing(this.noMamesButton);
@@ -361,7 +361,7 @@ export class DiceScene extends Phaser.Scene {
             }
         };
 
-        this.scene.scene.events.emit('diceUpdate',[update]);
+        this.events.emit('diceUpdate',[update]);
         if (this.fiverPass && !this.nomames){
             if (this.fiverText.visible){
                 this.fiverText.setVisible(false);
@@ -372,9 +372,9 @@ export class DiceScene extends Phaser.Scene {
             let allMaxRolled = this.dice.reduce((previous, die) => (previous && die.rollCount >=5), true);
 
             if(allFive){
-                this.server.noMames(NMType.ROLLED_5, 0);
+                this.events.emit('noMames',[NMType.ROLLED_5, 0]);
             } else if (allMaxRolled) {
-                this.server.noMames(NMType.FAILED_5, 0);
+                this.events.emit('noMames',[NMType.FAILED_5, 0]);
             }
         }
         

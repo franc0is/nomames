@@ -218,6 +218,11 @@ export class Server {
                     let update = event[0];
                     this.updateDice(update);
                 });
+
+                this.diceScene.events.addListener('noMames',(event) => {
+                    this.noMames(event[0], event[1]);
+                });
+
                 break;
             }
             case DiceUpdateMessage.getType(): {
