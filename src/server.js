@@ -23,6 +23,8 @@ export class Server {
         this.diceScene = new DiceScene();
         this.firstPass = true;
         this.clockwise = true;
+        this.nomames = false;
+        this.fiverPass = false;
 
         this.pubnub = new PubNub({
             subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',
@@ -209,6 +211,10 @@ export class Server {
                         );
                         this.diceScene.scene.add('',popDie,true);
                     }
+                });
+                this.diceScene.events.addListener('diceUpdate',(event) => {
+                    let update = event[0];
+                    this.updateDice(update);
                 });
                 break;
             }
