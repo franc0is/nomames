@@ -21,7 +21,6 @@ export class Server {
         this.widowUsed = false;
         this.lastTimetoken = 0;
         this.diceScene = new DiceScene();
-
         this.firstPass = true;
         this.clockwise = true;
         this.nomames = false;
@@ -188,32 +187,31 @@ export class Server {
                     if (!this.firstPass) {
                         this.passCup(this.clockwise);
                     } else {
-                            this.diceScene.scene.remove('popUpScene');
-                            let popDie = new PopUpScene(
-                                'Who would you like to pass to?',
-                                {
-                                    label: '[ '+this.playersList.getNextClockwise().name+' ]',
-                                    callbacks: {
-                                        onClick: () => {
-                                            this.diceScene.scene.stop('popUpScene');
-                                            this.passCup(true, false);
-                                        }
-                                    }
-                                },
-                                {
-                                    label: '[ '+this.playersList.getNextCounterClockwise().name+' ]',
-                                    callbacks: {
-                                        onClick: () => {
-                                            this.diceScene.scene.stop('popUpScene');
-                                            this.passCup(false, false);
-                                        }
+                        this.diceScene.scene.remove('popUpScene');
+                        let popDie = new PopUpScene(
+                            'Who would you like to pass to?',
+                            {
+                                label: '[ '+this.playersList.getNextClockwise().name+' ]',
+                                callbacks: {
+                                    onClick: () => {
+                                        this.diceScene.scene.stop('popUpScene');
+                                        this.passCup(true, false);
                                     }
                                 }
-                            );
-                            this.diceScene.scene.add('',popDie,true);
+                            },
+                            {
+                                label: '[ '+this.playersList.getNextCounterClockwise().name+' ]',
+                                callbacks: {
+                                    onClick: () => {
+                                        this.diceScene.scene.stop('popUpScene');
+                                        this.passCup(false, false);
+                                    }
+                                }
+                            }
+                        );
+                        this.diceScene.scene.add('',popDie,true);
                     }
                 });
-
                 this.diceScene.events.addListener('diceUpdate',(event) => {
                     let update = event[0];
                     this.updateDice(update);
