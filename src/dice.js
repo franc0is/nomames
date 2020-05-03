@@ -9,9 +9,8 @@ export class Dice extends Phaser.GameObjects.Container {
         this.lastClickTime = 0;
 
         this.setName('diceContainer');
-        //this.setPosition(x, y);
 
-        this.on('pointerdown', this.onClick, this);
+        this.on('pointerup', this.onClick, this);
 
 
         this.die = new DiceSprite(scene, x, y, initial_value);
