@@ -300,7 +300,6 @@ export class DiceScene extends Phaser.Scene {
     }
 
     setPlayable(playable) {
-        console.log('clearing updates');
         this.cup.setOnUpdateCb((action, dice) => {});
         this.table.setOnUpdateCb((action, dice) => {});
         this.cup.setOnMoveCb((action, dice) => {});
@@ -322,7 +321,6 @@ export class DiceScene extends Phaser.Scene {
         }
         if (playable) {
             if(!this.nomames){
-                console.log('setting updates');
                 this.cup.setOnUpdateCb((action, dice) => {
                     this.updateCup(action, dice)
                 });
@@ -343,11 +341,8 @@ export class DiceScene extends Phaser.Scene {
 
     updateCup(action, dice) {
         if (action === Action.ROLL_ONE) {
-            console.log('this should not have happened - roll_one inside cup')
             this.table.setOnUpdateCb((action, dice) => {});
-        
             this.table.add(dice[0]);
-
             this.table.setOnUpdateCb((action, dice) => {
                 this.updateTable(action, dice);
             })
@@ -357,7 +352,7 @@ export class DiceScene extends Phaser.Scene {
 
     moveCup(action, dice) {
         this.table.setOnUpdateCb((action, dice) => {});
-        
+
         this.table.add(dice[0]);
 
         this.table.setOnUpdateCb((action, dice) => {
@@ -425,15 +420,13 @@ export class DiceScene extends Phaser.Scene {
             let allFive = this.dice.reduce((previous,die) => (previous && d.value === die.value && die.rollCount >=1 && die.getVisible()), true);
             let allMaxRolled = this.dice.reduce((previous, die) => (previous && die.rollCount >=5 && die.getVisible()), true);
 
-            console.log('allMaxRolled: '+allMaxRolled)
-
             if(allFive){
                 this.server.noMames(NMType.ROLLED_5, 0);
             } else if (allMaxRolled) {
                 this.server.noMames(NMType.FAILED_5, 0);
             }
         }
-        
+
         this.cup.setOnUpdateCb((action, dice) => {
             this.updateCup(action, dice)
         });
@@ -508,11 +501,9 @@ export class DiceScene extends Phaser.Scene {
                     this.dice[4].animate(function(target) {
                         target.setValue(new_value);
                     });
-                
                     break;
                 }
                 case Action.MOVE_ONE: {
-                    
                     break;
                 }
                 case Action.ROLL_MANY: {
@@ -520,14 +511,11 @@ export class DiceScene extends Phaser.Scene {
                     break;
                 }
                 case Action.SHOW_MANY: {
-                    
                     break;
                 }
             }
 
             this.audioManager.playAudioForAction(msg.action);
-
-            console.log('table visible: '+this.table.getVisible());
 
             this.rolledButton.setEnabled(msg.cup.rolled);
             this.lookedButton.setEnabled(msg.cup.visible);
