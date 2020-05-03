@@ -1,6 +1,4 @@
 import { TextButton } from '../text-button';
-import { Server } from '../server';
-import { PopUpScene } from './popup-scene';
 
 
 export class AdminMenuScene extends Phaser.Scene {
@@ -10,7 +8,6 @@ export class AdminMenuScene extends Phaser.Scene {
 
     init(data) {
         this.audioManager = data.audioManager;
-        this.server = data.server
     }
 
     updateText() {
@@ -62,29 +59,7 @@ export class AdminMenuScene extends Phaser.Scene {
             onClick: () => {
                 this.menu.setVisible(false);
                 this.adminButton.setVisible(true);
-
-                this.scene.remove('popUpScene');
-                let popReset = new PopUpScene(
-                    '  Continue with game reset?',
-                    {
-                        label: '[ continue ]',
-                        callbacks: {
-                            onClick: () => {
-                                this.scene.stop('popUpScene');
-                                this.server.reset();
-                            }
-                        }
-                    },
-                    {
-                        label: '[ cancel ]',
-                        callbacks: {
-                            onClick: () => {
-                                this.scene.stop('popUpScene');
-                            }
-                        }
-                    }
-                );
-                this.scene.add('',popReset,true);
+                this.events.emit('reset',[]);
             }
         });
         this.add.existing(this.resetButton);
@@ -101,7 +76,7 @@ export class AdminMenuScene extends Phaser.Scene {
 
         this.resyncButton = new TextButton(this, 20, 100, 'Re-Sync', {
             onClick: () => {
-                this.server.resync();
+                this.events.emit('resync',[]);
             }
         });
         this.add.existing(this.resyncButton);

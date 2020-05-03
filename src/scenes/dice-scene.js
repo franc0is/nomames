@@ -6,8 +6,6 @@ import { Action } from '../message';
 import { NMType } from '../message';
 import { PlayersLabel } from '../playerslabel';
 import { NMAudioManager } from '../audio';
-import { PopUpScene } from './popup-scene';
-import { AdminMenuScene } from './adminmenu-scene';
 
 
 const NUM_DICE = 5;
@@ -23,16 +21,13 @@ export class DiceScene extends Phaser.Scene {
      */
     constructor() {
         super({ key: 'diceScene' });
-        this.audioManager = new NMAudioManager(this);
-        this.leftButtonAction = () => {};
-        this.rightButtonAction = () => {};
+
     }
 
     init(data) {
-        this.server = data.server;
-        
-        let adminScene = new AdminMenuScene();
-        this.scene.add('',adminScene);
+        this.audioManager = data.audioManager;
+        this.scene.launch('adminMenuScene', { audioManager: data.audioManager});
+        this.playersList = data.playersList;
     }
 
     preload() {
@@ -43,7 +38,6 @@ export class DiceScene extends Phaser.Scene {
 
     create() {
         this.audioManager.create();
-        this.scene.launch('adminMenuScene', { audioManager: this.audioManager, server: this.server });
 
         this.nomames = false;
         this.fiverPass = false;
@@ -174,11 +168,13 @@ export class DiceScene extends Phaser.Scene {
             }
         });
 
-        let playersList = this.server.getPlayersList();
-        this.playersLabel = new PlayersLabel(this, 5, 30, playersList);
-        this.add.existing(this.playersLabel);
+        
+        let isMe = this.playersList.getActivePlayer().isMe;
 
-        if (!playersList.getActivePlayer().isMe) {
+        this.playersLabel = new PlayersLabel(this, 5, 30, this.playersList);
+        this.add.existing(this.playersLabel)
+
+        if(!isMe) {
             this.setPlayable(false);
         }
 
@@ -194,6 +190,7 @@ export class DiceScene extends Phaser.Scene {
             this.updateTable(action, dice);
         });
     }
+
 
     onPause(pauseText) {
         this.scene.pause();

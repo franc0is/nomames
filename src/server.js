@@ -6,6 +6,8 @@ import { PlayersList } from './playerslist'
 import { Player } from './player'
 import { DiceScene } from './scenes/dice-scene';
 import { PopUpScene } from './scenes/popup-scene';
+import { NMAudioManager } from './audio';
+import { AdminMenuScene } from './scenes/adminmenu-scene';
 
 
 /*
@@ -13,9 +15,10 @@ import { PopUpScene } from './scenes/popup-scene';
  */
 
 export class Server {
-    constructor(callbacks) {
+    constructor(callbacks, scene) {
         // TODO change this to a map uuid => player
         this.setCallbacks(callbacks);
+        this.scene = scene;
         this.myUUID = PubNub.generateUUID();
         this.playersList = new PlayersList(this.myUUID);
         this.widowUsed = false;
@@ -25,6 +28,8 @@ export class Server {
         this.clockwise = true;
         this.nomames = false;
         this.fiverPass = false;
+        this.audioManager = new NMAudioManager(this.diceScene);
+        this.adminScene = new AdminMenuScene();
 
         this.pubnub = new PubNub({
             subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',
@@ -117,7 +122,7 @@ export class Server {
                 }
             }
         );
-        this.callbacks.onPlayersUpdate(this.playersList);
+        this.scene.onPlayersUpdate(this.playersList);
     }
 
     publish(msg) {
@@ -181,7 +186,8 @@ export class Server {
                 let player = this.playersList.getPlayerByUUID(uuid);
                 player.isActive = true;
                 this.playersList.orderByUUIDList(deserialized.uuidList);
-                this.callbacks.onGameStart(this.diceScene);
+                this.callbacks.onGameStart(this.diceScene, this.adminScene, this.audioManager, this.playersList);
+                this.scene = this.diceScene;
 
                 this.diceScene.events.addListener('pass',(event) => {
                     let passFive = event[0];
@@ -255,6 +261,35 @@ export class Server {
 
                 this.diceScene.events.addListener('look',(event) => {
                     this.diceScene.look();
+                });
+
+                this.adminScene.events.addListener('reset', (event) => {
+                    this.diceScene.scene.remove('popUpScene');
+                    let popReset = new PopUpScene(
+                        '  Continue with game reset?',
+                        {
+                            label: '[ continue ]',
+                            callbacks: {
+                                onClick: () => {
+                                    this.diceScene.scene.stop('popUpScene');
+                                    this.reset();
+                                }
+                            }
+                        },
+                        {
+                            label: '[ cancel ]',
+                            callbacks: {
+                                onClick: () => {
+                                    this.diceScene.scene.stop('popUpScene');
+                                }
+                            }
+                        }
+                    );
+                    this.diceScene.scene.add('',popReset,true);
+                });
+
+                this.adminScene.events.addListener('resync', (event) => {
+                    this.resync();
                 });
 
                 break;
