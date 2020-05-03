@@ -189,7 +189,7 @@ export class Server {
                 this.callbacks.onGameStart(this.diceScene, this.adminScene, this.audioManager, this.playersList);
                 this.scene = this.diceScene;
 
-                this.diceScene.events.addListener('pass',(event) => {
+                this.adminScene.events.addListener('pass',(event) => {
                     let passFive = event[0];
                     if (!this.firstPass) {
                         this.passCup(this.clockwise, passFive);
@@ -229,7 +229,11 @@ export class Server {
                     this.noMames(event[0], event[1]);
                 });
 
-                this.diceScene.events.addListener('killPlayer', (event) => {
+                this.adminScene.events.addListener('noMames',(event) => {
+                    this.noMames(event[0], event[1]);
+                });
+
+                this.adminScene.events.addListener('killPlayer', (event) => {
                     this.diceScene.scene.remove('popUpScene');
                     let popDie = new PopUpScene(
                         'You are about to loose a life',
@@ -255,11 +259,11 @@ export class Server {
                     this.diceScene.scene.add('',popDie,true);
                 });
 
-                this.diceScene.events.addListener('roll',(event) => {
+                this.adminScene.events.addListener('roll',(event) => {
                     this.diceScene.roll();
                 });
 
-                this.diceScene.events.addListener('look',(event) => {
+                this.adminScene.events.addListener('look',(event) => {
                     this.diceScene.look();
                 });
 
