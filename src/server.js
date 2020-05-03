@@ -218,10 +218,12 @@ export class Server {
                                             this.diceScene.scene.stop('popUpScene');
                                             this.passCup(false, passFive);
                                         }
+
                                     }
                                 }
-                            );
-                            this.diceScene.scene.add('',popDie,true);
+                            }
+                        );
+                        this.diceScene.scene.add('',popDie,true);
                     }
                 });
 
