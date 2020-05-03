@@ -1,8 +1,6 @@
 import { TextButton } from '../text-button';
 import { NMType } from '../message';
 
-
-
 export class AdminMenuScene extends Phaser.Scene {
     constructor() {
         super({key: 'adminMenuScene'});
@@ -94,7 +92,7 @@ export class AdminMenuScene extends Phaser.Scene {
         });
         this.add.existing(this.resyncButton);
         this.adminMenu.add(this.resyncButton);
-        
+
         this.cupRollButton = new TextButton(this, 0, 30, 'Roll', {
             onClick: () => {
                 this.events.emit('roll',[]);
@@ -137,6 +135,7 @@ export class AdminMenuScene extends Phaser.Scene {
         });
         this.add.existing(this.makeDeadButton);
         this.makeDeadButton.setEnabled(false);
+
         this.deathMenu.add(this.makeDeadButton);
 
         this.noMamesButton = new TextButton(this, 0, 60, 'No Mames!', {
