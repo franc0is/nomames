@@ -24,14 +24,12 @@ export class Server {
         this.widowUsed = false;
         this.lastTimetoken = 0;
         this.diceScene = new DiceScene();
-        this.audioManager = new NMAudioManager(this.diceScene);
-        this.adminScene = new AdminMenuScene();
-
-
         this.firstPass = true;
         this.clockwise = true;
         this.nomames = false;
         this.fiverPass = false;
+        this.audioManager = new NMAudioManager(this.diceScene);
+        this.adminScene = new AdminMenuScene();
 
         this.pubnub = new PubNub({
             subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',
@@ -192,33 +190,30 @@ export class Server {
                 this.playersList.orderByUUIDList(deserialized.uuidList);
                 this.callbacks.onGameStart(this.diceScene, this.adminScene, this.audioManager, this.playersList, isMe);
                 this.scene = this.diceScene;
-                
 
                 this.adminScene.events.addListener('pass',(event) => {
                     let passFive = event[0];
                     if (!this.firstPass) {
                         this.passCup(this.clockwise, passFive);
                     } else {
-                            this.diceScene.scene.remove('popUpScene');
-                            let popDie = new PopUpScene(
-                                'Who would you like to pass to?',
-                                {
-                                    label: '[ '+this.playersList.getNextClockwise().name+' ]',
-                                    callbacks: {
-                                        onClick: () => {
-                                            this.diceScene.scene.stop('popUpScene');
-                                            this.passCup(true, passFive);
-                                        }
+                        this.diceScene.scene.remove('popUpScene');
+                        let popDie = new PopUpScene(
+                            'Who would you like to pass to?',
+                            {
+                                label: '[ '+this.playersList.getNextClockwise().name+' ]',
+                                callbacks: {
+                                    onClick: () => {
+                                        this.diceScene.scene.stop('popUpScene');
+                                        this.passCup(true, passFive);
                                     }
-                                },
-                                {
-                                    label: '[ '+this.playersList.getNextCounterClockwise().name+' ]',
-                                    callbacks: {
-                                        onClick: () => {
-                                            this.diceScene.scene.stop('popUpScene');
-                                            this.passCup(false, passFive);
-                                        }
-
+                                }
+                            },
+                            {
+                                label: '[ '+this.playersList.getNextCounterClockwise().name+' ]',
+                                callbacks: {
+                                    onClick: () => {
+                                        this.diceScene.scene.stop('popUpScene');
+                                        this.passCup(false, passFive);
                                     }
                                 }
                             }
@@ -318,6 +313,7 @@ export class Server {
                 this.adminScene.events.addListener('resync', (event) => {
                     this.resync();
                 });
+
                 break;
             }
             case DiceUpdateMessage.getType(): {

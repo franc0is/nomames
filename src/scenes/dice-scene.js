@@ -8,7 +8,6 @@ import { PlayersLabel } from '../playerslabel';
 import { NMAudioManager } from '../audio';
 
 
-
 const NUM_DICE = 5;
 
 export class DiceScene extends Phaser.Scene {
@@ -122,9 +121,7 @@ export class DiceScene extends Phaser.Scene {
             }
         });
 
-        
         let isMe = this.playersList.getActivePlayer().isMe;
-
         this.playersLabel = new PlayersLabel(this, 5, 30, this.playersList);
         this.add.existing(this.playersLabel)
 
@@ -182,10 +179,10 @@ export class DiceScene extends Phaser.Scene {
         if (this.fiverPass && !this.nomames){
             this.fiverText.setVisible(true)
         }
-        
+
         this.lookedButton.setEnabled(false);
         this.rolledButton.setEnabled(false);
-        
+
         if (playable) {
             this.cup.setOnUpdateCb((action, dice) => {
                 this.updateCup(action, dice)
@@ -270,7 +267,7 @@ export class DiceScene extends Phaser.Scene {
         };
 
         this.events.emit('diceUpdate',[update]);
-        
+
         this.cup.setOnUpdateCb((action, dice) => {
             this.updateCup(action, dice)
         });
@@ -438,6 +435,7 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onReset() {
+        this.scene.remove('adminMenuScene');
         this.scene.restart();
     }
 
@@ -479,5 +477,10 @@ export class DiceScene extends Phaser.Scene {
 
         }
         this.cup.setVisible(true);
+    }
+
+    startTurn() {
+        this.lookedButton.setEnabled(false);
+        this.rolledButton.setEnabled(false);
     }
 }
