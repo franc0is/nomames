@@ -45,10 +45,6 @@ export class Dice extends Phaser.GameObjects.Container {
         }
     }
 
-    getVisible(){
-        return this.die.visible;
-    }
-
     setOnRoll(onRollCb) {
         this.onRollCb = onRollCb;
     }
