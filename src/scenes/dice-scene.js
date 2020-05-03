@@ -129,7 +129,7 @@ export class DiceScene extends Phaser.Scene {
                                 callbacks: {
                                     onClick: () => {
                                         this.scene.stop('popUpScene');
-                                        this.server.passCup(true);
+                                        this.server.passCup(true, false);
                                     }
                                 }
                             },
@@ -138,22 +138,48 @@ export class DiceScene extends Phaser.Scene {
                                 callbacks: {
                                     onClick: () => {
                                         this.scene.stop('popUpScene');
-                                        this.server.passCup(false);
+                                        this.server.passCup(false, false);
                                     }
                                 }
                             }
                         );
                         this.scene.add('',popDie,true);
                 }
-            },
+            }
         });
         this.add.existing(this.nextPlayerButton);
         this.nextPlayerButton.setEnabled(false);
 
         this.fiverButton = new TextButton(this, 690, 120, 'Pass 5',{
             onClick: () => {
-                this.server.passCup(this.clockwise, true);
-                this.makeDeadButton.setEnabled(true);
+                if(!this.firstpass){
+                    this.server.passCup(this.clockwise, true);
+                    this.makeDeadButton.setEnabled(true);
+                } else {
+                    this.scene.remove('popUpScene');
+                    let popDie = new PopUpScene(
+                        'Who would you like to pass to?',
+                        {
+                            label: '[ '+this.server.playersList.getNextClockwise().name+' ]',
+                            callbacks: {
+                                onClick: () => {
+                                    this.scene.stop('popUpScene');
+                                    this.server.passCup(true, true);
+                                }
+                            }
+                        },
+                        {
+                            label: '[ '+this.server.playersList.getNextCounterClockwise().name+' ]',
+                            callbacks: {
+                                onClick: () => {
+                                    this.scene.stop('popUpScene');
+                                    this.server.passCup(false, true);
+                                }
+                            }
+                        }
+                    );
+                    this.scene.add('',popDie,true);
+                }
             }
         });
         this.add.existing(this.fiverButton);
