@@ -184,8 +184,9 @@ export class Server {
                 this.callbacks.onGameStart(this.diceScene);
 
                 this.diceScene.events.addListener('pass',(event) => {
+                    let passFive = event[0];
                     if (!this.firstPass) {
-                        this.passCup(this.clockwise);
+                        this.passCup(this.clockwise, passFive);
                     } else {
                         this.diceScene.scene.remove('popUpScene');
                         let popDie = new PopUpScene(
@@ -195,7 +196,7 @@ export class Server {
                                 callbacks: {
                                     onClick: () => {
                                         this.diceScene.scene.stop('popUpScene');
-                                        this.passCup(true, false);
+                                        this.passCup(true, passFive);
                                     }
                                 }
                             },
@@ -204,7 +205,7 @@ export class Server {
                                 callbacks: {
                                     onClick: () => {
                                         this.diceScene.scene.stop('popUpScene');
-                                        this.passCup(false, false);
+                                        this.passCup(false, passFive);
                                     }
                                 }
                             }
@@ -212,6 +213,7 @@ export class Server {
                         this.diceScene.scene.add('',popDie,true);
                     }
                 });
+
                 this.diceScene.events.addListener('diceUpdate',(event) => {
                     let update = event[0];
                     this.updateDice(update);
