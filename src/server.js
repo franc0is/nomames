@@ -176,6 +176,7 @@ export class Server {
         let me = this.playersList.getMe();
         let msg = new ResetMessage(me.uuid);
         this.publish(msg);
+        this.adminScene.onReset();
     }
 
     handleMessage(msg, fromMe) {
@@ -244,7 +245,10 @@ export class Server {
                 });
 
                 this.adminScene.events.addListener('accept',(event) => {
-                    this.diceScene.startTurn();
+                    this.diceScene.setPlayable(true);
+                    if (this.fiverPass){
+                        this.diceScene.look();
+                    }
                 });
 
                 this.adminScene.events.addListener('killPlayer', (event) => {
@@ -329,8 +333,10 @@ export class Server {
                     this.adminScene.setMenuState(MenuState.START_TURN);
                 } else {
                     this.adminScene.setMenuState(MenuState.INACTIVE);
+                    this.diceScene.setPlayable(false);
                 }
-                this.diceScene.onFiver(deserialized.fiverPass);
+                this.fiverPass = deserialized.fiverPass;
+                this.diceScene.onFiver(this.fiverPass);
                 this.diceScene.onPlayersUpdate(this.playersList);
                 break;
             }
@@ -354,7 +360,7 @@ export class Server {
                     }
                 }
                 this.playersList.setDirection(true);
-                this.diceScene.onReset();
+                this.onReset(player.isMe);
                 break;
             }
             case NoMamesMessage.getType(): {
@@ -367,10 +373,22 @@ export class Server {
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
                 this.playersList.setDirection(true);
-                this.diceScene.onReset();
+                this.onReset(this.playersList.getPlayerByUUID(uuid).isMe);
                 break;
             }
         }
+    }
+
+    onReset(value) {
+        if(value){
+            this.adminScene.onreset();
+        } else {
+            this.adminScene.setMenuState(MenuState.INACTIVE);
+        }
+        this.diceScene.onReset();
+        this.firstPass = true;
+        this.nomames = false
+        this.fiverPass = false
     }
 
     handlePresence(presenceEvent) {

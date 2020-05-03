@@ -121,9 +121,7 @@ export class DiceScene extends Phaser.Scene {
             }
         });
 
-        
         let isMe = this.playersList.getActivePlayer().isMe;
-
         this.playersLabel = new PlayersLabel(this, 5, 30, this.playersList);
         this.add.existing(this.playersLabel)
 
@@ -165,6 +163,9 @@ export class DiceScene extends Phaser.Scene {
         });
         this.cup.fiver = fp;
         this.firstpass = false;
+        if(fp) {
+            this.fiverText.setVisible(true);
+        }
     }
 
     setPlayable(playable) {
@@ -174,26 +175,27 @@ export class DiceScene extends Phaser.Scene {
 
         this.input.enabled = playable;
         this.cup.reset();
-        if (this.fiverPass) {
+
+        if (this.fiverPass && !this.nomames){
             this.fiverText.setVisible(true)
         }
 
-        if (!playable) {
-            this.lookedButton.setEnabled(false);
-            this.rolledButton.setEnabled(false);
+        this.lookedButton.setEnabled(false);
+        this.rolledButton.setEnabled(false);
+
+        if (playable) {
+            this.cup.setOnUpdateCb((action, dice) => {
+                this.updateCup(action, dice)
+            });
+
+            this.table.setOnUpdateCb((action, dice) => {
+                this.updateTable(action, dice);
+            });
+
+            this.cup.setOnMoveCb((action, dice) => {
+                this.moveCup(action, dice);
+            })
         }
-
-        this.cup.setOnUpdateCb((action, dice) => {
-            this.updateCup(action, dice)
-        });
-
-        this.table.setOnUpdateCb((action, dice) => {
-            this.updateTable(action, dice);
-        });
-
-        this.cup.setOnMoveCb((action, dice) => {
-            this.moveCup(action, dice);
-        })
     }
 
     updateCup(action, dice) {
@@ -231,9 +233,9 @@ export class DiceScene extends Phaser.Scene {
         this.table.setOnUpdateCb((action, dice) => {});
         this.cup.setOnMoveCb((action, dice) => {});
 
-        if (this.fiverPass) {
+        if (this.fiverPass && !this.nomames) {
             this.cup.getDice().forEach(d=>{
-                if (d.didRoll()){
+                if (d.didRoll() && d.getVisible()){
                     this.table.add(d);
                 }
             });
@@ -247,8 +249,6 @@ export class DiceScene extends Phaser.Scene {
             }
         }
 
-        // we've taken an action that changes dice,
-        // no mames is disabled
         this.cup.reorder();
         this.table.reorder();
         this.lookedButton.setEnabled(this.cup.getVisible());
@@ -267,22 +267,7 @@ export class DiceScene extends Phaser.Scene {
         };
 
         this.events.emit('diceUpdate',[update]);
-        if (this.fiverPass && !this.nomames){
-            if (this.fiverText.visible){
-                this.fiverText.setVisible(false);
-                this.fiverTryText.setVisible(true);
-            }
-            let d = this.dice[0];
-            let allFive = this.dice.reduce((previous,die) => (previous && d.value === die.value && die.rollCount >=1), true);
-            let allMaxRolled = this.dice.reduce((previous, die) => (previous && die.rollCount >=5), true);
 
-            if(allFive){
-                this.events.emit('noMames',[NMType.ROLLED_5, 0]);
-            } else if (allMaxRolled) {
-                this.events.emit('noMames',[NMType.FAILED_5, 0]);
-            }
-        }
-        
         this.cup.setOnUpdateCb((action, dice) => {
             this.updateCup(action, dice)
         });
@@ -304,15 +289,10 @@ export class DiceScene extends Phaser.Scene {
                 this.onFiverReceipt();
                 return
             }
-            this.setPlayable(true);
-        }
-        if (!playersList.getActivePlayer().isMe){
-            this.setPlayable(false)
         }
     }
 
     onFiverReceipt(){
-        this.setPlayable(true);
         this.dice.forEach(d=> {
             d.maxRoll = 5;
         });
@@ -398,6 +378,7 @@ export class DiceScene extends Phaser.Scene {
 
             this.rolledButton.setEnabled(msg.cup.rolled);
             this.lookedButton.setEnabled(msg.cup.visible);
+
             if (this.fiverPass){
                 this.cup.setVisible(msg.cup.visible);
                 if (msg.cup.visible){
@@ -428,6 +409,10 @@ export class DiceScene extends Phaser.Scene {
         this.table.setOnUpdateCb((action, dice) => {});
         this.cup.setOnMoveCb((action, dice) => {});
 
+        this.fiverFailText.setVisible(false);
+        this.fiverText.setVisible(false);
+        this.fiverTryText.setVisible(false);
+
         //added switch to address multiple types of endings and added audio sync capabilities
         switch (nmt){
             case NMType.NO_MAMES: {
@@ -437,18 +422,16 @@ export class DiceScene extends Phaser.Scene {
                 break;
             }
             case NMType.FAILED_5: {
-                this.fiverTryText.setVisible(false);
                 this.fiverFailText.setVisible(true);
+                this.cup.setVisible(true);
                 break;
             }
             case NMType.ROLLED_5: {
-                this.fiverTryText.setVisible(false);
                 this.fiverWinText.setVisible(true);
+                this.cup.setVisible(true);
                 break;
             }
         };
-
-        this.setPlayable(true);
     }
 
     onReset() {
@@ -464,6 +447,35 @@ export class DiceScene extends Phaser.Scene {
     };
 
     look(){
+        if (this.fiverPass && !this.nomames){
+            if (this.fiverText.visible){
+                this.fiverText.setVisible(false);
+                this.fiverTryText.setVisible(true);
+            }
+            let d = this.dice[0];
+            let allFive = this.dice.reduce((previous,die) => (previous && d.value === die.value && die.rollCount >=1), true);
+            
+            if(allFive){
+                this.events.emit('noMames',[NMType.ROLLED_5, 0]);
+                return
+            } else {
+                let rolledDice = [];
+                this.dice.forEach(die => {
+                    if (die.didRoll()){
+                        rolledDice.push(die);
+                    }
+                });
+                if (rolledDice.length >1){
+                    let value = rolledDice[0].value
+                    let notFailedFiver = rolledDice.reduce((previous, die) => previous && die.value === value, true);
+                    if (!notFailedFiver){
+                        this.events.emit('noMames',[NMType.FAILED_5, 0]);
+                        return
+                    }
+                }
+            }
+
+        }
         this.cup.setVisible(true);
     }
 

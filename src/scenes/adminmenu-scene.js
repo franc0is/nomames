@@ -1,6 +1,7 @@
 import { TextButton } from '../text-button';
 import { NMType } from '../message';
 
+
 export class AdminMenuScene extends Phaser.Scene {
     constructor() {
         super({key: 'adminMenuScene'});
@@ -121,7 +122,6 @@ export class AdminMenuScene extends Phaser.Scene {
         this.fiverButton = new TextButton(this, 0, 120, 'Pass 5',{
             onClick: () => {
                 this.events.emit('pass',[true]);
-                this.makeDeadButton.setEnabled(true);
             }
         });
         this.add.existing(this.fiverButton);
@@ -134,8 +134,6 @@ export class AdminMenuScene extends Phaser.Scene {
             }
         });
         this.add.existing(this.makeDeadButton);
-        this.makeDeadButton.setEnabled(false);
-
         this.deathMenu.add(this.makeDeadButton);
 
         this.noMamesButton = new TextButton(this, 0, 60, 'No Mames!', {
@@ -191,6 +189,14 @@ export class AdminMenuScene extends Phaser.Scene {
                 break;
             }
         }
+    }
+
+    onreset() {
+        this.cupRollButton.setEnabled(true);
+        this.cupLookButton.setEnabled(true);
+        this.nextPlayerButton.setEnabled(false);
+        this.fiverButton.setEnabled(false);
+        this.setMenuState(MenuState.ACTIONS);
     }
 }
 
