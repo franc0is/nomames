@@ -248,6 +248,11 @@ export class Server {
                     );
                     this.diceScene.scene.add('',popDie,true);
                 });
+
+                this.diceScene.events.addListener('roll',(event) => {
+                    this.diceScene.roll();
+                });
+
                 break;
             }
             case DiceUpdateMessage.getType(): {
