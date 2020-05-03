@@ -435,7 +435,6 @@ export class DiceScene extends Phaser.Scene {
     }
 
     onReset() {
-        this.scene.remove('adminMenuScene');
         this.scene.restart();
     }
 

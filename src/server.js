@@ -260,8 +260,7 @@ export class Server {
                             callbacks: {
                                 onClick: () => {
                                     this.diceScene.scene.stop('popUpScene');
-                                    let playersList = this.getPlayersList();
-                                    this.killPlayer(playersList.getMe());
+                                    this.killPlayer(this.playersList.getMe());
                                 }
                             }
                         },
@@ -360,7 +359,7 @@ export class Server {
                     }
                 }
                 this.playersList.setDirection(true);
-                this.onReset(player.isMe);
+                this.onReset(this.playersList.getActivePlayer().isMe);
                 break;
             }
             case NoMamesMessage.getType(): {
@@ -382,6 +381,7 @@ export class Server {
     onReset(value) {
         if(value){
             this.adminScene.onreset();
+            this.diceScene.setPlayable(true);
         } else {
             this.adminScene.setMenuState(MenuState.INACTIVE);
         }
