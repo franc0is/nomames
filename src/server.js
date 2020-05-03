@@ -7,7 +7,7 @@ import { Player } from './player'
 import { DiceScene } from './scenes/dice-scene';
 import { PopUpScene } from './scenes/popup-scene';
 import { NMAudioManager } from './audio';
-import { AdminMenuScene } from './scenes/adminmenu-scene';
+import { AdminMenuScene, MenuState } from './scenes/adminmenu-scene';
 
 
 /*
@@ -185,8 +185,9 @@ export class Server {
                 let uuid = deserialized.activePlayerUUID;
                 let player = this.playersList.getPlayerByUUID(uuid);
                 player.isActive = true;
+                let isMe = player.isMe;
                 this.playersList.orderByUUIDList(deserialized.uuidList);
-                this.callbacks.onGameStart(this.diceScene, this.adminScene, this.audioManager, this.playersList);
+                this.callbacks.onGameStart(this.diceScene, this.adminScene, this.audioManager, this.playersList, isMe);
                 this.scene = this.diceScene;
 
                 this.adminScene.events.addListener('pass',(event) => {
@@ -225,12 +226,25 @@ export class Server {
                     this.updateDice(update);
                 });
 
+                this.diceScene.events.addListener('cupRolled', (event) => {
+                    this.adminScene.cupRollButton.setEnabled(false);
+                })
+
                 this.diceScene.events.addListener('noMames',(event) => {
                     this.noMames(event[0], event[1]);
                 });
 
+                this.diceScene.events.addListener('allRolled',(event) => {
+                    this.adminScene.nextPlayerButton.setEnabled(true);
+                    this.adminScene.fiverButton.setEnabled(true);
+                });
+
                 this.adminScene.events.addListener('noMames',(event) => {
                     this.noMames(event[0], event[1]);
+                });
+
+                this.adminScene.events.addListener('accept',(event) => {
+                    this.diceScene.startTurn();
                 });
 
                 this.adminScene.events.addListener('killPlayer', (event) => {
@@ -311,6 +325,11 @@ export class Server {
                 let uuid = deserialized.activePlayerUUID;
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
+                if (this.playersList.getActivePlayer().isMe){
+                    this.adminScene.setMenuState(MenuState.START_TURN);
+                } else {
+                    this.adminScene.setMenuState(MenuState.INACTIVE);
+                }
                 this.diceScene.onFiver(deserialized.fiverPass);
                 this.diceScene.onPlayersUpdate(this.playersList);
                 break;
@@ -340,6 +359,7 @@ export class Server {
             }
             case NoMamesMessage.getType(): {
                 this.diceScene.onNoMames(deserialized.nmtype, deserialized.audionum);
+                this.adminScene.setMenuState(MenuState.DEATH);
                 break;
             }
             case ResetMessage.getType(): {

@@ -26,7 +26,7 @@ export class DiceScene extends Phaser.Scene {
 
     init(data) {
         this.audioManager = data.audioManager;
-        this.scene.launch('adminMenuScene', { audioManager: data.audioManager});
+        this.scene.launch('adminMenuScene', { audioManager: data.audioManager, isMe: data.isMe});
         this.playersList = data.playersList;
     }
 
@@ -241,8 +241,10 @@ export class DiceScene extends Phaser.Scene {
 
 
         if (this.firstpass) {
-            let allrolled = this.dice.reduce((previous, die) => (previous && die.didRoll()),
-                                             true /* initial value */);
+            let allrolled = this.dice.reduce((previous, die) => (previous && die.didRoll()), true /* initial value */);
+            if (allrolled){
+                this.events.emit('allRolled', []);
+            }
         }
 
         // we've taken an action that changes dice,
@@ -456,9 +458,17 @@ export class DiceScene extends Phaser.Scene {
 
     roll(){
         this.cup.roll();
+        if (this.cup.didRoll()){
+            this.events.emit('cupRolled', []);
+        }
     };
 
     look(){
         this.cup.setVisible(true);
+    }
+
+    startTurn() {
+        this.lookedButton.setEnabled(false);
+        this.rolledButton.setEnabled(false);
     }
 }

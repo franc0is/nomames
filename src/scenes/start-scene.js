@@ -19,10 +19,10 @@ export class StartScene extends Phaser.Scene {
             onPlayersUpdate: (players) => {
                 this.onPlayersUpdate(players);
             },
-            onGameStart: (scene, adminscene, audioManager, playersList) => {
+            onGameStart: (scene, adminscene, audioManager, playersList, isMe) => {
                 this.scene.add('',scene,false);
                 this.scene.add('',adminscene, false);
-                this.scene.start('diceScene', { audioManager: audioManager, playersList: playersList });
+                this.scene.start('diceScene', { audioManager: audioManager, playersList: playersList, isMe: isMe });
             }
         }, this);
 
