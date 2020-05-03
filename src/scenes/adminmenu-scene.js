@@ -1,4 +1,6 @@
 import { TextButton } from '../text-button';
+import { NMType } from '../message';
+
 
 
 export class AdminMenuScene extends Phaser.Scene {
@@ -14,6 +16,7 @@ export class AdminMenuScene extends Phaser.Scene {
 
     init(data) {
         this.audioManager = data.audioManager;
+        this.startactive = data.isMe;
     }
 
     updateText() {
@@ -139,7 +142,7 @@ export class AdminMenuScene extends Phaser.Scene {
         this.noMamesButton = new TextButton(this, 0, 60, 'No Mames!', {
             onClick: () => {
                 let even = Phaser.Math.RND.between(0, 1);
-                this.events.emit('noMames',[NMType.NO_MAMES, even]);
+                this.events.emit('noMames', [ NMType.NO_MAMES , even]);
             }
         });
         this.add.existing(this.noMamesButton);
@@ -149,10 +152,11 @@ export class AdminMenuScene extends Phaser.Scene {
             onClick: () => {
                 this.setMenuState(MenuState.ACTIONS);
                 this.actionMenu.allActive();
+                this.events.emit('accept',[]);
             }
         });
-        this.add.existing(this.noMamesButton);
-        this.startMenu.add(this.noMamesButton);
+        this.add.existing(this.acceptButton);
+        this.startMenu.add(this.acceptButton);
 
         this.updateText();
         this.startMenu.setVis(false);
@@ -160,6 +164,9 @@ export class AdminMenuScene extends Phaser.Scene {
         this.actionMenu.setVis(false);
         this.deathMenu.setVis(false);
 
+        if (this.startactive) {
+            this.setMenuState(MenuState.ACTIONS);
+        };
     }
 
     setMenuState(state){

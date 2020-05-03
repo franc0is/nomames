@@ -27,7 +27,7 @@ export class DiceScene extends Phaser.Scene {
 
     init(data) {
         this.audioManager = data.audioManager;
-        this.scene.launch('adminMenuScene', { audioManager: data.audioManager});
+        this.scene.launch('adminMenuScene', { audioManager: data.audioManager, isMe: data.isMe});
         this.playersList = data.playersList;
     }
 
@@ -296,14 +296,14 @@ export class DiceScene extends Phaser.Scene {
 
 
         if (this.firstpass) {
-            let allrolled = this.dice.reduce((previous, die) => (previous && die.didRoll()),
-                                             true /* initial value */);
-            //this.nextPlayerButton.setEnabled(allrolled);
-            //this.fiverButton.setEnabled(allrolled);
-        } else {
+            let allrolled = this.dice.reduce((previous, die) => (previous && die.didRoll()), true /* initial value */);
+            if (allrolled){
+                this.events.emit('allRolled', []);
+            }
+        } //else {
             //this.nextPlayerButton.setEnabled(!this.fiverPass);
             //this.fiverButton.setEnabled(!this.fiverPass);
-        }
+        //}
 
         // we've taken an action that changes dice,
         // no mames is disabled
@@ -522,9 +522,9 @@ export class DiceScene extends Phaser.Scene {
 
     roll(){
         this.cup.roll();
-        //this.cupRollButton.setEnabled(false);
-        //this.noMamesButton.setEnabled(false);
-        //this.cupLookButton.setEnabled(true);
+        if (this.cup.didRoll()){
+            this.events.emit('cupRolled', []);
+        }
     };
 
     look(){
@@ -538,5 +538,10 @@ export class DiceScene extends Phaser.Scene {
             //this.cupLookButton.setEnabled(true);
             //this.makeDeadButton.setEnabled(true);
         }
+    }
+
+    startTurn() {
+        this.lookedButton.setEnabled(false);
+        this.rolledButton.setEnabled(false);
     }
 }
