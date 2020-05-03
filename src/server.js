@@ -21,7 +21,6 @@ export class Server {
         this.widowUsed = false;
         this.lastTimetoken = 0;
         this.diceScene = new DiceScene();
-
         this.firstPass = true;
         this.clockwise = true;
         this.nomames = false;
@@ -189,29 +188,29 @@ export class Server {
                     if (!this.firstPass) {
                         this.passCup(this.clockwise, passFive);
                     } else {
-                            this.diceScene.scene.remove('popUpScene');
-                            let popDie = new PopUpScene(
-                                'Who would you like to pass to?',
-                                {
-                                    label: '[ '+this.playersList.getNextClockwise().name+' ]',
-                                    callbacks: {
-                                        onClick: () => {
-                                            this.diceScene.scene.stop('popUpScene');
-                                            this.passCup(true, passFive);
-                                        }
-                                    }
-                                },
-                                {
-                                    label: '[ '+this.playersList.getNextCounterClockwise().name+' ]',
-                                    callbacks: {
-                                        onClick: () => {
-                                            this.diceScene.scene.stop('popUpScene');
-                                            this.passCup(false, passFive);
-                                        }
+                        this.diceScene.scene.remove('popUpScene');
+                        let popDie = new PopUpScene(
+                            'Who would you like to pass to?',
+                            {
+                                label: '[ '+this.playersList.getNextClockwise().name+' ]',
+                                callbacks: {
+                                    onClick: () => {
+                                        this.diceScene.scene.stop('popUpScene');
+                                        this.passCup(true, passFive);
                                     }
                                 }
-                            );
-                            this.diceScene.scene.add('',popDie,true);
+                            },
+                            {
+                                label: '[ '+this.playersList.getNextCounterClockwise().name+' ]',
+                                callbacks: {
+                                    onClick: () => {
+                                        this.diceScene.scene.stop('popUpScene');
+                                        this.passCup(false, passFive);
+                                    }
+                                }
+                            }
+                        );
+                        this.diceScene.scene.add('',popDie,true);
                     }
                 });
 
@@ -223,6 +222,7 @@ export class Server {
                 this.diceScene.events.addListener('noMames',(event) => {
                     this.noMames(event[0], event[1]);
                 });
+
                 break;
             }
             case DiceUpdateMessage.getType(): {
