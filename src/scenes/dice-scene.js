@@ -143,18 +143,6 @@ export class DiceScene extends Phaser.Scene {
         });
     }
 
-
-    onPause(pauseText) {
-        this.scene.pause();
-        this.scene.launch('pauseScene', { pauseText: pauseText });
-    }
-
-    onResume() {
-        this.scene.stop('pauseScene');
-        this.scene.resume();
-
-    }
-
     onFiver(fp){
         this.fiverPass = fp;
         //reset all of the dice's rollcounts and tell dice and cup if 5 dice were passed
