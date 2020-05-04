@@ -181,6 +181,7 @@ export class AdminMenuScene extends Phaser.Scene {
                 break;
             }
             case MenuState.INACTIVE: {
+
                 break;
             }
             case MenuState.DEATH: {
@@ -195,7 +196,6 @@ export class AdminMenuScene extends Phaser.Scene {
         this.cupLookButton.setEnabled(true);
         this.nextPlayerButton.setEnabled(false);
         this.fiverButton.setEnabled(false);
-        console.log('admin scene in reset');   
         this.setMenuState(MenuState.ACTIONS);
     }
 }
