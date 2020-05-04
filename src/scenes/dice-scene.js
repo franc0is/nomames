@@ -6,6 +6,7 @@ import { Action } from '../message';
 import { NMType } from '../message';
 import { PlayersLabel } from '../playerslabel';
 import { NMAudioManager } from '../audio';
+import { EventDispatcher } from '../events';
 
 
 const NUM_DICE = 5;
@@ -21,7 +22,7 @@ export class DiceScene extends Phaser.Scene {
      */
     constructor() {
         super({ key: 'diceScene' });
-
+        this.eventDispatcher = EventDispatcher.getInstance();
     }
 
     init(data) {
@@ -245,7 +246,7 @@ export class DiceScene extends Phaser.Scene {
         if (this.firstpass) {
             let allrolled = this.dice.reduce((previous, die) => (previous && die.didRoll()), true /* initial value */);
             if (allrolled){
-                this.events.emit('allRolled', []);
+                this.eventDispatcher.emit('allRolled', []);
             }
         }
 
@@ -266,7 +267,7 @@ export class DiceScene extends Phaser.Scene {
             }
         };
 
-        this.events.emit('diceUpdate',[update]);
+        this.eventDispatcher.emit('diceUpdate',[update]);
 
         this.cup.setOnUpdateCb((action, dice) => {
             this.updateCup(action, dice)
@@ -442,7 +443,7 @@ export class DiceScene extends Phaser.Scene {
     roll(){
         this.cup.roll();
         if (this.cup.didRoll()){
-            this.events.emit('cupRolled', []);
+            this.eventDispatcher.emit('cupRolled', []);
         }
     };
 
@@ -456,7 +457,7 @@ export class DiceScene extends Phaser.Scene {
             let allFive = this.dice.reduce((previous,die) => (previous && d.value === die.value && die.rollCount >=1), true);
             
             if(allFive){
-                this.events.emit('noMames',[NMType.ROLLED_5, 0]);
+                this.eventDispatcher.emit('noMames',[NMType.ROLLED_5, 0]);
                 return
             } else {
                 let rolledDice = [];
@@ -469,7 +470,7 @@ export class DiceScene extends Phaser.Scene {
                     let value = rolledDice[0].value
                     let notFailedFiver = rolledDice.reduce((previous, die) => previous && die.value === value, true);
                     if (!notFailedFiver){
-                        this.events.emit('noMames',[NMType.FAILED_5, 0]);
+                        this.eventDispatcher.emit('noMames',[NMType.FAILED_5, 0]);
                         return
                     }
                 }

@@ -1,10 +1,12 @@
 import { TextButton } from '../text-button';
 import { NMType } from '../message';
+import { EventDispatcher } from '../events';
 
 
 export class AdminMenuScene extends Phaser.Scene {
     constructor() {
         super({key: 'adminMenuScene'});
+        this.eventDispatcher = EventDispatcher.getInstance();
     }
 
     preload(){
@@ -71,7 +73,7 @@ export class AdminMenuScene extends Phaser.Scene {
             onClick: () => {
                 this.adminMenu.setVis(false);
                 this.adminButton.setVisible(true);
-                this.events.emit('reset',[]);
+                this.eventDispatcher.emit('reset',[]);
             }
         });
         this.add.existing(this.resetButton);
@@ -88,7 +90,7 @@ export class AdminMenuScene extends Phaser.Scene {
 
         this.resyncButton = new TextButton(this, 20, 100, 'Re-Sync', {
             onClick: () => {
-                this.events.emit('resync',[]);
+                this.eventDispatcher.emit('resync',[]);
             }
         });
         this.add.existing(this.resyncButton);
@@ -96,7 +98,7 @@ export class AdminMenuScene extends Phaser.Scene {
 
         this.cupRollButton = new TextButton(this, 0, 30, 'Roll', {
             onClick: () => {
-                this.events.emit('roll',[]);
+                this.eventDispatcher.emit('roll',[]);
             }
         });
         this.add.existing(this.cupRollButton);
@@ -104,7 +106,7 @@ export class AdminMenuScene extends Phaser.Scene {
 
         this.cupLookButton = new TextButton(this, 0, 60, 'Look', {
             onClick: () => {
-                this.events.emit('look',[]);
+                this.eventDispatcher.emit('look',[]);
             }
         });
         this.add.existing(this.cupLookButton);
@@ -112,7 +114,7 @@ export class AdminMenuScene extends Phaser.Scene {
 
         this.nextPlayerButton = new TextButton(this, 0, 90, 'Pass', {
             onClick: () => {
-                this.events.emit('pass',[false]);
+                this.eventDispatcher.emit('pass',[false]);
             }
         });
         this.add.existing(this.nextPlayerButton);
@@ -121,7 +123,7 @@ export class AdminMenuScene extends Phaser.Scene {
 
         this.fiverButton = new TextButton(this, 0, 120, 'Pass 5',{
             onClick: () => {
-                this.events.emit('pass',[true]);
+                this.eventDispatcher.emit('pass',[true]);
             }
         });
         this.add.existing(this.fiverButton);
@@ -130,7 +132,7 @@ export class AdminMenuScene extends Phaser.Scene {
 
         this.makeDeadButton = new TextButton(this, 0, 30, 'Die', {
             onClick: () => {
-                this.events.emit('killPlayer',[]);
+                this.eventDispatcher.emit('killPlayer',[]);
             }
         });
         this.add.existing(this.makeDeadButton);
@@ -139,7 +141,7 @@ export class AdminMenuScene extends Phaser.Scene {
         this.noMamesButton = new TextButton(this, 0, 60, 'No Mames!', {
             onClick: () => {
                 let even = Phaser.Math.RND.between(0, 1);
-                this.events.emit('noMames', [ NMType.NO_MAMES , even]);
+                this.eventDispatcher.emit('noMames', [ NMType.NO_MAMES , even]);
             }
         });
         this.add.existing(this.noMamesButton);
@@ -149,7 +151,7 @@ export class AdminMenuScene extends Phaser.Scene {
             onClick: () => {
                 this.setMenuState(MenuState.ACTIONS);
                 this.actionMenu.allActive();
-                this.events.emit('accept',[]);
+                this.eventDispatcher.emit('accept',[]);
             }
         });
         this.add.existing(this.acceptButton);

@@ -8,6 +8,7 @@ import { DiceScene } from './scenes/dice-scene';
 import { PopUpScene } from './scenes/popup-scene';
 import { NMAudioManager } from './audio';
 import { AdminMenuScene, MenuState } from './scenes/adminmenu-scene';
+import { EventDispatcher } from './events';
 
 
 /*
@@ -30,6 +31,7 @@ export class Server {
         this.fiverPass = false;
         this.audioManager = new NMAudioManager(this.diceScene);
         this.adminScene = new AdminMenuScene();
+        this.eventDispatcher = EventDispatcher.getInstance();
 
         this.pubnub = new PubNub({
             subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',
@@ -191,7 +193,7 @@ export class Server {
                 this.callbacks.onGameStart(this.diceScene, this.adminScene, this.audioManager, this.playersList, isMe);
                 this.scene = this.diceScene;
 
-                this.adminScene.events.addListener('pass',(event) => {
+                this.eventDispatcher.on('pass',(event) => {
                     let passFive = event[0];
                     if (!this.firstPass) {
                         this.passCup(this.clockwise, passFive);
@@ -222,36 +224,36 @@ export class Server {
                     }
                 });
 
-                this.diceScene.events.addListener('diceUpdate',(event) => {
+                this.eventDispatcher.on('diceUpdate',(event) => {
                     let update = event[0];
                     this.updateDice(update);
                 });
 
-                this.diceScene.events.addListener('cupRolled', (event) => {
+                this.eventDispatcher.on('cupRolled', (event) => {
                     this.adminScene.cupRollButton.setEnabled(false);
                 })
 
-                this.diceScene.events.addListener('noMames',(event) => {
+                this.eventDispatcher.on('noMames',(event) => {
                     this.noMames(event[0], event[1]);
                 });
 
-                this.diceScene.events.addListener('allRolled',(event) => {
+                this.eventDispatcher.on('allRolled',(event) => {
                     this.adminScene.nextPlayerButton.setEnabled(true);
                     this.adminScene.fiverButton.setEnabled(true);
                 });
 
-                this.adminScene.events.addListener('noMames',(event) => {
+                this.eventDispatcher.on('noMames',(event) => {
                     this.noMames(event[0], event[1]);
                 });
 
-                this.adminScene.events.addListener('accept',(event) => {
+                this.eventDispatcher.on('accept',(event) => {
                     this.diceScene.setPlayable(true);
                     if (this.fiverPass){
                         this.diceScene.look();
                     }
                 });
 
-                this.adminScene.events.addListener('killPlayer', (event) => {
+                this.eventDispatcher.on('killPlayer', (event) => {
                     this.diceScene.scene.remove('popUpScene');
                     let popDie = new PopUpScene(
                         'You are about to loose a life',
@@ -276,15 +278,15 @@ export class Server {
                     this.diceScene.scene.add('',popDie,true);
                 });
 
-                this.adminScene.events.addListener('roll',(event) => {
+                this.eventDispatcher.on('roll',(event) => {
                     this.diceScene.roll();
                 });
 
-                this.adminScene.events.addListener('look',(event) => {
+                this.eventDispatcher.on('look',(event) => {
                     this.diceScene.look();
                 });
 
-                this.adminScene.events.addListener('reset', (event) => {
+                this.eventDispatcher.on('reset', (event) => {
                     this.diceScene.scene.remove('popUpScene');
                     let popReset = new PopUpScene(
                         '  Continue with game reset?',
@@ -309,7 +311,7 @@ export class Server {
                     this.diceScene.scene.add('',popReset,true);
                 });
 
-                this.adminScene.events.addListener('resync', (event) => {
+                this.eventDispatcher.on('resync', (event) => {
                     this.resync();
                 });
 
@@ -384,14 +386,10 @@ export class Server {
         this.nomames = false
         this.fiverPass = false
         let active = this.playersList.getActivePlayer().isMe;
-        console.log(this.playersList.getActivePlayer());
-        console.log(active);
-        if(active){
-            console.log('loading aciton menu');
+        if (active){
             this.adminScene.onreset();
             this.diceScene.setPlayable(true);
         } else {
-            console.log('clearing menus')
             this.adminScene.setMenuState(MenuState.INACTIVE);
         }
     }
