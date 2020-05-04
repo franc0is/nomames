@@ -26,8 +26,8 @@ export class DiceScene extends Phaser.Scene {
 
     init(data) {
         this.audioManager = data.audioManager;
-        this.scene.launch('adminMenuScene', { audioManager: data.audioManager, isMe: data.isMe});
         this.playersList = data.playersList;
+        this.scene.bringToTop('adminMenuScene');
     }
 
     preload() {
@@ -434,7 +434,8 @@ export class DiceScene extends Phaser.Scene {
         };
     }
 
-    onReset() {
+    onReset(playersList) {
+        this.playersList = playersList;
         this.scene.restart();
     }
 
