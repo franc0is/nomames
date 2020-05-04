@@ -8,6 +8,7 @@ import { DiceScene } from './scenes/dice-scene';
 import { PopUpScene } from './scenes/popup-scene';
 import { NMAudioManager } from './audio';
 import { AdminMenuScene, MenuState } from './scenes/adminmenu-scene';
+import { EventDispatcher } from './events';
 
 
 /*
@@ -30,6 +31,7 @@ export class Server {
         this.fiverPass = false;
         this.audioManager = new NMAudioManager(this.diceScene);
         this.adminScene = new AdminMenuScene();
+        this.eventDispatcher = EventDispatcher.getInstance();
 
         this.pubnub = new PubNub({
             subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',
@@ -48,12 +50,14 @@ export class Server {
                 }
                 if (statusEvent.category === "PNNetworkDownCategory") {
                     // no internet
-                    this.scene.onPause('Disconnected :-(');
+                    this.scene.pause();
+                    this.scene.launch('pauseScene', { pauseText: 'Disconnected :-(' });
                 }
                 if (statusEvent.category === "PNNetworkUpCategory") {
                     // internet back
                     this.connect(this.channel);
-                    this.scene.onResume();
+                    this.scene.stop('pauseScene');
+                    this.scene.resume();
                 }
                 if (statusEvent.category === "PNTimeoutCategory") {
                     // network timeout
@@ -68,6 +72,132 @@ export class Server {
                 this.handleMessage(msg.message, fromMe);
             }
         })
+
+        this.registerEventHandlers();
+    }
+
+    registerEventHandlers() {
+        this.eventDispatcher.on('pass',(event) => {
+            let passFive = event[0];
+            if (!this.firstPass) {
+                this.passCup(this.clockwise, passFive);
+            } else {
+                this.diceScene.scene.remove('popUpScene');
+                let popDie = new PopUpScene(
+                    'Who would you like to pass to?',
+                    {
+                        label: '[ '+this.playersList.getNextClockwise().name+' ]',
+                        callbacks: {
+                            onClick: () => {
+                                this.diceScene.scene.stop('popUpScene');
+                                this.passCup(true, passFive);
+                            }
+                        }
+                    },
+                    {
+                        label: '[ '+this.playersList.getNextCounterClockwise().name+' ]',
+                        callbacks: {
+                            onClick: () => {
+                                this.diceScene.scene.stop('popUpScene');
+                                this.passCup(false, passFive);
+                            }
+                        }
+                    }
+                );
+                this.diceScene.scene.add('',popDie,true);
+            }
+        });
+
+        this.eventDispatcher.on('diceUpdate',(event) => {
+            let update = event[0];
+            this.updateDice(update);
+        });
+
+        this.eventDispatcher.on('cupRolled', (event) => {
+            this.adminScene.cupRollButton.setEnabled(false);
+        })
+
+        this.eventDispatcher.on('noMames',(event) => {
+            this.noMames(event[0], event[1]);
+        });
+
+        this.eventDispatcher.on('allRolled',(event) => {
+            this.adminScene.nextPlayerButton.setEnabled(true);
+            this.adminScene.fiverButton.setEnabled(true);
+        });
+
+        this.eventDispatcher.on('noMames',(event) => {
+            this.noMames(event[0], event[1]);
+        });
+
+        this.eventDispatcher.on('accept',(event) => {
+            this.diceScene.setPlayable(true);
+            if (this.fiverPass){
+                this.diceScene.look();
+            }
+        });
+
+        this.eventDispatcher.on('killPlayer', (event) => {
+            this.diceScene.scene.remove('popUpScene');
+            let popDie = new PopUpScene(
+                'You are about to loose a life',
+                {
+                    label: '[ confirm ]',
+                    callbacks: {
+                        onClick: () => {
+                            this.diceScene.scene.stop('popUpScene');
+                            this.killPlayer(this.playersList.getMe());
+                        }
+                    }
+                },
+                {
+                    label: '[ cancel ]',
+                    callbacks: {
+                        onClick: () => {
+                            this.diceScene.scene.stop('popUpScene');
+                        }
+                    }
+                }
+            );
+            this.diceScene.scene.add('',popDie,true);
+        });
+
+        this.eventDispatcher.on('roll',(event) => {
+            this.diceScene.roll();
+        });
+
+        this.eventDispatcher.on('look',(event) => {
+            this.diceScene.look();
+        });
+
+        this.eventDispatcher.on('reset', (event) => {
+            this.diceScene.scene.remove('popUpScene');
+            let popReset = new PopUpScene(
+                '  Continue with game reset?',
+                {
+                    label: '[ continue ]',
+                    callbacks: {
+                        onClick: () => {
+                            this.diceScene.scene.stop('popUpScene');
+                            this.reset();
+                        }
+                    }
+                },
+                {
+                    label: '[ cancel ]',
+                    callbacks: {
+                        onClick: () => {
+                            this.diceScene.scene.stop('popUpScene');
+                        }
+                    }
+                }
+            );
+            this.diceScene.scene.add('',popReset,true);
+        });
+
+        this.eventDispatcher.on('resync', (event) => {
+            this.resync();
+        });
     }
 
     setCallbacks(callbacks) {
@@ -190,129 +320,6 @@ export class Server {
                 this.playersList.orderByUUIDList(deserialized.uuidList);
                 this.callbacks.onGameStart(this.diceScene, this.adminScene, this.audioManager, this.playersList, isMe);
                 this.scene = this.diceScene;
-
-                this.adminScene.events.addListener('pass',(event) => {
-                    let passFive = event[0];
-                    if (!this.firstPass) {
-                        this.passCup(this.clockwise, passFive);
-                    } else {
-                        this.diceScene.scene.remove('popUpScene');
-                        let popDie = new PopUpScene(
-                            'Who would you like to pass to?',
-                            {
-                                label: '[ '+this.playersList.getNextClockwise().name+' ]',
-                                callbacks: {
-                                    onClick: () => {
-                                        this.diceScene.scene.stop('popUpScene');
-                                        this.passCup(true, passFive);
-                                    }
-                                }
-                            },
-                            {
-                                label: '[ '+this.playersList.getNextCounterClockwise().name+' ]',
-                                callbacks: {
-                                    onClick: () => {
-                                        this.diceScene.scene.stop('popUpScene');
-                                        this.passCup(false, passFive);
-                                    }
-                                }
-                            }
-                        );
-                        this.diceScene.scene.add('',popDie,true);
-                    }
-                });
-
-                this.diceScene.events.addListener('diceUpdate',(event) => {
-                    let update = event[0];
-                    this.updateDice(update);
-                });
-
-                this.diceScene.events.addListener('cupRolled', (event) => {
-                    this.adminScene.cupRollButton.setEnabled(false);
-                })
-
-                this.diceScene.events.addListener('noMames',(event) => {
-                    this.noMames(event[0], event[1]);
-                });
-
-                this.diceScene.events.addListener('allRolled',(event) => {
-                    this.adminScene.nextPlayerButton.setEnabled(true);
-                    this.adminScene.fiverButton.setEnabled(true);
-                });
-
-                this.adminScene.events.addListener('noMames',(event) => {
-                    this.noMames(event[0], event[1]);
-                });
-
-                this.adminScene.events.addListener('accept',(event) => {
-                    this.diceScene.setPlayable(true);
-                    if (this.fiverPass){
-                        this.diceScene.look();
-                    }
-                });
-
-                this.adminScene.events.addListener('killPlayer', (event) => {
-                    this.diceScene.scene.remove('popUpScene');
-                    let popDie = new PopUpScene(
-                        'You are about to loose a life',
-                        {
-                            label: '[ confirm ]',
-                            callbacks: {
-                                onClick: () => {
-                                    this.diceScene.scene.stop('popUpScene');
-                                    this.killPlayer(this.playersList.getMe());
-                                }
-                            }
-                        },
-                        {
-                            label: '[ cancel ]',
-                            callbacks: {
-                                onClick: () => {
-                                    this.diceScene.scene.stop('popUpScene');
-                                }
-                            }
-                        }
-                    );
-                    this.diceScene.scene.add('',popDie,true);
-                });
-
-                this.adminScene.events.addListener('roll',(event) => {
-                    this.diceScene.roll();
-                });
-
-                this.adminScene.events.addListener('look',(event) => {
-                    this.diceScene.look();
-                });
-
-                this.adminScene.events.addListener('reset', (event) => {
-                    this.diceScene.scene.remove('popUpScene');
-                    let popReset = new PopUpScene(
-                        '  Continue with game reset?',
-                        {
-                            label: '[ continue ]',
-                            callbacks: {
-                                onClick: () => {
-                                    this.diceScene.scene.stop('popUpScene');
-                                    this.reset();
-                                }
-                            }
-                        },
-                        {
-                            label: '[ cancel ]',
-                            callbacks: {
-                                onClick: () => {
-                                    this.diceScene.scene.stop('popUpScene');
-                                }
-                            }
-                        }
-                    );
-                    this.diceScene.scene.add('',popReset,true);
-                });
-
-                this.adminScene.events.addListener('resync', (event) => {
-                    this.resync();
-                });
-
                 break;
             }
             case DiceUpdateMessage.getType(): {
@@ -384,14 +391,10 @@ export class Server {
         this.nomames = false
         this.fiverPass = false
         let active = this.playersList.getActivePlayer().isMe;
-        console.log(this.playersList.getActivePlayer());
-        console.log(active);
-        if(active){
-            console.log('loading aciton menu');
+        if (active){
             this.adminScene.onreset();
             this.diceScene.setPlayable(true);
         } else {
-            console.log('clearing menus')
             this.adminScene.setMenuState(MenuState.INACTIVE);
         }
     }
