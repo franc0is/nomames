@@ -20,6 +20,7 @@ export class JoinScene extends Phaser.Scene {
             onGameStart: (scene, adminscene, audioManager, playersList, isMe) => {
                 this.scene.add('',scene,false);
                 this.scene.add('',adminscene, false);
+                this.scene.launch('adminMenuScene', { audioManager: audioManager, isMe: isMe});
                 this.scene.start('diceScene', { audioManager: audioManager, playersList: playersList, isMe: isMe});
             }
         }, this);

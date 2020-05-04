@@ -260,8 +260,7 @@ export class Server {
                             callbacks: {
                                 onClick: () => {
                                     this.diceScene.scene.stop('popUpScene');
-                                    let playersList = this.getPlayersList();
-                                    this.killPlayer(playersList.getMe());
+                                    this.killPlayer(this.playersList.getMe());
                                 }
                             }
                         },
@@ -360,7 +359,7 @@ export class Server {
                     }
                 }
                 this.playersList.setDirection(true);
-                this.onReset(player.isMe);
+                this.onReset();
                 break;
             }
             case NoMamesMessage.getType(): {
@@ -373,22 +372,28 @@ export class Server {
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
                 this.playersList.setDirection(true);
-                this.onReset(this.playersList.getPlayerByUUID(uuid).isMe);
+                this.onReset();
                 break;
             }
         }
     }
 
-    onReset(value) {
-        if(value){
-            this.adminScene.onreset();
-        } else {
-            this.adminScene.setMenuState(MenuState.INACTIVE);
-        }
-        this.diceScene.onReset();
+    onReset() {
+        this.diceScene.onReset(this.playersList);
         this.firstPass = true;
         this.nomames = false
         this.fiverPass = false
+        let active = this.playersList.getActivePlayer().isMe;
+        console.log(this.playersList.getActivePlayer());
+        console.log(active);
+        if(active){
+            console.log('loading aciton menu');
+            this.adminScene.onreset();
+            this.diceScene.setPlayable(true);
+        } else {
+            console.log('clearing menus')
+            this.adminScene.setMenuState(MenuState.INACTIVE);
+        }
     }
 
     handlePresence(presenceEvent) {
