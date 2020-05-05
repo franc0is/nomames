@@ -35,6 +35,7 @@ export class JoinScene extends Phaser.Scene {
                 let inputText = this.hostJoinEl.getChildByName('gameIdField');
                 if (inputText.value !== '') {
                     this.hostJoinEl.removeListener('click');
+                    this.hostJoinEl.removeListener('keypress');
                     this.server.connect(inputText.value);
                     this.nameEl.setVisible(true);
                     this.hostJoinEl.setVisible(false);
@@ -44,6 +45,26 @@ export class JoinScene extends Phaser.Scene {
                 }
             }
         });
+
+        this.hostJoinEl.addListener('keypress')
+        this.hostJoinEl.on('keypress', (e) => {
+            if (e.key === 'Enter') {
+                // code for enter
+                let inputText = this.hostJoinEl.getChildByName('gameIdField');
+
+                if (inputText.value !== '') {
+                    this.hostJoinEl.removeListener('click');
+                    this.hostJoinEl.removeListener('keypress');
+                    this.server.connect(inputText.value);
+                    this.nameEl.setVisible(true);
+                    this.hostJoinEl.setVisible(false);
+                    this.channelText.setVisible(true);
+                    this.channelText.setText('GameID: ' + inputText.value);
+                    this.playersLabel.setVisible(true);
+                }
+            }
+        });
+        
 
         this.channelText = this.add.text(200, 150, '', { color: '#0f0', fontsize: '36px' });
         this.channelText.setVisible(false);
@@ -56,6 +77,7 @@ export class JoinScene extends Phaser.Scene {
                 let inputText = this.nameEl.getChildByName('nameField');
                 if (inputText.value !== '') {
                     this.nameEl.removeListener('click');
+                    this.nameEl.removeListener('keypress');
                     this.nameEl.setVisible(false);
                     this.server.setName(inputText.value);
                     this.nameText.setText('Name: ' +inputText.value);
@@ -63,6 +85,23 @@ export class JoinScene extends Phaser.Scene {
                 }
             }
 
+        });
+
+        this.nameEl.addListener('keypress')
+        this.nameEl.on('keypress', (e) => {
+            if (e.key === 'Enter') {
+                // code for enter
+                let inputText = this.nameEl.getChildByName('nameField');
+
+                if (inputText.value !== '') {
+                    this.nameEl.removeListener('click');
+                    this.nameEl.removeListener('keypress');
+                    this.nameEl.setVisible(false);
+                    this.server.setName(inputText.value);
+                    this.nameText.setText('Name: ' +inputText.value);
+                    this.nameText.setVisible(true);
+                }
+            }
         });
 
         
