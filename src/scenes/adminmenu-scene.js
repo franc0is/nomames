@@ -71,7 +71,7 @@ export class AdminMenuScene extends Phaser.Scene {
             onClick: () => {
                 this.adminMenu.setVis(false);
                 this.adminButton.setVisible(true);
-                this.events.emit('reset',[]);
+                this.game.events.emit('reset',[]);
             }
         });
         this.add.existing(this.resetButton);

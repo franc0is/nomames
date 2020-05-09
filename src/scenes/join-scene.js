@@ -17,13 +17,11 @@ export class JoinScene extends Phaser.Scene {
             onPlayersUpdate: (players) => {
                 this.onPlayersUpdate(players);
             },
-            onGameStart: (scene, adminscene, audioManager, playersList, isMe) => {
-                this.scene.add('',scene,false);
-                this.scene.add('',adminscene, false);
+            onGameStart: (audioManager, playersList, isMe) => {
                 this.scene.launch('adminMenuScene', { audioManager: audioManager, isMe: isMe});
                 this.scene.start('diceScene', { audioManager: audioManager, playersList: playersList, isMe: isMe});
             }
-        }, this);
+        }, this, this.game, this.scene.get('diceScene'), this.scene.get('adminMenuScene'));
 
 
         let text = this.add.text(50,30,'Welcome! \n\nTo join, enter the game ID.',{ color: 'white', fontSize: '20px '});

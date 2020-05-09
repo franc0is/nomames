@@ -2,12 +2,11 @@ import PubNub from 'pubnub';
 import { Message, StartGameMessage, DiceUpdateMessage,
          PassCupMessage, KillPlayerMessage, NoMamesMessage,
          ResetMessage } from './message';
-import { PlayersList } from './playerslist'
-import { Player } from './player'
-import { DiceScene } from './scenes/dice-scene';
+import { PlayersList } from './playerslist';
+import { Player } from './player';
 import { PopUpScene } from './scenes/popup-scene';
 import { NMAudioManager } from './audio';
-import { AdminMenuScene, MenuState } from './scenes/adminmenu-scene';
+import { MenuState } from './scenes/adminmenu-scene';
 
 
 /*
@@ -15,21 +14,22 @@ import { AdminMenuScene, MenuState } from './scenes/adminmenu-scene';
  */
 
 export class Server {
-    constructor(callbacks, scene) {
+    constructor(callbacks, scene, game, diceScene, adminScene) {
         // TODO change this to a map uuid => player
         this.setCallbacks(callbacks);
         this.scene = scene;
+        var events = game.events;
         this.myUUID = PubNub.generateUUID();
         this.playersList = new PlayersList(this.myUUID);
         this.widowUsed = false;
         this.lastTimetoken = 0;
-        this.diceScene = new DiceScene();
+        this.diceScene = diceScene;
         this.firstPass = true;
         this.clockwise = true;
         this.nomames = false;
         this.fiverPass = false;
         this.audioManager = new NMAudioManager(this.diceScene);
-        this.adminScene = new AdminMenuScene();
+        this.adminScene = adminScene;
 
         this.pubnub = new PubNub({
             subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',
@@ -67,7 +67,33 @@ export class Server {
                 this.lastTimetoken = msg.timetoken;
                 this.handleMessage(msg.message, fromMe);
             }
-        })
+        });
+
+        events.on('reset', (event) => {
+            this.diceScene.scene.remove('popUpScene');
+            let popReset = new PopUpScene(
+                '  Continue with game reset?',
+                {
+                    label: '[ continue ]',
+                    callbacks: {
+                        onClick: () => {
+                            this.diceScene.scene.stop('popUpScene');
+                            this.reset();
+                        }
+                    }
+                },
+                {
+                    label: '[ cancel ]',
+                    callbacks: {
+                        onClick: () => {
+                            this.diceScene.scene.stop('popUpScene');
+                        }
+                    }
+                }
+            );
+            this.diceScene.scene.add('',popReset,true);
+        });
+
     }
 
     setCallbacks(callbacks) {
@@ -176,7 +202,7 @@ export class Server {
         let me = this.playersList.getMe();
         let msg = new ResetMessage(me.uuid);
         this.publish(msg);
-        this.adminScene.onReset();
+        this.adminScene.onreset();
     }
 
     handleMessage(msg, fromMe) {
@@ -188,7 +214,7 @@ export class Server {
                 player.isActive = true;
                 let isMe = player.isMe;
                 this.playersList.orderByUUIDList(deserialized.uuidList);
-                this.callbacks.onGameStart(this.diceScene, this.adminScene, this.audioManager, this.playersList, isMe);
+                this.callbacks.onGameStart(this.audioManager, this.playersList, isMe);
                 this.scene = this.diceScene;
 
                 this.adminScene.events.addListener('pass',(event) => {
@@ -284,31 +310,6 @@ export class Server {
                     this.diceScene.look();
                 });
 
-                this.adminScene.events.addListener('reset', (event) => {
-                    this.diceScene.scene.remove('popUpScene');
-                    let popReset = new PopUpScene(
-                        '  Continue with game reset?',
-                        {
-                            label: '[ continue ]',
-                            callbacks: {
-                                onClick: () => {
-                                    this.diceScene.scene.stop('popUpScene');
-                                    this.reset();
-                                }
-                            }
-                        },
-                        {
-                            label: '[ cancel ]',
-                            callbacks: {
-                                onClick: () => {
-                                    this.diceScene.scene.stop('popUpScene');
-                                }
-                            }
-                        }
-                    );
-                    this.diceScene.scene.add('',popReset,true);
-                });
-
                 this.adminScene.events.addListener('resync', (event) => {
                     this.resync();
                 });
@@ -384,14 +385,10 @@ export class Server {
         this.nomames = false
         this.fiverPass = false
         let active = this.playersList.getActivePlayer().isMe;
-        console.log(this.playersList.getActivePlayer());
-        console.log(active);
         if(active){
-            console.log('loading aciton menu');
             this.adminScene.onreset();
             this.diceScene.setPlayable(true);
         } else {
-            console.log('clearing menus')
             this.adminScene.setMenuState(MenuState.INACTIVE);
         }
     }
