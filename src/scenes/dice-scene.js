@@ -209,7 +209,7 @@ export class DiceScene extends Phaser.Scene {
                 this.updateTable(action, dice);
             })
         }
-        this.updateDice(action);
+        this.updateDice(action, -1);
     }
 
     moveCup(action, dice) {
@@ -225,10 +225,15 @@ export class DiceScene extends Phaser.Scene {
 
 
     updateTable(action, dice) {
-        this.updateDice(action);
+        let i = -1;
+        if (action === Action.ROLL_ONE) {
+            let tableDice = this.table.getDice();
+            i = tableDice.findIndex((die) => (die === dice[0]));   
+        }
+        this.updateDice(action, i);
     }
 
-    updateDice(action) {
+    updateDice(action, indieIndex) {
         this.cup.setOnUpdateCb((action, dice) => {});
         this.table.setOnUpdateCb((action, dice) => {});
         this.cup.setOnMoveCb((action, dice) => {});
@@ -262,7 +267,8 @@ export class DiceScene extends Phaser.Scene {
                 'dice': this.cup.getDice().map(d => [d.getValue(),d.rollCount])
             },
             'table': {
-                'dice': this.table.getDice().map(d => [d.getValue(),d.rollCount])
+                'dice': this.table.getDice().map(d => [d.getValue(),d.rollCount]),
+                'indie': indieIndex
             }
         };
 
@@ -307,6 +313,8 @@ export class DiceScene extends Phaser.Scene {
             switch (msg.action) {
                 case Action.ROLL_ONE: {
                     //remove all dice
+                    let indie = msg.table.indie;
+                    console.log('indie before cup: '+indie);
                     this.cup.getDice().forEach(d => {
                         this.cup.remove(d);
                     });
@@ -320,6 +328,7 @@ export class DiceScene extends Phaser.Scene {
                         this.dice[i].setRoll(die[1]);
                         this.dice[i].setValue(die[0]);
                         this.cup.add(this.dice[i]);
+                        indie++
                         i++
                     });
                     msg.table.dice.forEach(die => {
@@ -330,9 +339,10 @@ export class DiceScene extends Phaser.Scene {
                     });
                     console.assert(i === 5);
 
-                    let new_value = this.dice[4].getValue()
-                    this.dice[4].setValue(0);
-                    this.dice[4].animate(function(target) {
+                    console.log('indie index: '+ indie)
+                    let new_value = this.dice[indie].getValue()
+                    this.dice[indie].setValue(0);
+                    this.dice[indie].animate(function(target) {
                         target.setValue(new_value);
                     });
                 
