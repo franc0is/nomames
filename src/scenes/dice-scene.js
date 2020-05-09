@@ -447,13 +447,17 @@ export class DiceScene extends Phaser.Scene {
     };
 
     look(){
+        this.cup.setVisible(true);
+    }
+
+    checkFive() {
         if (this.fiverPass && !this.nomames){
             if (this.fiverText.visible){
                 this.fiverText.setVisible(false);
                 this.fiverTryText.setVisible(true);
             }
             let d = this.dice[0];
-            let allFive = this.dice.reduce((previous,die) => (previous && d.value === die.value && die.rollCount >=1), true);
+            let allFive = this.dice.reduce((previous,die) => (previous && d.value === die.value && die.rollCount >=1 && die.visible), true);
             
             if(allFive){
                 this.events.emit('noMames',[NMType.ROLLED_5, 0]);
@@ -474,9 +478,7 @@ export class DiceScene extends Phaser.Scene {
                     }
                 }
             }
-
         }
-        this.cup.setVisible(true);
     }
 
     startTurn() {

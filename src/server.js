@@ -160,6 +160,7 @@ export class Server {
     updateDice(update) {
         let msg = new DiceUpdateMessage(update);
         this.publish(msg);
+        this.diceScene.checkFive();
     }
 
     killPlayer(player) {
