@@ -384,8 +384,6 @@ export class Server {
             }
             case SeatPlayerMessage.getType(): {
                 if (!fromMe) {
-                    console.log('seating message: ');
-                    console.log({deserialized});
                     this.callbacks.onSeatPlayer(deserialized.seats);
                 }
                 break;
