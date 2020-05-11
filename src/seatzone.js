@@ -15,8 +15,13 @@ export class SeatZone extends Phaser.GameObjects.Zone {
         this.graphics = scene.add.graphics();
         this.graphics.lineStyle(2, 0xffff00);
         this.graphics.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width - 20, this.height - 20);
+        this.onUpdateCb = () => {};
     }
 
+    setUpdate(CB){
+        this.onUpdateCb = CB;
+    }
+    
     reorder() {
         var objs = this.container.getName();
         var i = 1;
