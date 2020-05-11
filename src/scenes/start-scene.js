@@ -46,7 +46,7 @@ export class StartScene extends Phaser.Scene {
                     this.nameText.setText('Name: ' +inputText.value);
                     this.welcomeText.setVisible(false);
                     this.nameText.setVisible(true);
-                    this.startButton.setVisible(true);
+                    this.doneSeatingButton.setVisible(true);
                     this.directionText.setVisible(true);
                     this.randomizeButton.setVisible(true);
                     for (let seat of this.seats) {
@@ -61,7 +61,17 @@ export class StartScene extends Phaser.Scene {
         this.directionText = this.add.text(50,350,'To set the order of players,\ndrag players to a seat or \nclick on "RANDOMIZE SEATING"', {color: '#0f0', fontsize: '24px'});
         this.directionText.setVisible(false);
 
-        this.startButton = new TextButton(this, 90, 250, '[ START ]', {
+        this.startButton = new TextButton(this, 50, 250, '[ START ]', {
+            onClick: () => {
+                let names = this.getSeated();
+                this.server.playersList.orderByUUIDList(names);
+                this.server.startGame();
+            }
+        });
+        this.add.existing(this.startButton);
+        this.startButton.setVisible(false);
+
+        this.doneSeatingButton = new TextButton (this, 50, 250, '[DONE SEATING]', {
             onClick: () => {
                 if (this.getUnseated()){
                     this.scene.remove('popUpScene');
@@ -72,9 +82,11 @@ export class StartScene extends Phaser.Scene {
                                 callbacks: {
                                     onClick: () => {
                                         this.scene.stop('popUpScene');
-                                        let names = this.getSeated();
-                                        this.server.playersList.orderByUUIDList(names);
-                                        this.server.startGame();
+                                        this.doneSeatingButton.setVisible(false);
+                                        this.randomizeButton.setVisible(false);
+                                        this.directionText.setVisible(false);
+                                        this.startButton.setVisible(true);
+                                        this.rollFirstButton.setVisible(true);
                                     }
                                 }
                             },
@@ -88,15 +100,25 @@ export class StartScene extends Phaser.Scene {
                             });
                     this.scene.add('',popReset,true);
                 }else {
-                    let names = this.getSeated();
-                    this.server.playersList.orderByUUIDList(names);
-                    this.server.startGame();
+                    this.doneSeatingButton.setVisible(false);
+                    this.randomizeButton.setVisible(false);
+                    this.directionText.setVisible(false);
+                    this.startButton.setVisible(true);
+                    this.rollFirstButton.setVisible(true);
                 }
             }
         });
-        this.add.existing(this.startButton);
-        this.startButton.setVisible(false);
-        this.startButton.setEnabled(false);
+        this.add.existing(this.doneSeatingButton);
+        this.doneSeatingButton.setVisible(false);
+        this.doneSeatingButton.setEnabled(false);
+
+        this.rollFirstButton = new TextButton (this, 50, 280, '[ROLL FOR FIRST]', {
+            onClick: () => {
+
+            }
+        });
+        this.add.existing(this.rollFirstButton);
+        this.rollFirstButton.setVisible(false);
 
         let playersList = this.server.getPlayersList();
         this.playersLabel = new DraggableLabel(this, 5, 400, playersList);
@@ -161,7 +183,7 @@ export class StartScene extends Phaser.Scene {
                     let next_seat = emptySeats.splice(randomIndex, 1)[0];
                     next_seat.add(label);
                 });
-                this.startButton.setEnabled(true);
+                this.doneSeatingButton.setEnabled(true);
             }
         });
         this.randomizeButton.setVisible(false);
