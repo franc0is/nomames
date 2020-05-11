@@ -193,7 +193,7 @@ export class Server {
 
                 this.adminScene.events.addListener('pass',(event) => {
                     let passFive = event[0];
-                    if (!this.firstPass) {
+                    if (!this.firstPass || this.playersList.countLiving() < 3) {
                         this.passCup(this.clockwise, passFive);
                     } else {
                         this.diceScene.scene.remove('popUpScene');
