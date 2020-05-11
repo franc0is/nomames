@@ -11,7 +11,7 @@ import { AdminMenuScene, MenuState } from './scenes/adminmenu-scene';
 
 
 /*
- * callbacks: onPlayersUpdate, onGameStart, onNoMames, onReset
+ * callbacks: onPlayersUpdate, onGameStart, onNoMames, onReset, onSeatPlayer
  */
 
 export class Server {
@@ -158,6 +158,8 @@ export class Server {
     }
 
     seatPlayer(update) {
+        console.log('seat update: ');
+        console.log({update});
         let msg = new SeatPlayerMessage(update);
         this.publish(msg);
     }
@@ -381,7 +383,11 @@ export class Server {
                 break;
             }
             case SeatPlayerMessage.getType(): {
-                this.onSeatPlayer(deserialized.seats)
+                if (!fromMe) {
+                    console.log('seating message: ');
+                    console.log({deserialized});
+                    this.callbacks.onSeatPlayer(deserialized.seats);
+                }
                 break;
             }
         }

@@ -181,11 +181,27 @@ export class StartScene extends Phaser.Scene {
 
     // A bit confused about what to do here
     onSeatPlayer(seats) {
-        this.seats(playersList);
+        let i = 0;
+        this.seats.forEach((seat) => {
+            seat = seats[i];
+            i++;
+        });
     }
 
     updateSeating() {
-        this.server.seatPlayer(this.seats);
+        let seatChart = []
+        this.seats.forEach((seat) => {
+            let name = seat.getUuid();
+            if (name[0] !== undefined){
+                seatChart.push(name[0].uuid)
+            } else {
+                seatChart.push(-1);
+            }
+        });
+        let update = {
+            'seats': seatChart
+        };
+        this.server.seatPlayer(update);
     }
 
     // FIXME should ultimately remove

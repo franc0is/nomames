@@ -53,6 +53,7 @@ export class SeatZone extends Phaser.GameObjects.Zone {
         playerlabel.x = this.x-45;
         playerlabel.y = this.y-10;
         this.container.add(playerlabel);
+        this.onUpdateCb();
     };
 
     remove(playerlabel) {
