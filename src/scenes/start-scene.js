@@ -115,6 +115,7 @@ export class StartScene extends Phaser.Scene {
 
         for (let seat of this.seats) {
             this.add.existing(seat);
+            seat.setUpdate(() => {this.updateSeating();});
             seat.setVisible(false);
         }
 
@@ -181,6 +182,10 @@ export class StartScene extends Phaser.Scene {
     // A bit confused about what to do here
     onSeatPlayer(seats) {
         this.seats(playersList);
+    }
+
+    updateSeating() {
+        this.server.seatPlayer(this.seats);
     }
 
     // FIXME should ultimately remove

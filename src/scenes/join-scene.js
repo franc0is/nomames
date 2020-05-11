@@ -17,6 +17,9 @@ export class JoinScene extends Phaser.Scene {
             onPlayersUpdate: (players) => {
                 this.onPlayersUpdate(players);
             },
+            onSeatPlayer: (seats) => {
+                this.onSeatPlayer(seats)
+            },
             onGameStart: (scene, adminscene, audioManager, playersList, isMe) => {
                 this.scene.add('',scene,false);
                 this.scene.add('',adminscene, false);

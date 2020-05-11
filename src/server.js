@@ -1,5 +1,5 @@
 import PubNub from 'pubnub';
-import { Message, StartGameMessage, DiceUpdateMessage, seatPlayerMessage,
+import { Message, StartGameMessage, DiceUpdateMessage, SeatPlayerMessage,
          PassCupMessage, KillPlayerMessage, NoMamesMessage,
          ResetMessage } from './message';
 import { PlayersList } from './playerslist'
@@ -378,6 +378,10 @@ export class Server {
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
                 this.playersList.setDirection(true);
                 this.onReset();
+                break;
+            }
+            case SeatPlayerMessage.getType(): {
+                this.onSeatPlayer(deserialized.seats)
                 break;
             }
         }
