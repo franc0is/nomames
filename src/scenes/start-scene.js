@@ -5,6 +5,7 @@ import { SeatZone } from '../seatzone';
 import { PopUpScene } from './popup-scene';
 import { humanReadableIds } from 'human-readable-ids'
 import { Dice } from '../dice';
+import { RFType } from '../message';
 
 export class StartScene extends Phaser.Scene {
     constructor() {
@@ -29,6 +30,9 @@ export class StartScene extends Phaser.Scene {
                 this.scene.add('',adminscene, false);
                 this.scene.launch('adminMenuScene', { audioManager: audioManager, isMe: isMe});
                 this.scene.start('diceScene', { audioManager: audioManager, playersList: playersList, isMe: isMe });
+            },
+            onRollFirst: (type, seats, value) => {
+                this.onRollFirst(type, seats, value);
             }
         }, this);
 
@@ -118,21 +122,30 @@ export class StartScene extends Phaser.Scene {
             onClick: () => {
                 this.dice = [];
                 this.seats.forEach((seat) => {
-                    let die = new Dice (this, 35, 0, 5);
-                    this.add.existing(die);
-                    seat.add(die);
-                    this.dice.push(die);
                     let name = seat.getUuid()
-                    let uuid = name[0].uuid;
-                    console.log()
-                    if(this.playersList.getMe().uuid !== uuid){
-                        console.log('set Click: null')
-                        die.setClick(() => {});
-                    }else {
-                        seat.setHighlighted(true);
+                    console.log('seat name:');
+                    console.log({name});
+                    if (name.length > 0) {
+                        let uuid = name[0].uuid;
+                        let die = new Dice (this, 35, 0, 5);
+                        this.add.existing(die);
+                        seat.add(die);
+                        this.dice.push(die);
+                        console.log()
+                        if(this.playersList.getMe().uuid !== uuid){
+                            console.log('set Click: null')
+                            die.setClick(() => {});
+                        }else {
+                            seat.setHighlighted(true);
+                        }
                     }
-                    
-                })
+                });
+                let update = {
+                    type: RFType.START,
+                    seats: [],
+                    value: 0
+                }
+                this.server.rollFirst(update);
             }
         });
         this.add.existing(this.rollFirstButton);
@@ -262,5 +275,12 @@ export class StartScene extends Phaser.Scene {
         this.removeInactivePlayers();
         let names = this.getSeated();
         return (this.playersLabel.playerLabels.length !== names.length);
+    }
+
+    onRollFirst(type, seats, value) {
+        console.log('onRollFirst');
+        console.log({type});
+        console.log({seats});
+        console.log({value});
     }
 }

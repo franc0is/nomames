@@ -26,6 +26,9 @@ export class JoinScene extends Phaser.Scene {
                 this.scene.add('',adminscene, false);
                 this.scene.launch('adminMenuScene', { audioManager: audioManager, isMe: isMe});
                 this.scene.start('diceScene', { audioManager: audioManager, playersList: playersList, isMe: isMe});
+            },
+            onRollFirst: (type, seats, value) => {
+                this.onRollFirst(type, seats, value);
             }
         }, this);
 
@@ -122,5 +125,12 @@ export class JoinScene extends Phaser.Scene {
     // FIXME should ultimately remove
     removeInactivePlayers() {
         this.playersLabel.playerLabels = this.playersLabel.playerLabels.filter(label => label.active);
+    }
+
+    onRollFirst(type, seats, value) {
+        console.log('onRollFirst');
+        console.log({type});
+        console.log({seats});
+        console.log({value});
     }
 }

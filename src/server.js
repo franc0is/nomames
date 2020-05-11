@@ -1,7 +1,7 @@
 import PubNub from 'pubnub';
 import { Message, StartGameMessage, DiceUpdateMessage, SeatPlayerMessage,
          PassCupMessage, KillPlayerMessage, NoMamesMessage,
-         ResetMessage } from './message';
+         ResetMessage, RollForFirstMessage} from './message';
 import { PlayersList } from './playerslist'
 import { Player } from './player'
 import { DiceScene } from './scenes/dice-scene';
@@ -154,6 +154,11 @@ export class Server {
         this.playersList.setNextPlayerActive();
         let activePlayer = this.playersList.getActivePlayer();
         let msg = new PassCupMessage(activePlayer.uuid,isClockwise,fiverPass);
+        this.publish(msg);
+    }
+
+    rollFirst(update) {
+        let msg = new RollForFirstMessage(update);
         this.publish(msg);
     }
 
@@ -385,6 +390,11 @@ export class Server {
                     this.callbacks.onSeatPlayer(deserialized.seats);
                 }
                 break;
+            }
+            case RollForFirstMessage.getType(): {
+                if (!fromMe) {
+                    this.callbacks.onRollFirst(deserialized.type, deserialized.seats, deserialized.value);
+                }
             }
         }
     }

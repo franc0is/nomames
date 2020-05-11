@@ -94,6 +94,29 @@ export class SeatPlayerMessage extends Message {
     }
 }
 
+export const RFType= {
+    START: 'start',
+    UPDATE: 'update',
+    RESET: 'reset'
+}
+
+export class RollForFirstMessage extends Message {
+    constructor(update) {
+        super('rollForFirst');
+        this.type = update['type'];
+        this.seats = update['seats'];
+        this.value = update['value'];
+    }
+
+    static getType(){
+        return 'rollForFirst';
+    }
+
+    static deserialize(msg){
+        return new this(msg);
+    }
+}
+
 
 export class KillPlayerMessage extends Message {
     constructor(uuid) {
