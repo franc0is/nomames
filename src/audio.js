@@ -28,13 +28,12 @@ export class NMAudioManager {
         return this.muted;
     }
 
-    playNoMames() {
+    playNoMames(audionum) {
         if (this.muted) {
             return;
         }
 
-        let even = Phaser.Math.RND.between(0, 1);
-        if (even === 0) {
+        if (audionum === 0) {
             this.noMamesAudio.play();
         } else {
             this.ayNoMamesAudio.play();

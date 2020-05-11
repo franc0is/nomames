@@ -2,6 +2,8 @@ import { Server } from '../server';
 import { TextButton } from '../text-button';
 import { DraggableLabel } from '../draggable-label';
 import { SeatZone } from '../seatzone';
+import { PopUpScene } from './popup-scene';
+import { humanReadableIds } from 'human-readable-ids'
 
 export class StartScene extends Phaser.Scene {
     constructor() {
@@ -10,7 +12,6 @@ export class StartScene extends Phaser.Scene {
 
     preload() {
         this.load.html('nameform', 'assets/nameform.html');
-        this.load.html('hoststartform', 'assets/hoststartform.html');
     };
 
     create() {
@@ -21,36 +22,19 @@ export class StartScene extends Phaser.Scene {
             onSeatPlayer: (seats) => {
                 this.onSeatPlayer(seats)
             },
-            onGameStart: (msg) => {
-                this.scene.start('diceScene', { server: this.server });
-                this.scene.start('muteScene', { server: this.server });
+            onGameStart: (scene, adminscene, audioManager, playersList, isMe) => {
+                this.scene.add('',scene,false);
+                this.scene.add('',adminscene, false);
+                this.scene.launch('adminMenuScene', { audioManager: audioManager, isMe: isMe});
+                this.scene.start('diceScene', { audioManager: audioManager, playersList: playersList, isMe: isMe });
             }
-        });
+        }, this);
 
-        let text = this.add.text(50,30,'Welcome! \n\nTo start, enter a game ID\nThis will create a game.',{ color: 'white', fontSize: '20px '});
-
-        this.hostJoinEl = this.add.dom(360, 150).createFromCache('hoststartform');
-        this.hostJoinEl.addListener('click');
-        this.hostJoinEl.on('click', (event) => {
-            if (event.target.name === 'playButton') {
-                let inputText = this.hostJoinEl.getChildByName('gameIdField');
-                if (inputText.value !== '') {
-                    this.hostJoinEl.removeListener('click');
-                    this.server.connect(inputText.value);
-                    this.nameEl.setVisible(true);
-                    this.hostJoinEl.setVisible(false);
-                    this.channelText.setVisible(true);
-                    this.channelText.setText('GameID: ' + inputText.value);
-                    this.playersLabel.setVisible(true);
-                }
-            }
-        });
-
-        this.channelText = this.add.text(50, 150, '', { color: '#0f0', fontsize: '36px' });
-        this.channelText.setVisible(false);
+        this.welcomeText = this.add.text(50,30,
+                                         'Welcome! \n\nShare this game ID with other players\n',
+                                         { color: 'white', fontSize: '20px '});
 
         this.nameEl = this.add.dom(360, 200).createFromCache('nameform');
-        this.nameEl.setVisible(false);
         this.nameEl.addListener('click');
         this.nameEl.on('click', (event) => {
             if (event.target.name === 'playButton') {
@@ -60,6 +44,7 @@ export class StartScene extends Phaser.Scene {
                     this.nameEl.setVisible(false);
                     this.server.setName(inputText.value);
                     this.nameText.setText('Name: ' +inputText.value);
+                    this.welcomeText.setVisible(false);
                     this.nameText.setVisible(true);
                     this.startButton.setVisible(true);
                     this.directionText.setVisible(true);
@@ -69,7 +54,6 @@ export class StartScene extends Phaser.Scene {
                     }
                 }
             }
-
         });
 
         this.nameText = this.add.text(50,200, '',{color: '#0f0', fontsize: '36px'});
@@ -79,15 +63,35 @@ export class StartScene extends Phaser.Scene {
 
         this.startButton = new TextButton(this, 90, 250, '[ START ]', {
             onClick: () => {
-                let names = [];
-                this.seats.forEach(seat => {
-                    let name = seat.getUuid()
-                    if (name[0] !== undefined){
-                        names.push(name[0].uuid);
-                    }
-                });
+                if (this.getUnseated()){
+                    this.scene.remove('popUpScene');
+                        let popReset = new PopUpScene(
+                            'There are unseated players',
+                            {
+                                label: '[ start anyway ]',
+                                callbacks: {
+                                    onClick: () => {
+                                        this.scene.stop('popUpScene');
+                                        let names = this.getSeated();
+                                        this.server.playersList.orderByUUIDList(names);
+                                        this.server.startGame();
+                                    }
+                                }
+                            },
+                            {
+                                label: '[ cancel ]',
+                                callbacks: {
+                                    onClick: () => {
+                                        this.scene.stop('popUpScene');
+                                    }
+                                }
+                            });
+                    this.scene.add('',popReset,true);
+                }else {
+                    let names = this.getSeated();
                     this.server.playersList.orderByUUIDList(names);
                     this.server.startGame();
+                }
             }
         });
         this.add.existing(this.startButton);
@@ -96,9 +100,7 @@ export class StartScene extends Phaser.Scene {
 
         let playersList = this.server.getPlayersList();
         this.playersLabel = new DraggableLabel(this, 5, 400, playersList);
-
         this.add.existing(this.playersLabel);
-        this.playersLabel.setVisible(false);
 
         this.seats = [
             new SeatZone(this, 500, 100, 100, 100, 'Seat 1'),
@@ -148,7 +150,7 @@ export class StartScene extends Phaser.Scene {
             }
         });
 
-        this.randomizeButton = new TextButton(this, 50, 300, 'RANDOMIZE SEATING', {
+        this.randomizeButton = new TextButton(this, 50, 300, '[RANDOMIZE SEATING]', {
             onClick: () => {
                 // Make an array all the seats and randomly pick them off for each player
                 this.removeInactivePlayers() ; // FIXME normally for every player, there are ~2 additional inactive players. This manages to remove all of them
@@ -164,6 +166,10 @@ export class StartScene extends Phaser.Scene {
         this.randomizeButton.setVisible(false);
         this.add.existing(this.randomizeButton);
 
+        let game_id = humanReadableIds.random();
+        this.server.connect(game_id);
+        this.channelText = this.add.text(50, 120, 'GameID: ' + game_id,
+                                         { color: '#0f0', fontsize: '36px' });
     }
 
 
@@ -180,5 +186,23 @@ export class StartScene extends Phaser.Scene {
     // FIXME should ultimately remove
     removeInactivePlayers() {
         this.playersLabel.playerLabels = this.playersLabel.playerLabels.filter(label => label.active);
+    }
+    getSeated(){
+        let names = [];
+        this.seats.forEach(seat => {
+            let name = seat.getUuid()
+            if (name[0] !== undefined){
+                names.push(name[0].uuid);
+            }
+        });
+        return names
+    }
+
+    getUnseated(){
+        this.removeInactivePlayers();
+        let names = this.getSeated();
+        console.log(this.playersLabel.playerLabels)
+        console.log({names})
+        return (this.playersLabel.playerLabels.length !== names.length);
     }
 }

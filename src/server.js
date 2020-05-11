@@ -4,6 +4,10 @@ import { Message, StartGameMessage, DiceUpdateMessage, seatPlayerMessage,
          ResetMessage } from './message';
 import { PlayersList } from './playerslist'
 import { Player } from './player'
+import { DiceScene } from './scenes/dice-scene';
+import { PopUpScene } from './scenes/popup-scene';
+import { NMAudioManager } from './audio';
+import { AdminMenuScene, MenuState } from './scenes/adminmenu-scene';
 
 
 /*
@@ -11,13 +15,21 @@ import { Player } from './player'
  */
 
 export class Server {
-    constructor(callbacks) {
+    constructor(callbacks, scene) {
         // TODO change this to a map uuid => player
         this.setCallbacks(callbacks);
+        this.scene = scene;
         this.myUUID = PubNub.generateUUID();
         this.playersList = new PlayersList(this.myUUID);
         this.widowUsed = false;
         this.lastTimetoken = 0;
+        this.diceScene = new DiceScene();
+        this.firstPass = true;
+        this.clockwise = true;
+        this.nomames = false;
+        this.fiverPass = false;
+        this.audioManager = new NMAudioManager(this.diceScene);
+        this.adminScene = new AdminMenuScene();
 
         this.pubnub = new PubNub({
             subscribeKey: 'sub-c-b9b14632-698f-11ea-94ed-e20534093ea4',
@@ -36,12 +48,12 @@ export class Server {
                 }
                 if (statusEvent.category === "PNNetworkDownCategory") {
                     // no internet
-                    this.callbacks.onPause('Disconnected :-(');
+                    this.scene.onPause('Disconnected :-(');
                 }
                 if (statusEvent.category === "PNNetworkUpCategory") {
                     // internet back
                     this.connect(this.channel);
-                    this.callbacks.onResume();
+                    this.scene.onResume();
                 }
                 if (statusEvent.category === "PNTimeoutCategory") {
                     // network timeout
@@ -60,6 +72,10 @@ export class Server {
 
     setCallbacks(callbacks) {
         this.callbacks = callbacks;
+    }
+
+    resync() {
+        this.connect(this.channel);
     }
 
     connect(channel) {
@@ -106,7 +122,7 @@ export class Server {
                 }
             }
         );
-        this.callbacks.onPlayersUpdate(this.playersList);
+        this.scene.onPlayersUpdate(this.playersList);
     }
 
     publish(msg) {
@@ -156,8 +172,8 @@ export class Server {
         this.publish(msg);
     }
 
-    noMames() {
-        let msg = new NoMamesMessage();
+    noMames(nmtype, audionum) {
+        let msg = new NoMamesMessage(nmtype, audionum);
         this.publish(msg);
     }
 
@@ -165,6 +181,7 @@ export class Server {
         let me = this.playersList.getMe();
         let msg = new ResetMessage(me.uuid);
         this.publish(msg);
+        this.adminScene.onReset();
     }
 
     handleMessage(msg, fromMe) {
@@ -174,24 +191,157 @@ export class Server {
                 let uuid = deserialized.activePlayerUUID;
                 let player = this.playersList.getPlayerByUUID(uuid);
                 player.isActive = true;
+                let isMe = player.isMe;
                 this.playersList.orderByUUIDList(deserialized.uuidList);
-                this.callbacks.onGameStart(deserialized);
+                this.callbacks.onGameStart(this.diceScene, this.adminScene, this.audioManager, this.playersList, isMe);
+                this.scene = this.diceScene;
+
+                this.adminScene.events.addListener('pass',(event) => {
+                    let passFive = event[0];
+                    if (!this.firstPass) {
+                        this.passCup(this.clockwise, passFive);
+                    } else {
+                        this.diceScene.scene.remove('popUpScene');
+                        let popDie = new PopUpScene(
+                            'Who would you like to pass to?',
+                            {
+                                label: '[ '+this.playersList.getNextClockwise().name+' ]',
+                                callbacks: {
+                                    onClick: () => {
+                                        this.diceScene.scene.stop('popUpScene');
+                                        this.passCup(true, passFive);
+                                    }
+                                }
+                            },
+                            {
+                                label: '[ '+this.playersList.getNextCounterClockwise().name+' ]',
+                                callbacks: {
+                                    onClick: () => {
+                                        this.diceScene.scene.stop('popUpScene');
+                                        this.passCup(false, passFive);
+                                    }
+                                }
+                            }
+                        );
+                        this.diceScene.scene.add('',popDie,true);
+                    }
+                });
+
+                this.diceScene.events.addListener('diceUpdate',(event) => {
+                    let update = event[0];
+                    this.updateDice(update);
+                });
+
+                this.diceScene.events.addListener('cupRolled', (event) => {
+                    this.adminScene.cupRollButton.setEnabled(false);
+                })
+
+                this.diceScene.events.addListener('noMames',(event) => {
+                    this.noMames(event[0], event[1]);
+                });
+
+                this.diceScene.events.addListener('allRolled',(event) => {
+                    this.adminScene.nextPlayerButton.setEnabled(true);
+                    this.adminScene.fiverButton.setEnabled(true);
+                });
+
+                this.adminScene.events.addListener('noMames',(event) => {
+                    this.noMames(event[0], event[1]);
+                });
+
+                this.adminScene.events.addListener('accept',(event) => {
+                    this.diceScene.setPlayable(true);
+                    if (this.fiverPass){
+                        this.diceScene.look();
+                    }
+                });
+
+                this.adminScene.events.addListener('killPlayer', (event) => {
+                    this.diceScene.scene.remove('popUpScene');
+                    let popDie = new PopUpScene(
+                        'You are about to loose a life',
+                        {
+                            label: '[ confirm ]',
+                            callbacks: {
+                                onClick: () => {
+                                    this.diceScene.scene.stop('popUpScene');
+                                    this.killPlayer(this.playersList.getMe());
+                                }
+                            }
+                        },
+                        {
+                            label: '[ cancel ]',
+                            callbacks: {
+                                onClick: () => {
+                                    this.diceScene.scene.stop('popUpScene');
+                                }
+                            }
+                        }
+                    );
+                    this.diceScene.scene.add('',popDie,true);
+                });
+
+                this.adminScene.events.addListener('roll',(event) => {
+                    this.diceScene.roll();
+                });
+
+                this.adminScene.events.addListener('look',(event) => {
+                    this.diceScene.look();
+                });
+
+                this.adminScene.events.addListener('reset', (event) => {
+                    this.diceScene.scene.remove('popUpScene');
+                    let popReset = new PopUpScene(
+                        '  Continue with game reset?',
+                        {
+                            label: '[ continue ]',
+                            callbacks: {
+                                onClick: () => {
+                                    this.diceScene.scene.stop('popUpScene');
+                                    this.reset();
+                                }
+                            }
+                        },
+                        {
+                            label: '[ cancel ]',
+                            callbacks: {
+                                onClick: () => {
+                                    this.diceScene.scene.stop('popUpScene');
+                                }
+                            }
+                        }
+                    );
+                    this.diceScene.scene.add('',popReset,true);
+                });
+
+                this.adminScene.events.addListener('resync', (event) => {
+                    this.resync();
+                });
+
                 break;
             }
             case DiceUpdateMessage.getType(): {
                 if (!fromMe) {
-                    this.callbacks.onDiceUpdate(deserialized);
+                    this.diceScene.onDiceUpdate(deserialized);
                 }
                 break;
             }
             case PassCupMessage.getType(): {
+                this.firstPass = false;
+                this.clockwise = deserialized.isClockwise;
                 this.playersList.setDirection(deserialized.isClockwise);
-                this.callbacks.onPassDirectionChange(deserialized.isClockwise);
                 let uuid = deserialized.activePlayerUUID;
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
-                this.callbacks.onFiver(deserialized.fiverPass);
-                this.callbacks.onPlayersUpdate(this.playersList);
+                if (this.playersList.getActivePlayer().isMe){
+                    this.adminScene.setMenuState(MenuState.START_TURN);
+                } else {
+                    this.adminScene.setMenuState(MenuState.INACTIVE);
+                    this.diceScene.setPlayable(false);
+                }
+                this.fiverPass = deserialized.fiverPass;
+                this.diceScene.onFiver(this.fiverPass);
+                this.diceScene.onPlayersUpdate(this.playersList);
                 break;
             }
             case KillPlayerMessage.getType(): {
@@ -214,11 +364,12 @@ export class Server {
                     }
                 }
                 this.playersList.setDirection(true);
-                this.callbacks.onReset();
+                this.onReset();
                 break;
             }
             case NoMamesMessage.getType(): {
-                this.callbacks.onNoMames();
+                this.diceScene.onNoMames(deserialized.nmtype, deserialized.audionum);
+                this.adminScene.setMenuState(MenuState.DEATH);
                 break;
             }
             case ResetMessage.getType(): {
@@ -226,9 +377,27 @@ export class Server {
                 this.playersList.getActivePlayer().isActive = false;
                 this.playersList.getPlayerByUUID(uuid).isActive = true;
                 this.playersList.setDirection(true);
-                this.callbacks.onReset();
+                this.onReset();
                 break;
             }
+        }
+    }
+
+    onReset() {
+        this.diceScene.onReset(this.playersList);
+        this.firstPass = true;
+        this.nomames = false
+        this.fiverPass = false
+        let active = this.playersList.getActivePlayer().isMe;
+        console.log(this.playersList.getActivePlayer());
+        console.log(active);
+        if(active){
+            console.log('loading aciton menu');
+            this.adminScene.onreset();
+            this.diceScene.setPlayable(true);
+        } else {
+            console.log('clearing menus')
+            this.adminScene.setMenuState(MenuState.INACTIVE);
         }
     }
 
@@ -244,11 +413,16 @@ export class Server {
                 break;
             case 'timeout':
             case 'leave':
-                this.playersList.removePlayerByUUID(uuid);
+                let player = this.playersList.getPlayerByUUID(uuid);
+                player.numLives = -1;
+                player.isDead = true;
+                if (player.isActive) {
+                    this.playersList.setNextPlayerActive();
+                }
                 break;
         }
         console.log('Received ', presenceEvent['action'], ' with state ',
             presenceEvent['state'], ' playersList is now ' ,this.playersList);
-        this.callbacks.onPlayersUpdate(this.playersList);
+        this.scene.onPlayersUpdate(this.playersList);
     }
 }

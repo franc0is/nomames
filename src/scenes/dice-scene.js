@@ -3,9 +3,9 @@ import { Dice } from '../dice';
 import { DiceZone } from '../dice-zone';
 import { TextButton } from '../text-button';
 import { Action } from '../message';
+import { NMType } from '../message';
 import { PlayersLabel } from '../playerslabel';
 import { NMAudioManager } from '../audio';
-import { PopUpScene } from './popup-scene';
 
 
 const NUM_DICE = 5;
@@ -21,39 +21,13 @@ export class DiceScene extends Phaser.Scene {
      */
     constructor() {
         super({ key: 'diceScene' });
-        this.audioManager = new NMAudioManager(this);
-        this.leftButtonAction = () => {};
-        this.rightButtonAction = () => {};
+
     }
 
     init(data) {
-        this.server = data.server;
-        this.server.setCallbacks({
-            onPlayersUpdate: (players) => {
-                this.onPlayersUpdate(players);
-            },
-            onDiceUpdate: (msg) => {
-                this.onDiceUpdate(msg);
-            },
-            onNoMames: () => {
-                this.onNoMames();
-            },
-            onReset: () => {
-                this.onReset();
-            },
-            onPassDirectionChange: (isClockwise) => {
-                this.onPassDirectionChange(isClockwise);
-            },
-            onPause: (pauseText) => {
-                this.onPause(pauseText);
-            },
-            onResume: () => {
-                this.onResume();
-            },
-            onFiver: (fp) => {
-                this.onFiver(fp);
-            }
-        });
+        this.audioManager = data.audioManager;
+        this.playersList = data.playersList;
+        this.scene.bringToTop('adminMenuScene');
     }
 
     preload() {
@@ -64,137 +38,29 @@ export class DiceScene extends Phaser.Scene {
 
     create() {
         this.audioManager.create();
-        this.scene.launch('muteScene', { audioManager: this.audioManager });
 
         this.nomames = false;
         this.fiverPass = false;
         this.table = new DiceZone(this, 430, 100, 500, 150, 'Table');
         this.cup = new DiceZone(this, 430, 300, 500, 150, 'Cup');
 
-        this.noMamesText = this.add.text(170, 180, "🚨🖕🚨 NO MAMES GUEY 🚨🖕🚨", { fill: 'red' });
+        this.noMamesText = this.add.text(270, 180, "🚨🖕🚨 NO MAMES GUEY 🚨🖕🚨", { fill: 'red' });
         this.noMamesText.setVisible(false);
 
+        this.fiverText = this.add.text(220,180, '🎲🎲🎲🎲🎲 !! FIVE OF A KIND !! 🎲🎲🎲🎲🎲',{color: '#0f0'});
+        this.fiverText.setVisible(false);
+
+        this.fiverTryText = this.add.text(220,180, 'ROLLIN ROLLIN ROLLIN - GOING FOR IT!!',{color: 'yellow'});
+        this.fiverTryText.setVisible(false);
+
+        this.fiverFailText = this.add.text(220 , 180, '😢😭😢 BETTER LUCK NEXT TIME 😢😭😢', {color: 'yellow'});
+        this.fiverFailText.setVisible(false);
+
+        this.fiverWinText = this.add.text(220 , 180, '🎲🎲🎲🎲🎲 !! FIVE OF A KIND !! 🎲🎲🎲🎲🎲', {color: 'yellow'});
+        this.fiverWinText.setVisible(false);
+
         this.firstpass = true;
-
-        this.cupRollButton = new TextButton(this, 690, 30, 'Roll', {
-            onClick: () => {
-                this.cup.roll();
-                this.cupRollButton.setEnabled(false);
-                this.noMamesButton.setEnabled(false);
-                this.cupLookButton.setEnabled(true);
-            }
-        });
-        this.add.existing(this.cupRollButton);
-
-        this.cupLookButton = new TextButton(this, 690, 60, 'Look', {
-            onClick: () => {
-                this.cup.setVisible(true);
-                this.noMamesButton.setEnabled(false);
-                this.cupLookButton.setEnabled(false);
-                if (this.fiverPass){
-                    this.makeDeadButton.setEnabled(true)
-                    this.cup.getDice().forEach(d=>{
-                        if (d.didRoll()){
-                            this.table.add(d);
-                        }
-                    });
-                }
-                if (!this.cup.didRoll()){
-                    this.cupRollButton.setEnabled(true);
-                } 
-            }
-        });
-        this.add.existing(this.cupLookButton);
-
-        this.nextPlayerButton = new TextButton(this, 690, 90, 'Pass', {
-            onClick: () => {
-                this.server.passCup(this.clockwise, false);
-            },
-        });
-        this.add.existing(this.nextPlayerButton);
-        this.nextPlayerButton.setEnabled(false);
-
         this.clockwise = true;
-        this.passDirectionButton = new TextButton(this, 740, 90, '>',{
-            onClick: () => {
-                this.onPassDirectionChange(!this.clockwise);
-            }
-        });
-        this.add.existing(this.passDirectionButton);
-
-        this.fiverButton = new TextButton(this, 690, 120, 'Pass 5',{
-            onClick: () => {
-                this.server.passCup(this.clockwise, true);
-                this.makeDeadButton.setEnabled(true);
-            }
-        });
-        this.add.existing(this.fiverButton);
-        this.fiverButton.setEnabled(false)
-
-        this.makeDeadButton = new TextButton(this, 690, 150, 'Die', {
-            onClick: () => {
-                this.scene.remove('popUpScene');
-                let popDie = new PopUpScene(
-                    'You are about to loose a life',
-                    {
-                        label: '[ confirm ]',
-                        callbacks: {
-                            onClick: () => {
-                                this.scene.stop('popUpScene');
-                                let playersList = this.server.getPlayersList();
-                                this.server.killPlayer(playersList.getMe());
-                            }
-                        }
-                    },
-                    {
-                        label: '[ cancel ]',
-                        callbacks: {
-                            onClick: () => {
-                                this.scene.stop('popUpScene');
-                            }
-                        }
-                    }
-                );
-                this.scene.add('',popDie,true);
-            }
-        });
-        this.add.existing(this.makeDeadButton);
-        this.makeDeadButton.setEnabled(false);
-
-        this.noMamesButton = new TextButton(this, 690, 180, 'No Mames!', {
-            onClick: () => {
-                this.server.noMames();
-            }
-        });
-        this.add.existing(this.noMamesButton);
-
-        this.resetButton = new TextButton(this, 690, 210, 'Reset', {
-            onClick: () => {
-                this.scene.remove('popUpScene');
-                let popReset = new PopUpScene(
-                    'Continue with game reset?',
-                    {
-                        label: '[ continue ]',
-                        callbacks: {
-                            onClick: () => {
-                                this.scene.stop('popUpScene');
-                                this.server.reset();
-                            }
-                        }
-                    },
-                    {
-                        label: '[ cancel ]',
-                        callbacks: {
-                            onClick: () => {
-                                this.scene.stop('popUpScene');
-                            }
-                        }
-                    }
-                );
-                this.scene.add('',popReset,true);
-            }
-        });
-        this.add.existing(this.resetButton);
 
         this.lookedButton = new TextButton(this, 690, 280, 'Looked', {
             onClick: () => {
@@ -255,11 +121,11 @@ export class DiceScene extends Phaser.Scene {
             }
         });
 
-        let playersList = this.server.getPlayersList();
-        this.playersLabel = new PlayersLabel(this, 5, 30, playersList);
-        this.add.existing(this.playersLabel);
+        let isMe = this.playersList.getActivePlayer().isMe;
+        this.playersLabel = new PlayersLabel(this, 5, 30, this.playersList);
+        this.add.existing(this.playersLabel)
 
-        if (!playersList.getActivePlayer().isMe) {
+        if(!isMe) {
             this.setPlayable(false);
         }
 
@@ -267,10 +133,15 @@ export class DiceScene extends Phaser.Scene {
             this.updateCup(action, dice)
         });
 
+        this.cup.setOnMoveCb((action, dice) => {
+            this.moveCup(action, dice);
+        })
+
         this.table.setOnUpdateCb((action, dice) => {
             this.updateTable(action, dice);
         });
     }
+
 
     onPause(pauseText) {
         this.scene.pause();
@@ -285,41 +156,71 @@ export class DiceScene extends Phaser.Scene {
 
     onFiver(fp){
         this.fiverPass = fp;
-        this.passDirectionButton.setEnabled(false);
+        //reset all of the dice's rollcounts and tell dice and cup if 5 dice were passed
+        this.dice.forEach(d=> {
+            d.resetRoll();
+            d.passFive = fp;
+        });
+        this.cup.fiver = fp;
+        this.firstpass = false;
+        if(fp) {
+            this.fiverText.setVisible(true);
+        }
     }
 
     setPlayable(playable) {
+        this.cup.setOnUpdateCb((action, dice) => {});
+        this.table.setOnUpdateCb((action, dice) => {});
+        this.cup.setOnMoveCb((action, dice) => {});
+
         this.input.enabled = playable;
         this.cup.reset();
-        this.cupLookButton.setEnabled(playable);
-        this.cupRollButton.setEnabled(playable);
-        this.noMamesButton.setEnabled(playable);
-        this.resetButton.setEnabled(playable);
-        this.dice.forEach(dice => {
-            dice.resetRoll();
-        });
-        if (!this.fiverPass){
-            this.nextPlayerButton.setEnabled(playable);
-            this.fiverButton.setEnabled(playable);
-        } else {
-            this.nextPlayerButton.setEnabled(false);
-            this.fiverButton.setEnabled(false);
-            this.dice.forEach(dice => {
-                dice.resetRoll();
-            });
+
+        if (this.fiverPass && !this.nomames){
+            this.fiverText.setVisible(true)
         }
-        if (!playable) {
-            this.passDirectionButton.setEnabled(false);
-            this.lookedButton.setEnabled(false);
-            this.rolledButton.setEnabled(false);
+
+        this.lookedButton.setEnabled(false);
+        this.rolledButton.setEnabled(false);
+
+        if (playable) {
+            this.cup.setOnUpdateCb((action, dice) => {
+                this.updateCup(action, dice)
+            });
+
+            this.table.setOnUpdateCb((action, dice) => {
+                this.updateTable(action, dice);
+            });
+
+            this.cup.setOnMoveCb((action, dice) => {
+                this.moveCup(action, dice);
+            })
         }
     }
 
     updateCup(action, dice) {
         if (action === Action.ROLL_ONE) {
+            console.log('this should not have happened - roll_one inside cup')
+            this.table.setOnUpdateCb((action, dice) => {});
+        
             this.table.add(dice[0]);
+
+            this.table.setOnUpdateCb((action, dice) => {
+                this.updateTable(action, dice);
+            })
         }
         this.updateDice(action);
+    }
+
+    moveCup(action, dice) {
+        this.table.setOnUpdateCb((action, dice) => {});
+        
+        this.table.add(dice[0]);
+
+        this.table.setOnUpdateCb((action, dice) => {
+            this.updateTable(action, dice);
+        })
+
     }
 
 
@@ -328,135 +229,44 @@ export class DiceScene extends Phaser.Scene {
     }
 
     updateDice(action) {
-        if (this.firstpass) {
-            let allrolled = this.dice.reduce((previous, die) => previous && die.didRoll,
-                                             true /* initial value */);
-            this.nextPlayerButton.setEnabled(allrolled);
-            this.fiverButton.setEnabled(allrolled);
-        } else {
-            this.nextPlayerButton.setEnabled(!this.fiverPass);
-            this.fiverButton.setEnabled(!this.fiverPass);
+        this.cup.setOnUpdateCb((action, dice) => {});
+        this.table.setOnUpdateCb((action, dice) => {});
+        this.cup.setOnMoveCb((action, dice) => {});
+
+        if (this.fiverPass && !this.nomames) {
+            this.cup.getDice().forEach(d=>{
+                if (d.didRoll() && d.getVisible()){
+                    this.table.add(d);
+                }
+            });
         }
 
-        // we've taken an action that changes dice,
-        // no mames is disabled
+
+        if (this.firstpass) {
+            let allrolled = this.dice.reduce((previous, die) => (previous && die.didRoll()), true /* initial value */);
+            if (allrolled){
+                this.events.emit('allRolled', []);
+            }
+        }
+
         this.cup.reorder();
         this.table.reorder();
         this.lookedButton.setEnabled(this.cup.getVisible());
         this.rolledButton.setEnabled(this.cup.didRoll());
-        this.noMamesButton.setEnabled(false);
         this.audioManager.playAudioForAction(action);
         let update = {
             'action': action,
             'cup': {
                 'rolled': this.cup.didRoll(),
                 'visible': this.cup.getVisible(),
-                'dice': this.cup.getDice().map(d => d.getValue())
+                'dice': this.cup.getDice().map(d => [d.getValue(),d.rollCount])
             },
             'table': {
-                'dice': this.table.getDice().map(d => d.getValue())
+                'dice': this.table.getDice().map(d => [d.getValue(),d.rollCount])
             }
         };
-        this.server.updateDice(update);
-    }
 
-    onPlayersUpdate(playersList) {
-        // XXX this is not completely correct.
-        // in the event a player joins or leaves the game, it will
-        // disable the pass direction button
-        this.firstpass = false;
-        this.passDirectionButton.setEnabled(false);
-        this.playersLabel.updateWithPlayers(playersList);
-        if (!this.input.enabled && playersList.getActivePlayer().isMe) {
-            // this player is now active
-            if (this.fiverPass){
-                this.onFiverReceipt();
-                return
-            }
-            this.setPlayable(true);
-        }
-        if (!playersList.getActivePlayer().isMe){
-            this.setPlayable(false)
-        }
-        if (this.nomames) {
-            this.onNoMames();
-        }
-    }
-
-    onFiverReceipt(){
-        this.setPlayable(true);
-        this.dice.forEach(d=> {
-            d.maxRoll = 5;
-        });
-        this.cup.maxRoll = 5;
-    };
-
-    onDiceUpdate(msg) {
-        this.cup.setOnUpdateCb((action, dice) => {});
-        this.table.setOnUpdateCb((action, dice) => {});
-
-        switch (msg.action) {
-            case Action.ROLL_ONE: {
-                let table_dice = Array.from(this.table.getDice());
-                let new_value = -1;
-                msg.table.dice.forEach(die => {
-                    let idx = table_dice.findIndex(d => d.getValue() === die);
-                    if (idx === -1) {
-                        console.assert(new_value === -1);
-                        new_value = die;
-                    } else {
-                        table_dice.splice(idx, 1);
-                    }
-                });
-                // FIXME we don't know which dice to animate
-                // when we roll the exact same...
-                // I don't think this matters since everyone's orders are different. -ac
-                if (new_value !== -1) {
-                    table_dice[0].animate(function(target) {
-                        target.setValue(new_value);
-                    });
-                }
-                break;
-            }
-            case Action.MOVE_ONE: {
-                //remove all dice
-                this.cup.getDice().forEach(d => {
-                    this.cup.remove(d);
-                });
-                this.table.getDice().forEach(d => {
-                    this.table.remove(d);
-                });
-
-                //refill all dice per message
-                let i = 0;
-                msg.cup.dice.forEach(die => {
-                    this.dice[i].setValue(die);
-                    this.cup.add(this.dice[i]);
-                    i++
-                });
-                msg.table.dice.forEach(die => {
-                    this.dice[i].setValue(die);
-                    this.table.add(this.dice[i]);
-                    i++
-                });
-                console.assert(i === 5);
-                break;
-            }
-            case Action.ROLL_MANY: {
-                for (const [i, die] of msg.cup.dice.entries()) {
-                    this.cup.getDice()[i].setValue(die);
-                }
-                break;
-            }
-        }
-
-        this.audioManager.playAudioForAction(msg.action);
-
-        this.rolledButton.setEnabled(msg.cup.rolled);
-        this.lookedButton.setEnabled(msg.cup.visible);
-        if (this.fiverPass){
-            this.cup.setVisible(msg.cup.visible);
-        }
+        this.events.emit('diceUpdate',[update]);
 
         this.cup.setOnUpdateCb((action, dice) => {
             this.updateCup(action, dice)
@@ -465,34 +275,212 @@ export class DiceScene extends Phaser.Scene {
         this.table.setOnUpdateCb((action, dice) => {
             this.updateTable(action, dice);
         });
+
+        this.cup.setOnMoveCb((action, dice) => {
+            this.moveCup(action, dice);
+        })
     }
 
-    onNoMames() {
-        if (!this.nomames) {
-            this.audioManager.playNoMames();
+    onPlayersUpdate(playersList) {
+        this.playersLabel.updateWithPlayers(playersList);
+        if (!this.input.enabled && playersList.getActivePlayer().isMe) {
+            // this player is now active
+            if (this.fiverPass){
+                this.onFiverReceipt();
+                return
+            }
         }
-        this.nomames = true;
-        this.setPlayable(true);
-        this.cup.setVisible(true);
-        this.noMamesText.setVisible(true);
-        this.makeDeadButton.setEnabled(true);
-        this.cupLookButton.setEnabled(false);
-        this.cupRollButton.setEnabled(true);
-        this.noMamesButton.setEnabled(false);
-        this.nextPlayerButton.setEnabled(false);
-        this.fiverButton.setEnabled(false);
     }
 
-    onReset() {
+    onFiverReceipt(){
+        this.dice.forEach(d=> {
+            d.maxRoll = 5;
+        });
+        this.cup.maxRoll = 5;
+    };
+
+    onDiceUpdate(msg) {
+            this.cup.setOnUpdateCb((action, dice) => {});
+            this.table.setOnUpdateCb((action, dice) => {});
+            this.cup.setOnMoveCb((action, dice) => {});
+
+            switch (msg.action) {
+                case Action.ROLL_ONE: {
+                    //remove all dice
+                    this.cup.getDice().forEach(d => {
+                        this.cup.remove(d);
+                    });
+                    this.table.getDice().forEach(d => {
+                        this.table.remove(d);
+                    });
+
+                    //refill all dice per message
+                    let i = 0;
+                    msg.cup.dice.forEach(die => {
+                        this.dice[i].setRoll(die[1]);
+                        this.dice[i].setValue(die[0]);
+                        this.cup.add(this.dice[i]);
+                        i++
+                    });
+                    msg.table.dice.forEach(die => {
+                        this.dice[i].setRoll(die[1]);
+                        this.dice[i].setValue(die[0]);
+                        this.table.add(this.dice[i]);
+                        i++
+                    });
+                    console.assert(i === 5);
+
+                    let new_value = this.dice[4].getValue()
+                    this.dice[4].setValue(0);
+                    this.dice[4].animate(function(target) {
+                        target.setValue(new_value);
+                    });
+                
+                    break;
+                }
+                case Action.MOVE_ONE: {
+                    //remove all dice
+                    this.cup.getDice().forEach(d => {
+                        this.cup.remove(d);
+                    });
+                    this.table.getDice().forEach(d => {
+                        this.table.remove(d);
+                    });
+
+                    //refill all dice per message
+                    let i = 0;
+                    msg.cup.dice.forEach(die => {
+                        this.dice[i].setRoll(die[1]);
+                        this.dice[i].setValue(die[0]);
+                        this.cup.add(this.dice[i]);
+                        i++
+                    });
+                    msg.table.dice.forEach(die => {
+                        this.dice[i].setValue(die[0]);
+                        this.dice[i].setRoll(die[1]);
+                        this.table.add(this.dice[i]);
+                        i++
+                    });
+                    console.assert(i === 5);
+                    break;
+                }
+                case Action.ROLL_MANY: {
+                    this.cup.incRoll();
+                    for (const [i, die] of msg.cup.dice.entries()) {
+                        this.cup.getDice()[i].setValue(die[0]);
+                        this.cup.getDice()[i].setRoll(die[1]);
+                    }
+                    break;
+                }
+            }
+
+            this.audioManager.playAudioForAction(msg.action);
+
+            this.rolledButton.setEnabled(msg.cup.rolled);
+            this.lookedButton.setEnabled(msg.cup.visible);
+
+            if (this.fiverPass){
+                this.cup.setVisible(msg.cup.visible);
+                if (msg.cup.visible){
+                    if(this.fiverText.visible){
+                        this.fiverText.setVisible(false);
+                        this.fiverTryText.setVisible(true);
+                    }
+                }
+            }
+            if(!this.nomames){
+                this.cup.setOnUpdateCb((action, dice) => {
+                    this.updateCup(action, dice)
+                });
+
+                this.table.setOnUpdateCb((action, dice) => {
+                    this.updateTable(action, dice);
+                });
+
+                this.cup.setOnMoveCb((action, dice) => {
+                    this.moveCup(action, dice);
+                })
+            }
+    }
+
+    onNoMames(nmt, audionum) {
+        this.nomames = true;
+        this.cup.setOnUpdateCb((action, dice) => {});
+        this.table.setOnUpdateCb((action, dice) => {});
+        this.cup.setOnMoveCb((action, dice) => {});
+
+        this.fiverFailText.setVisible(false);
+        this.fiverText.setVisible(false);
+        this.fiverTryText.setVisible(false);
+
+        //added switch to address multiple types of endings and added audio sync capabilities
+        switch (nmt){
+            case NMType.NO_MAMES: {
+                this.audioManager.playNoMames(audionum);
+                this.noMamesText.setVisible(true); 
+                this.cup.setVisible(true);
+                break;
+            }
+            case NMType.FAILED_5: {
+                this.fiverFailText.setVisible(true);
+                this.cup.setVisible(true);
+                break;
+            }
+            case NMType.ROLLED_5: {
+                this.fiverWinText.setVisible(true);
+                this.cup.setVisible(true);
+                break;
+            }
+        };
+    }
+
+    onReset(playersList) {
+        this.playersList = playersList;
         this.scene.restart();
     }
 
-    onPassDirectionChange(isClockwise) {
-        if (isClockwise) {
-            this.passDirectionButton.setText('>');
-        } else {
-            this.passDirectionButton.setText('<');
+    roll(){
+        this.cup.roll();
+        if (this.cup.didRoll()){
+            this.events.emit('cupRolled', []);
         }
-        this.clockwise = isClockwise;
+    };
+
+    look(){
+        if (this.fiverPass && !this.nomames){
+            if (this.fiverText.visible){
+                this.fiverText.setVisible(false);
+                this.fiverTryText.setVisible(true);
+            }
+            let d = this.dice[0];
+            let allFive = this.dice.reduce((previous,die) => (previous && d.value === die.value && die.rollCount >=1), true);
+            
+            if(allFive){
+                this.events.emit('noMames',[NMType.ROLLED_5, 0]);
+                return
+            } else {
+                let rolledDice = [];
+                this.dice.forEach(die => {
+                    if (die.didRoll()){
+                        rolledDice.push(die);
+                    }
+                });
+                if (rolledDice.length >1){
+                    let value = rolledDice[0].value
+                    let notFailedFiver = rolledDice.reduce((previous, die) => previous && die.value === value, true);
+                    if (!notFailedFiver){
+                        this.events.emit('noMames',[NMType.FAILED_5, 0]);
+                        return
+                    }
+                }
+            }
+
+        }
+        this.cup.setVisible(true);
+    }
+
+    startTurn() {
+        this.lookedButton.setEnabled(false);
+        this.rolledButton.setEnabled(false);
     }
 }
