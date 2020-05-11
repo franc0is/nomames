@@ -158,8 +158,6 @@ export class Server {
     }
 
     seatPlayer(update) {
-        console.log('seat update: ');
-        console.log({update});
         let msg = new SeatPlayerMessage(update);
         this.publish(msg);
     }
@@ -397,14 +395,10 @@ export class Server {
         this.nomames = false
         this.fiverPass = false
         let active = this.playersList.getActivePlayer().isMe;
-        console.log(this.playersList.getActivePlayer());
-        console.log(active);
         if(active){
-            console.log('loading aciton menu');
             this.adminScene.onreset();
             this.diceScene.setPlayable(true);
         } else {
-            console.log('clearing menus')
             this.adminScene.setMenuState(MenuState.INACTIVE);
         }
     }
