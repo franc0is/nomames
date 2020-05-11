@@ -107,17 +107,14 @@ export class JoinScene extends Phaser.Scene {
             if (uuid !== -1){
                 this.playersLabel.playerLabels.forEach((label) => {
                     if (label.uuid === uuid){
-                        console.log('match found')
                         this.seats[i].add(label);
                     }
                 });
-                console.log(uuid);
             }
         }
     }
 
     onPlayersUpdate(playersList) {
-        console.log("Players update!");
         this.playersLabel.updateWithPlayers(playersList);
     }
 

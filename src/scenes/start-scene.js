@@ -175,7 +175,6 @@ export class StartScene extends Phaser.Scene {
 
 
     onPlayersUpdate(playersList) {
-        console.log("Players update!");
         this.playersLabel.updateWithPlayers(playersList);
     }
 
@@ -222,8 +221,6 @@ export class StartScene extends Phaser.Scene {
     getUnseated(){
         this.removeInactivePlayers();
         let names = this.getSeated();
-        console.log(this.playersLabel.playerLabels)
-        console.log({names})
         return (this.playersLabel.playerLabels.length !== names.length);
     }
 }
