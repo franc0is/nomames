@@ -161,4 +161,14 @@ export class PlayersList {
             }
         } while (i != activeIdx);
     }
+
+    countLiving() {
+        let count = 0;
+        this.players.forEach((player) => {
+            if (player.numLives >= 0){
+                count++
+            };
+        });
+        return count;
+    }
 }
