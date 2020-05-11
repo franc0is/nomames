@@ -10,6 +10,7 @@ export class JoinScene extends Phaser.Scene {
     preload() {
         this.load.html('nameform', 'assets/nameform.html');
         this.load.html('hostjoinform', 'assets/hostjoinform.html');
+        this.load.spritesheet('dice', 'assets/dice-pixel.png', { frameWidth: 64, frameHeight: 64});
     }
 
     create() {

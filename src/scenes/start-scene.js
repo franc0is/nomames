@@ -4,6 +4,7 @@ import { DraggableLabel } from '../draggable-label';
 import { SeatZone } from '../seatzone';
 import { PopUpScene } from './popup-scene';
 import { humanReadableIds } from 'human-readable-ids'
+import { Dice } from '../dice';
 
 export class StartScene extends Phaser.Scene {
     constructor() {
@@ -12,6 +13,7 @@ export class StartScene extends Phaser.Scene {
 
     preload() {
         this.load.html('nameform', 'assets/nameform.html');
+        this.load.spritesheet('dice', 'assets/dice-pixel.png', { frameWidth: 64, frameHeight: 64});
     };
 
     create() {
@@ -114,14 +116,30 @@ export class StartScene extends Phaser.Scene {
 
         this.rollFirstButton = new TextButton (this, 50, 280, '[ROLL FOR FIRST]', {
             onClick: () => {
-
+                this.dice = [];
+                this.seats.forEach((seat) => {
+                    let die = new Dice (this, 35, 0, 5);
+                    this.add.existing(die);
+                    seat.add(die);
+                    this.dice.push(die);
+                    let name = seat.getUuid()
+                    let uuid = name[0].uuid;
+                    console.log()
+                    if(this.playersList.getMe().uuid !== uuid){
+                        console.log('set Click: null')
+                        die.setClick(() => {});
+                    }else {
+                        seat.setHighlighted(true);
+                    }
+                    
+                })
             }
         });
         this.add.existing(this.rollFirstButton);
         this.rollFirstButton.setVisible(false);
 
-        let playersList = this.server.getPlayersList();
-        this.playersLabel = new DraggableLabel(this, 5, 400, playersList);
+        this.playersList = this.server.getPlayersList();
+        this.playersLabel = new DraggableLabel(this, 5, 400, this.playersList);
         this.add.existing(this.playersLabel);
 
         this.seats = [
