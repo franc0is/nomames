@@ -1,6 +1,8 @@
 import { Server } from '../server';
 import { SeatZone } from '../seatzone';
 import { DraggableLabel } from '../draggable-label';
+import { RFType } from '../message';
+import { Dice } from '../dice';
 
 export class JoinScene extends Phaser.Scene {
     constructor() {
@@ -97,8 +99,8 @@ export class JoinScene extends Phaser.Scene {
         this.nameText.setVisible(false);
 
 
-        let playersList = this.server.getPlayersList();
-        this.playersLabel = new DraggableLabel(this, 5, 400, playersList);
+        this.playersList = this.server.getPlayersList();
+        this.playersLabel = new DraggableLabel(this, 5, 400, this.playersList);
         this.add.existing(this.playersLabel);
         this.playersLabel.setVisible(false);
     }
@@ -128,9 +130,34 @@ export class JoinScene extends Phaser.Scene {
     }
 
     onRollFirst(type, seats, value) {
-        console.log('onRollFirst');
-        console.log({type});
-        console.log({seats});
-        console.log({value});
+        switch (type){
+            case RFType.START:{
+                this.dice = [];
+                this.seats.forEach((seat) => {
+                    let name = seat.getUuid()
+                    if (name.length > 0) {
+                        let uuid = name[0].uuid;
+                        let die = new Dice (this, 35, 0, 5);
+                        this.add.existing(die);
+                        seat.add(die);
+                        this.dice.push(die);
+                        if(this.playersList.getMe().uuid !== uuid){
+                            die.setClick(() => {});
+                        }else {
+                            seat.setHighlighted(true);
+                        }
+                    }
+                });
+                break;
+            }
+            case RFType.UPDATE:{
+
+                break;
+            }
+            case RFType.RESET:{
+
+                break;
+            }
+        }
     }
 }

@@ -11,7 +11,8 @@ export class Message {
             [PassCupMessage.getType()]: PassCupMessage,
             [KillPlayerMessage.getType()]: KillPlayerMessage,
             [NoMamesMessage.getType()]: NoMamesMessage,
-            [ResetMessage.getType()]: ResetMessage
+            [ResetMessage.getType()]: ResetMessage,
+            [RollForFirstMessage.getType()]: RollForFirstMessage
         };
     }
 
@@ -103,7 +104,7 @@ export const RFType= {
 export class RollForFirstMessage extends Message {
     constructor(update) {
         super('rollForFirst');
-        this.RFtype = update['type'];
+        this.RFtype = update['RFtype'];
         this.seats = update['seats'];
         this.value = update['value'];
     }

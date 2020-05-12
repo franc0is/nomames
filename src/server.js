@@ -160,8 +160,6 @@ export class Server {
     rollFirst(update) {
         let msg = new RollForFirstMessage(update);
         this.publish(msg);
-        console.log(msg);
-        console.log({msg});
     }
 
     seatPlayer(update) {
@@ -395,7 +393,7 @@ export class Server {
             }
             case RollForFirstMessage.getType(): {
                 if (!fromMe) {
-                    this.callbacks.onRollFirst(deserialized.type, deserialized.seats, deserialized.value);
+                    this.callbacks.onRollFirst(deserialized.RFtype, deserialized.seats, deserialized.value);
                 }
             }
         }

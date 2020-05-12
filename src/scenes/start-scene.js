@@ -141,7 +141,7 @@ export class StartScene extends Phaser.Scene {
                     }
                 });
                 let update = {
-                    type: RFType.START,
+                    RFtype: RFType.START,
                     seats: [],
                     value: 0
                 }
