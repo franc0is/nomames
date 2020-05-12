@@ -160,6 +160,8 @@ export class Server {
     rollFirst(update) {
         let msg = new RollForFirstMessage(update);
         this.publish(msg);
+        console.log(msg);
+        console.log({msg});
     }
 
     seatPlayer(update) {

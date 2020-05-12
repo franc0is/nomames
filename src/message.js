@@ -103,7 +103,7 @@ export const RFType= {
 export class RollForFirstMessage extends Message {
     constructor(update) {
         super('rollForFirst');
-        this.type = update['type'];
+        this.RFtype = update['type'];
         this.seats = update['seats'];
         this.value = update['value'];
     }
@@ -112,7 +112,7 @@ export class RollForFirstMessage extends Message {
         return 'rollForFirst';
     }
 
-    static deserialize(msg){
+    static deserialize(msg) {
         return new this(msg);
     }
 }
