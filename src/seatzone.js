@@ -18,6 +18,11 @@ export class SeatZone extends Phaser.GameObjects.Zone {
         this.onUpdateCb = () => {};
     }
 
+    setLabel(value){
+        console.log('value received: '+value);
+        this.nameText.text = value;
+    }
+
     setUpdate(CB){
         this.onUpdateCb = CB;
     }
@@ -54,10 +59,11 @@ export class SeatZone extends Phaser.GameObjects.Zone {
             this.nameText.setVisible(value);
     }
 
-    add(playerlabel) {
-        playerlabel.x = this.x-45;
-        playerlabel.y = this.y-10;
+    add(playerlabel) {  
+        playerlabel.x = this.x-40;
+        playerlabel.y = this.y-15;
         this.container.add(playerlabel);
+        console.log('added: '+playerlabel);
         this.onUpdateCb();
     };
 
