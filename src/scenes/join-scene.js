@@ -129,6 +129,16 @@ export class JoinScene extends Phaser.Scene {
         this.playersLabel.playerLabels = this.playersLabel.playerLabels.filter(label => label.active);
     }
 
+    onDieRoll(seat, value) {
+        let update = {
+            RFtype: RFType.UPDATE,
+            seats: seat,
+            value: value
+        }
+        this.server.rollFirst(update);
+        console.log(update);
+    }
+
     onRollFirst(type, seats, value) {
         switch (type){
             case RFType.START:{
@@ -145,13 +155,23 @@ export class JoinScene extends Phaser.Scene {
                             die.setClick(() => {});
                         }else {
                             seat.setHighlighted(true);
+                            die.setOnRoll(() => {
+                                this.onDieRoll(seat.name[seat.name.length-1], die.value);
+                            });
                         }
                     }
                 });
                 break;
             }
             case RFType.UPDATE:{
-
+                this.seats.forEach((seat) => {
+                    if (seat.name[seat.name.length-1] === seats[0]){
+                        let die = seat.getDie()[0];
+                        die.animate(function(target) {
+                            target.setValue(value);
+                        });
+                    }
+                });
                 break;
             }
             case RFType.RESET:{

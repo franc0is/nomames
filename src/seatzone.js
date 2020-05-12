@@ -39,6 +39,11 @@ export class SeatZone extends Phaser.GameObjects.Zone {
         return this.container.getAll();
     }
 
+    getDie() {
+        console.log(this.container.getAll('rollCount'));
+        return this.container.getAll('rollCount');
+        }
+
     reset() {
         this.rolled = false;
         this.setVisible(false);

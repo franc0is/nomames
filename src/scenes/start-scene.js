@@ -123,20 +123,19 @@ export class StartScene extends Phaser.Scene {
                 this.dice = [];
                 this.seats.forEach((seat) => {
                     let name = seat.getUuid()
-                    console.log('seat name:');
-                    console.log({name});
                     if (name.length > 0) {
                         let uuid = name[0].uuid;
                         let die = new Dice (this, 35, 0, 5);
                         this.add.existing(die);
                         seat.add(die);
                         this.dice.push(die);
-                        console.log()
                         if(this.playersList.getMe().uuid !== uuid){
-                            console.log('set Click: null')
                             die.setClick(() => {});
                         }else {
                             seat.setHighlighted(true);
+                            die.setOnRoll(() => {
+                                this.onDieRoll(seat.name[seat.name.length-1], die.value);
+                            });
                         }
                     }
                 });
@@ -278,9 +277,54 @@ export class StartScene extends Phaser.Scene {
     }
 
     onRollFirst(type, seats, value) {
-        console.log('onRollFirst');
-        console.log({type});
-        console.log({seats});
-        console.log({value});
+        switch (type){
+            case RFType.START:{
+                this.dice = [];
+                this.seats.forEach((seat) => {
+                    let name = seat.getUuid()
+                    if (name.length > 0) {
+                        let uuid = name[0].uuid;
+                        let die = new Dice (this, 35, 0, 5);
+                        this.add.existing(die);
+                        seat.add(die);
+                        this.dice.push(die);
+                        if(this.playersList.getMe().uuid !== uuid){
+                            die.setClick(() => {});
+                        }else {
+                            seat.setHighlighted(true);
+                            die.setOnRoll(() => {
+                                this.onDieRoll(seat.name[seat.name.length-1], die.value);
+                            });
+                        }
+                    }
+                });
+                break;
+            }
+            case RFType.UPDATE:{
+                    this.seats.forEach((seat) => {
+                        if (seat.name[seat.name.length-1] === seats[0]){
+                            let die = seat.getDie()[0];
+                            die.animate(function(target) {
+                                target.setValue(value);
+                            });
+                        }
+                    });
+                break;
+            }
+            case RFType.RESET:{
+
+                break;
+            }
+        }
+    }
+
+    onDieRoll(seat, value) {
+        let update = {
+            RFtype: RFType.UPDATE,
+            seats: seat,
+            value: value
+        }
+        this.server.rollFirst(update);
+        console.log(update);
     }
 }
