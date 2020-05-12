@@ -12,6 +12,22 @@ export class Dice extends Phaser.GameObjects.Container {
 
         this.on('pointerup', this.onClick, this);
 
+        this.click = () => {
+            if (this.rollCount >= this.maxRoll) {
+                return;
+            }
+            // 350ms double click for rolling
+            let clickDelay = this.scene.time.now - this.lastClickTime;
+            this.lastClickTime = this.scene.time.now;
+            if (clickDelay < 350) {
+                this.setValue(0)
+                this.onMoveCb(this);
+                this.animate(function(target) {
+                    target.roll();
+                });
+            }
+        };
+
 
         this.die = new DiceSprite(scene, x, y, initial_value);
         scene.add.existing(this.die);
@@ -53,6 +69,10 @@ export class Dice extends Phaser.GameObjects.Container {
         this.onMoveCb = cb;
     }
 
+    setClick(CB) {
+        this.click = CB;
+    }
+
     didRoll(){
         return (this.rollCount >= this.maxRoll);
     }
@@ -71,6 +91,10 @@ export class Dice extends Phaser.GameObjects.Container {
         return {
             'frame': this.getValue()
         }
+    }
+
+    onClick() {
+        this.click();
     }
 
     resetRoll() {
@@ -92,22 +116,6 @@ export class Dice extends Phaser.GameObjects.Container {
         // if I don't specify arguments, it crashes
         this.tween.setCallback('onLoop', cb, [this], this);
         this.tween.play();
-    }
-
-    onClick() {
-        if (this.rollCount >= this.maxRoll) {
-            return;
-        }
-        // 350ms double click for rolling
-        let clickDelay = this.scene.time.now - this.lastClickTime;
-        this.lastClickTime = this.scene.time.now;
-        if (clickDelay < 350) {
-            this.setValue(0)
-            this.onMoveCb(this);
-            this.animate(function(target) {
-                target.roll();
-            });
-        }
     }
 
     roll() {

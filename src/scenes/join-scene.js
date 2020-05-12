@@ -1,6 +1,8 @@
 import { Server } from '../server';
 import { SeatZone } from '../seatzone';
 import { DraggableLabel } from '../draggable-label';
+import { RFType } from '../message';
+import { Dice } from '../dice';
 
 export class JoinScene extends Phaser.Scene {
     constructor() {
@@ -10,6 +12,7 @@ export class JoinScene extends Phaser.Scene {
     preload() {
         this.load.html('nameform', 'assets/nameform.html');
         this.load.html('hostjoinform', 'assets/hostjoinform.html');
+        this.load.spritesheet('dice', 'assets/dice-pixel.png', { frameWidth: 64, frameHeight: 64});
     }
 
     create() {
@@ -25,6 +28,9 @@ export class JoinScene extends Phaser.Scene {
                 this.scene.add('',adminscene, false);
                 this.scene.launch('adminMenuScene', { audioManager: audioManager, isMe: isMe});
                 this.scene.start('diceScene', { audioManager: audioManager, playersList: playersList, isMe: isMe});
+            },
+            onRollFirst: (type, seats, value) => {
+                this.onRollFirst(type, seats, value);
             }
         }, this);
 
@@ -93,8 +99,8 @@ export class JoinScene extends Phaser.Scene {
         this.nameText.setVisible(false);
 
 
-        let playersList = this.server.getPlayersList();
-        this.playersLabel = new DraggableLabel(this, 5, 400, playersList);
+        this.playersList = this.server.getPlayersList();
+        this.playersLabel = new DraggableLabel(this, 5, 400, this.playersList);
         this.add.existing(this.playersLabel);
         this.playersLabel.setVisible(false);
     }
@@ -121,5 +127,37 @@ export class JoinScene extends Phaser.Scene {
     // FIXME should ultimately remove
     removeInactivePlayers() {
         this.playersLabel.playerLabels = this.playersLabel.playerLabels.filter(label => label.active);
+    }
+
+    onRollFirst(type, seats, value) {
+        switch (type){
+            case RFType.START:{
+                this.dice = [];
+                this.seats.forEach((seat) => {
+                    let name = seat.getUuid()
+                    if (name.length > 0) {
+                        let uuid = name[0].uuid;
+                        let die = new Dice (this, 35, 0, 5);
+                        this.add.existing(die);
+                        seat.add(die);
+                        this.dice.push(die);
+                        if(this.playersList.getMe().uuid !== uuid){
+                            die.setClick(() => {});
+                        }else {
+                            seat.setHighlighted(true);
+                        }
+                    }
+                });
+                break;
+            }
+            case RFType.UPDATE:{
+
+                break;
+            }
+            case RFType.RESET:{
+
+                break;
+            }
+        }
     }
 }

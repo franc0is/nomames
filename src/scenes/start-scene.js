@@ -4,6 +4,8 @@ import { DraggableLabel } from '../draggable-label';
 import { SeatZone } from '../seatzone';
 import { PopUpScene } from './popup-scene';
 import { humanReadableIds } from 'human-readable-ids'
+import { Dice } from '../dice';
+import { RFType } from '../message';
 
 export class StartScene extends Phaser.Scene {
     constructor() {
@@ -12,6 +14,7 @@ export class StartScene extends Phaser.Scene {
 
     preload() {
         this.load.html('nameform', 'assets/nameform.html');
+        this.load.spritesheet('dice', 'assets/dice-pixel.png', { frameWidth: 64, frameHeight: 64});
     };
 
     create() {
@@ -27,6 +30,9 @@ export class StartScene extends Phaser.Scene {
                 this.scene.add('',adminscene, false);
                 this.scene.launch('adminMenuScene', { audioManager: audioManager, isMe: isMe});
                 this.scene.start('diceScene', { audioManager: audioManager, playersList: playersList, isMe: isMe });
+            },
+            onRollFirst: (type, seats, value) => {
+                this.onRollFirst(type, seats, value);
             }
         }, this);
 
@@ -114,14 +120,39 @@ export class StartScene extends Phaser.Scene {
 
         this.rollFirstButton = new TextButton (this, 50, 280, '[ROLL FOR FIRST]', {
             onClick: () => {
-
+                this.dice = [];
+                this.seats.forEach((seat) => {
+                    let name = seat.getUuid()
+                    console.log('seat name:');
+                    console.log({name});
+                    if (name.length > 0) {
+                        let uuid = name[0].uuid;
+                        let die = new Dice (this, 35, 0, 5);
+                        this.add.existing(die);
+                        seat.add(die);
+                        this.dice.push(die);
+                        console.log()
+                        if(this.playersList.getMe().uuid !== uuid){
+                            console.log('set Click: null')
+                            die.setClick(() => {});
+                        }else {
+                            seat.setHighlighted(true);
+                        }
+                    }
+                });
+                let update = {
+                    RFtype: RFType.START,
+                    seats: [],
+                    value: 0
+                }
+                this.server.rollFirst(update);
             }
         });
         this.add.existing(this.rollFirstButton);
         this.rollFirstButton.setVisible(false);
 
-        let playersList = this.server.getPlayersList();
-        this.playersLabel = new DraggableLabel(this, 5, 400, playersList);
+        this.playersList = this.server.getPlayersList();
+        this.playersLabel = new DraggableLabel(this, 5, 400, this.playersList);
         this.add.existing(this.playersLabel);
 
         this.seats = [
@@ -244,5 +275,12 @@ export class StartScene extends Phaser.Scene {
         this.removeInactivePlayers();
         let names = this.getSeated();
         return (this.playersLabel.playerLabels.length !== names.length);
+    }
+
+    onRollFirst(type, seats, value) {
+        console.log('onRollFirst');
+        console.log({type});
+        console.log({seats});
+        console.log({value});
     }
 }

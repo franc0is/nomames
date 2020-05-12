@@ -11,7 +11,8 @@ export class Message {
             [PassCupMessage.getType()]: PassCupMessage,
             [KillPlayerMessage.getType()]: KillPlayerMessage,
             [NoMamesMessage.getType()]: NoMamesMessage,
-            [ResetMessage.getType()]: ResetMessage
+            [ResetMessage.getType()]: ResetMessage,
+            [RollForFirstMessage.getType()]: RollForFirstMessage
         };
     }
 
@@ -87,6 +88,29 @@ export class SeatPlayerMessage extends Message {
 
     static getType() {
         return 'seatPlayer';
+    }
+
+    static deserialize(msg) {
+        return new this(msg);
+    }
+}
+
+export const RFType= {
+    START: 'start',
+    UPDATE: 'update',
+    RESET: 'reset'
+}
+
+export class RollForFirstMessage extends Message {
+    constructor(update) {
+        super('rollForFirst');
+        this.RFtype = update['RFtype'];
+        this.seats = update['seats'];
+        this.value = update['value'];
+    }
+
+    static getType(){
+        return 'rollForFirst';
     }
 
     static deserialize(msg) {
