@@ -4,7 +4,7 @@ export class SeatZone extends Phaser.GameObjects.Zone {
         scene.add.existing(this);
         this.nameText = scene.add.text(
             x + 10 - width/2,
-            y + 10 - height/2,
+            y + 80 - height/2,
             name,
             { fill: '#0f0'}
         );

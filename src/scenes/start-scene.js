@@ -55,9 +55,12 @@ export class StartScene extends Phaser.Scene {
                     this.doneSeatingButton.setVisible(true);
                     this.directionText.setVisible(true);
                     this.randomizeButton.setVisible(true);
-                    for (let seat of this.seats) {
+                    this.seats.forEach((seat) => {
                         seat.setVisible(true);
-                    }
+                    });
+                    /*this.seatLabels.forEach((text) => {
+                        text.setVisible(true);
+                    });*/
                 }
             }
         });
@@ -121,6 +124,7 @@ export class StartScene extends Phaser.Scene {
         this.rollFirstButton = new TextButton (this, 50, 280, '[ROLL FOR FIRST]', {
             onClick: () => {
                 this.dice = [];
+                let i = 0;
                 this.seats.forEach((seat) => {
                     this.resetRollButton.setVisible(true);
                     this.rollFirstButton.setEnabled(false);
@@ -188,6 +192,20 @@ export class StartScene extends Phaser.Scene {
             seat.setUpdate(() => {this.updateSeating();});
             seat.setVisible(false);
         }
+
+       /* this.seatLabels = [
+            this.add.text(460,  20, 'Seat 1', {color: '#0f0'}),
+            this.add.text(625, 120, 'Seat 2', {color: '#0f0'}),
+            this.add.text(700, 250, 'Seat 3', {color: '#0f0'}),
+            this.add.text(560, 385, 'Seat 4', {color: '#0f0'}),
+            this.add.text(460, 435, 'Seat 5', {color: '#0f0'}),
+            this.add.text(360, 385, 'Seat 6', {color: '#0f0'}),
+            this.add.text(300, 250, 'Seat 7', {color: '#0f0'}),
+            this.add.text(375, 120, 'Seat 8', {color: '#0f0'})
+        ]
+        this.seatLabels.forEach((text) => {
+            text.setVisible(false);
+        });*/
 
         this.input.on('drag', function(pointer, gameObject, dragX, dragY) {
             gameObject.x = dragX;
