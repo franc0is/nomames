@@ -58,9 +58,6 @@ export class StartScene extends Phaser.Scene {
                     this.seats.forEach((seat) => {
                         seat.setVisible(true);
                     });
-                    /*this.seatLabels.forEach((text) => {
-                        text.setVisible(true);
-                    });*/
                 }
             }
         });
@@ -124,17 +121,18 @@ export class StartScene extends Phaser.Scene {
         this.rollFirstButton = new TextButton (this, 50, 280, '[ROLL FOR FIRST]', {
             onClick: () => {
                 this.dice = [];
-                let i = 0;
                 this.seats.forEach((seat) => {
                     this.resetRollButton.setVisible(true);
                     this.rollFirstButton.setEnabled(false);
                     let name = seat.getUuid()
                     if (name.length > 0) {
                         let uuid = name[0].uuid;
-                        let die = new Dice (this, 35, 0, 0);
+                        name[0].setVisible(false);
+                        let die = new Dice (this, 30, 5, 0);
                         this.add.existing(die);
                         seat.add(die);
                         this.dice.push(die);
+                        seat.setLabel(name[0].text);
                         if(this.playersList.getMe().uuid !== uuid){
                             die.setClick(() => {});
                         }else {
@@ -177,14 +175,14 @@ export class StartScene extends Phaser.Scene {
         this.add.existing(this.playersLabel);
 
         this.seats = [
-            new SeatZone(this, 500, 100, 100, 100, 'Seat 1'),
-            new SeatZone(this, 600, 150, 100, 100, 'Seat 2'),
-            new SeatZone(this, 650, 250, 100, 100, 'Seat 3'),
-            new SeatZone(this, 600, 350, 100, 100, 'Seat 4'),
-            new SeatZone(this, 500, 400, 100, 100, 'Seat 5'),
-            new SeatZone(this, 400, 350, 100, 100, 'Seat 6'),
-            new SeatZone(this, 350, 250, 100, 100, 'Seat 7'),
-            new SeatZone(this, 400, 150, 100, 100, 'Seat 8')
+            new SeatZone(this, 500, 80, 100, 100, 'Seat 1'),
+            new SeatZone(this, 610, 140, 100, 100, 'Seat 2'),
+            new SeatZone(this, 670, 250, 100, 100, 'Seat 3'),
+            new SeatZone(this, 610, 360, 100, 100, 'Seat 4'),
+            new SeatZone(this, 500, 420, 100, 100, 'Seat 5'),
+            new SeatZone(this, 390, 360, 100, 100, 'Seat 6'),
+            new SeatZone(this, 330, 250, 100, 100, 'Seat 7'),
+            new SeatZone(this, 390, 140, 100, 100, 'Seat 8')
         ];
 
         for (let seat of this.seats) {
@@ -192,20 +190,6 @@ export class StartScene extends Phaser.Scene {
             seat.setUpdate(() => {this.updateSeating();});
             seat.setVisible(false);
         }
-
-       /* this.seatLabels = [
-            this.add.text(460,  20, 'Seat 1', {color: '#0f0'}),
-            this.add.text(625, 120, 'Seat 2', {color: '#0f0'}),
-            this.add.text(700, 250, 'Seat 3', {color: '#0f0'}),
-            this.add.text(560, 385, 'Seat 4', {color: '#0f0'}),
-            this.add.text(460, 435, 'Seat 5', {color: '#0f0'}),
-            this.add.text(360, 385, 'Seat 6', {color: '#0f0'}),
-            this.add.text(300, 250, 'Seat 7', {color: '#0f0'}),
-            this.add.text(375, 120, 'Seat 8', {color: '#0f0'})
-        ]
-        this.seatLabels.forEach((text) => {
-            text.setVisible(false);
-        });*/
 
         this.input.on('drag', function(pointer, gameObject, dragX, dragY) {
             gameObject.x = dragX;
@@ -312,18 +296,26 @@ export class StartScene extends Phaser.Scene {
         return (this.playersLabel.playerLabels.length !== names.length);
     }
 
+    checkHighRoll(){
+
+    }
+
     onRollFirst(type, seats, value) {
         switch (type){
             case RFType.START:{
                 this.dice = [];
                 this.seats.forEach((seat) => {
+                    this.resetRollButton.setVisible(true);
+                    this.rollFirstButton.setEnabled(false);
                     let name = seat.getUuid()
                     if (name.length > 0) {
                         let uuid = name[0].uuid;
-                        let die = new Dice (this, 35, 0, 0);
+                        name[0].setVisible(false);
+                        let die = new Dice (this, 30, 5, 0);
                         this.add.existing(die);
                         seat.add(die);
                         this.dice.push(die);
+                        seat.setLabel(name[0].text);
                         if(this.playersList.getMe().uuid !== uuid){
                             die.setClick(() => {});
                         }else {
@@ -354,6 +346,7 @@ export class StartScene extends Phaser.Scene {
                 break;
             }
         }
+        this.checkHighRoll();
     }
 
     onDieRoll(seat, value) {
@@ -363,6 +356,6 @@ export class StartScene extends Phaser.Scene {
             value: value
         }
         this.server.rollFirst(update);
-        console.log(update);
+        this.checkHighRoll();
     }
 }
