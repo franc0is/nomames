@@ -122,10 +122,12 @@ export class StartScene extends Phaser.Scene {
             onClick: () => {
                 this.dice = [];
                 this.seats.forEach((seat) => {
+                    this.resetRollButton.setVisible(true);
+                    this.rollFirstButton.setEnabled(false);
                     let name = seat.getUuid()
                     if (name.length > 0) {
                         let uuid = name[0].uuid;
-                        let die = new Dice (this, 35, 0, 5);
+                        let die = new Dice (this, 35, 0, 0);
                         this.add.existing(die);
                         seat.add(die);
                         this.dice.push(die);
@@ -149,6 +151,22 @@ export class StartScene extends Phaser.Scene {
         });
         this.add.existing(this.rollFirstButton);
         this.rollFirstButton.setVisible(false);
+
+        this.resetRollButton = new TextButton (this, 50, 310, '[RESET ROLLS]', {
+            onClick: () => {
+                this.dice.forEach((die) => {
+                    die.resetRoll();
+                })
+                let update = {
+                    RFtype: RFType.RESET,
+                    seats: [],
+                    value: 0
+                }
+                this.server.rollFirst(update);
+            }
+        });
+        this.add.existing(this.resetRollButton);
+        this.resetRollButton.setVisible(false);
 
         this.playersList = this.server.getPlayersList();
         this.playersLabel = new DraggableLabel(this, 5, 400, this.playersList);
@@ -284,7 +302,7 @@ export class StartScene extends Phaser.Scene {
                     let name = seat.getUuid()
                     if (name.length > 0) {
                         let uuid = name[0].uuid;
-                        let die = new Dice (this, 35, 0, 5);
+                        let die = new Dice (this, 35, 0, 0);
                         this.add.existing(die);
                         seat.add(die);
                         this.dice.push(die);
@@ -312,7 +330,9 @@ export class StartScene extends Phaser.Scene {
                 break;
             }
             case RFType.RESET:{
-
+                    this.dice.forEach((die) => {
+                        die.resetRoll();
+                    })
                 break;
             }
         }

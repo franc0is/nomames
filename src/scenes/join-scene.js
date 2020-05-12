@@ -147,7 +147,7 @@ export class JoinScene extends Phaser.Scene {
                     let name = seat.getUuid()
                     if (name.length > 0) {
                         let uuid = name[0].uuid;
-                        let die = new Dice (this, 35, 0, 5);
+                        let die = new Dice (this, 35, 0, 0);
                         this.add.existing(die);
                         seat.add(die);
                         this.dice.push(die);
@@ -175,7 +175,9 @@ export class JoinScene extends Phaser.Scene {
                 break;
             }
             case RFType.RESET:{
-
+                this.dice.forEach((die) => {
+                    die.resetRoll();
+                })
                 break;
             }
         }
