@@ -118,12 +118,14 @@ export class StartScene extends Phaser.Scene {
         this.doneSeatingButton.setVisible(false);
         this.doneSeatingButton.setEnabled(false);
 
-        this.rollFirstButton = new TextButton (this, 50, 280, '[ROLL FOR FIRST]', {
+        this.rollFirstButton = new TextButton (this, 50, 280, '[ ROLL FOR FIRST ]', {
             onClick: () => {
+                this.startButton.setEnabled(false);
+                this.resetRollButton.setVisible(true);
+                this.resetRollButton.setEnabled(false);
+                this.rollFirstButton.setEnabled(false);
                 this.dice = [];
                 this.seats.forEach((seat) => {
-                    this.resetRollButton.setVisible(true);
-                    this.rollFirstButton.setEnabled(false);
                     let name = seat.getUuid()
                     if (name.length > 0) {
                         let uuid = name[0].uuid;
@@ -154,7 +156,7 @@ export class StartScene extends Phaser.Scene {
         this.add.existing(this.rollFirstButton);
         this.rollFirstButton.setVisible(false);
 
-        this.resetRollButton = new TextButton (this, 50, 310, '[RESET ROLLS]', {
+        this.resetRollButton = new TextButton (this, 50, 310, '[ RESET ROLLS ]', {
             onClick: () => {
                 this.dice.forEach((die) => {
                     die.resetRoll();
@@ -165,6 +167,7 @@ export class StartScene extends Phaser.Scene {
                     value: 0
                 }
                 this.server.rollFirst(update);
+                this.resetRollButton.setEnabled(false);
             }
         });
         this.add.existing(this.resetRollButton);
@@ -297,7 +300,41 @@ export class StartScene extends Phaser.Scene {
     }
 
     checkHighRoll(){
-
+        let allRolled = this.dice.reduce((previous, die) => (previous && die.didRoll()), true);
+        if(allRolled){
+            this.highnum = -1;
+            let counter = 0;
+            let highDice = [];
+            this.dice.forEach((die) => {
+                let v = die.value;
+                if (v>this.highnum){
+                    highDice = [];
+                    highDice.push(die);
+                    this.highnum = v;
+                    counter = 1;
+                } else if (v === this.highnum) {
+                    counter++;
+                }
+            });
+            console.log('high dice: ');
+            console.log({highDice});
+            if (counter === 1){
+                this.seats.forEach((seat) => {
+                    let items = seat.getUuid();
+                    if (items.length >1){
+                        if (items[1].value === this.highnum){
+                            let uuid = items[0].uuid;   
+                            console.log(uuid);
+                            //this.server.playersList.getActivePlayer().isActive = false;
+                            this.server.playersList.getPlayerByUUID(uuid).isActive = true;
+                        }
+                    }
+                });
+                this.startButton.setEnabled(true);
+            } else if (counter > 1){
+                this.resetRollButton.setEnabled(true);
+            }
+        }
     }
 
     onRollFirst(type, seats, value) {
@@ -335,6 +372,7 @@ export class StartScene extends Phaser.Scene {
                             die.animate(function(target) {
                                 target.setValue(value);
                             });
+                            die.rollCount++;
                         }
                     });
                 break;
