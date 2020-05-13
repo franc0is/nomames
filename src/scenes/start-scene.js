@@ -62,12 +62,12 @@ export class StartScene extends Phaser.Scene {
             }
         });
 
-        this.nameText = this.add.text(50,200, '',{color: '#0f0', fontsize: '36px'});
+        this.nameText = this.add.text(50,150, '',{color: '#0f0', fontsize: '36px'});
         this.nameText.setVisible(false);
         this.directionText = this.add.text(50,350,'To set the order of players,\ndrag players to a seat or \nclick on "RANDOMIZE SEATING"', {color: '#0f0', fontsize: '24px'});
         this.directionText.setVisible(false);
 
-        this.startButton = new TextButton(this, 50, 250, '[ START ]', {
+        this.startButton = new TextButton(this, 50, 270, '[ START ]', {
             onClick: () => {
                 let names = this.getSeated();
                 this.server.playersList.orderByUUIDList(names);
@@ -118,7 +118,7 @@ export class StartScene extends Phaser.Scene {
         this.doneSeatingButton.setVisible(false);
         this.doneSeatingButton.setEnabled(false);
 
-        this.rollFirstButton = new TextButton (this, 50, 280, '[ ROLL FOR FIRST ]', {
+        this.rollFirstButton = new TextButton (this, 50, 300, '[ ROLL FOR FIRST ]', {
             onClick: () => {
                 this.startButton.setEnabled(false);
                 this.resetRollButton.setVisible(true);
@@ -126,6 +126,7 @@ export class StartScene extends Phaser.Scene {
                 this.rollFirstButton.setEnabled(false);
                 this.dice = [];
                 this.seats.forEach((seat) => {
+                    seat.setUpdate(() => {});
                     let name = seat.getUuid()
                     if (name.length > 0) {
                         let uuid = name[0].uuid;
@@ -156,7 +157,7 @@ export class StartScene extends Phaser.Scene {
         this.add.existing(this.rollFirstButton);
         this.rollFirstButton.setVisible(false);
 
-        this.resetRollButton = new TextButton (this, 50, 310, '[ RESET ROLLS ]', {
+        this.resetRollButton = new TextButton (this, 50, 330, '[ RESET ROLLS ]', {
             onClick: () => {
                 this.dice.forEach((die) => {
                     die.resetRoll();
@@ -164,7 +165,7 @@ export class StartScene extends Phaser.Scene {
                 let update = {
                     RFtype: RFType.RESET,
                     seats: [],
-                    value: 0
+                    value: this.highnum
                 }
                 this.server.rollFirst(update);
                 this.resetRollButton.setEnabled(false);
@@ -242,9 +243,9 @@ export class StartScene extends Phaser.Scene {
         this.randomizeButton.setVisible(false);
         this.add.existing(this.randomizeButton);
 
-        let game_id = humanReadableIds.random();
-        this.server.connect(game_id);
-        this.channelText = this.add.text(50, 120, 'GameID: ' + game_id,
+        this.game_id = Phaser.Math.RND.integerInRange(0,99);
+        this.server.connect(this.game_id);
+        this.channelText = this.add.text(50, 120, 'GameID: ' + this.game_id,
                                          { color: '#0f0', fontsize: '36px' });
     }
 
@@ -307,15 +308,20 @@ export class StartScene extends Phaser.Scene {
             let highDice = [];
             this.dice.forEach((die) => {
                 let v = die.value;
+                console.log('value: ' + v);
                 if (v>this.highnum){
+                    console.log('higher number: ' + this.highnum);
                     highDice = [];
                     highDice.push(die);
                     this.highnum = v;
                     counter = 1;
+                    console.log('new high number: ' + this.highnum);
                 } else if (v === this.highnum) {
                     counter++;
+                    console.log('counter increased to: ' + counter);
                 }
             });
+            console.log('counter: ' + counter)
             if (counter === 1){
                 this.seats.forEach((seat) => {
                     let items = seat.getUuid();
@@ -359,12 +365,15 @@ export class StartScene extends Phaser.Scene {
                         }
                     }
                 });
+                this.checkHighRoll();
                 break;
             }
             case RFType.UPDATE:{
                     this.seats.forEach((seat) => {
                         if (seat.name[seat.name.length-1] === seats[0]){
                             let die = seat.getDie()[0];
+                            die.setValue(value);
+                            this.checkHighRoll();
                             die.animate(function(target) {
                                 target.setValue(value);
                             });
@@ -375,12 +384,16 @@ export class StartScene extends Phaser.Scene {
             }
             case RFType.RESET:{
                     this.dice.forEach((die) => {
-                        die.resetRoll();
+                        if (die.value === value){
+                            die.resetRoll();
+                        } else {
+                            die.setVisible(false);
+                        }
                     })
+                    this.checkHighRoll();
                 break;
             }
         }
-        this.checkHighRoll();
     }
 
     onDieRoll(seat, value) {
