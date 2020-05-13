@@ -45,7 +45,6 @@ export class SeatZone extends Phaser.GameObjects.Zone {
     }
 
     getDie() {
-        console.log(this.container.getAll('rollCount'));
         return this.container.getAll('rollCount');
         }
 
@@ -63,7 +62,6 @@ export class SeatZone extends Phaser.GameObjects.Zone {
         playerlabel.x = this.x-40;
         playerlabel.y = this.y-15;
         this.container.add(playerlabel);
-        console.log('added: '+playerlabel);
         this.onUpdateCb();
     };
 
