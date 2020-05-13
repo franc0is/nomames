@@ -19,7 +19,6 @@ export class SeatZone extends Phaser.GameObjects.Zone {
     }
 
     setLabel(value){
-        console.log('value received: '+value);
         this.nameText.text = value;
     }
 

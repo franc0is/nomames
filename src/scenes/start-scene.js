@@ -77,7 +77,7 @@ export class StartScene extends Phaser.Scene {
         this.add.existing(this.startButton);
         this.startButton.setVisible(false);
 
-        this.doneSeatingButton = new TextButton (this, 50, 250, '[DONE SEATING]', {
+        this.doneSeatingButton = new TextButton (this, 50, 270, '[ DONE SEATING ]', {
             onClick: () => {
                 if (this.getUnseated()){
                     this.scene.remove('popUpScene');
@@ -211,7 +211,7 @@ export class StartScene extends Phaser.Scene {
             if (dropZone.getUuid().length === 0){
                 dropZone.add(gameObject);
                 dropZone.setHighlighted(false);
-                this.scene.startButton.setEnabled(true);
+                this.scene.doneSeatingButton.setEnabled(true);
             } else {
                 gameObject.x = gameObject.input.dragStartX;
                 gameObject.y = gameObject.input.dragStartY;
@@ -226,7 +226,7 @@ export class StartScene extends Phaser.Scene {
             }
         });
 
-        this.randomizeButton = new TextButton(this, 50, 300, '[RANDOMIZE SEATING]', {
+        this.randomizeButton = new TextButton(this, 50, 300, '[ RANDOMIZE SEATING ]', {
             onClick: () => {
                 // Make an array all the seats and randomly pick them off for each player
                 this.removeInactivePlayers() ; // FIXME normally for every player, there are ~2 additional inactive players. This manages to remove all of them
@@ -316,16 +316,12 @@ export class StartScene extends Phaser.Scene {
                     counter++;
                 }
             });
-            console.log('high dice: ');
-            console.log({highDice});
             if (counter === 1){
                 this.seats.forEach((seat) => {
                     let items = seat.getUuid();
                     if (items.length >1){
                         if (items[1].value === this.highnum){
                             let uuid = items[0].uuid;   
-                            console.log(uuid);
-                            //this.server.playersList.getActivePlayer().isActive = false;
                             this.server.playersList.getPlayerByUUID(uuid).isActive = true;
                         }
                     }
