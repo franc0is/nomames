@@ -251,7 +251,7 @@ export class StartScene extends Phaser.Scene {
         this.randomizeButton.setVisible(false);
         this.add.existing(this.randomizeButton);
 
-        this.game_id = Phaser.Math.RND.integerInRange(0,99);
+        this.game_id = humanReadableIds.random();
         this.server.connect(this.game_id);
         this.channelText = this.add.text(50, 120, 'GameID: ' + this.game_id,
                                          { color: '#0f0', fontsize: '36px' });
