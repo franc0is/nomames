@@ -136,7 +136,6 @@ export class JoinScene extends Phaser.Scene {
             value: value
         }
         this.server.rollFirst(update);
-        console.log(update);
     }
 
     onRollFirst(type, seats, value) {

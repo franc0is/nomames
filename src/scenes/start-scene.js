@@ -159,9 +159,16 @@ export class StartScene extends Phaser.Scene {
 
         this.resetRollButton = new TextButton (this, 50, 330, '[ RESET ROLLS ]', {
             onClick: () => {
-                this.dice.forEach((die) => {
-                    die.resetRoll();
-                })
+                let newDice = [];
+                this.dice.forEach((die, index) => {
+                    if (die.value === this.highnum){
+                        die.resetRoll();
+                        newDice.push(die);
+                    } else {
+                        die.setVisible(false);
+                    }
+                });
+                this.dice = newDice;
                 let update = {
                     RFtype: RFType.RESET,
                     seats: [],
@@ -169,6 +176,7 @@ export class StartScene extends Phaser.Scene {
                 }
                 this.server.rollFirst(update);
                 this.resetRollButton.setEnabled(false);
+                this.highnum = -1;
             }
         });
         this.add.existing(this.resetRollButton);
@@ -308,20 +316,16 @@ export class StartScene extends Phaser.Scene {
             let highDice = [];
             this.dice.forEach((die) => {
                 let v = die.value;
-                console.log('value: ' + v);
                 if (v>this.highnum){
-                    console.log('higher number: ' + this.highnum);
                     highDice = [];
                     highDice.push(die);
                     this.highnum = v;
                     counter = 1;
-                    console.log('new high number: ' + this.highnum);
                 } else if (v === this.highnum) {
                     counter++;
-                    console.log('counter increased to: ' + counter);
                 }
             });
-            console.log('counter: ' + counter)
+            
             if (counter === 1){
                 this.seats.forEach((seat) => {
                     let items = seat.getUuid();
@@ -373,11 +377,11 @@ export class StartScene extends Phaser.Scene {
                         if (seat.name[seat.name.length-1] === seats[0]){
                             let die = seat.getDie()[0];
                             die.setValue(value);
+                            die.rollCount++;
                             this.checkHighRoll();
                             die.animate(function(target) {
                                 target.setValue(value);
                             });
-                            die.rollCount++;
                         }
                     });
                 break;
