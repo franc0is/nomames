@@ -142,7 +142,9 @@ export class Server {
     }
 
     startGame() {
-        this.playersList.setNextPlayerActive();
+        if (this.playersList.getActivePlayer() === undefined){
+            this.playersList.setNextPlayerActive();
+        }
         let activePlayer = this.playersList.getActivePlayer();
         let uuidList = this.playersList.getUUIDList();
         let msg = new StartGameMessage(activePlayer.uuid, uuidList);

@@ -55,7 +55,7 @@ export class JoinScene extends Phaser.Scene {
             }
         });
 
-        this.channelText = this.add.text(50, 150, '', { color: '#0f0', fontsize: '36px' });
+        this.channelText = this.add.text(50, 120, '', { color: '#0f0', fontsize: '36px' });
         this.channelText.setVisible(false);
 
         this.nameEl = this.add.dom(360, 200).createFromCache('nameform');
@@ -95,7 +95,7 @@ export class JoinScene extends Phaser.Scene {
         }
 
         
-        this.nameText = this.add.text(50,200, '',{color: '#0f0', fontsize: '36px'});
+        this.nameText = this.add.text(50,150, '',{color: '#0f0', fontsize: '36px'});
         this.nameText.setVisible(false);
 
 
@@ -136,7 +136,6 @@ export class JoinScene extends Phaser.Scene {
             value: value
         }
         this.server.rollFirst(update);
-        console.log(update);
     }
 
     onRollFirst(type, seats, value) {
@@ -178,7 +177,11 @@ export class JoinScene extends Phaser.Scene {
             }
             case RFType.RESET:{
                 this.dice.forEach((die) => {
-                    die.resetRoll();
+                    if (die.value === value){
+                        die.resetRoll();
+                    } else {
+                        die.setVisible(false);
+                    }
                 })
                 break;
             }
