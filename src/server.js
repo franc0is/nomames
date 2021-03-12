@@ -1,5 +1,5 @@
 import PubNub from 'pubnub';
-import { Message, StartGameMessage, DiceUpdateMessage,
+import { Message, StartGameMessage, DiceUpdateMessage, SeatPlayerMessage,
          PassCupMessage, KillPlayerMessage, NoMamesMessage,
          ResetMessage } from './message';
 import { PlayersList } from './playerslist'
@@ -11,7 +11,7 @@ import { AdminMenuScene, MenuState } from './scenes/adminmenu-scene';
 
 
 /*
- * callbacks: onPlayersUpdate, onGameStart, onNoMames, onReset
+ * callbacks: onPlayersUpdate, onGameStart, onNoMames, onReset, onSeatPlayer
  */
 
 export class Server {
@@ -154,6 +154,11 @@ export class Server {
         this.playersList.setNextPlayerActive();
         let activePlayer = this.playersList.getActivePlayer();
         let msg = new PassCupMessage(activePlayer.uuid,isClockwise,fiverPass);
+        this.publish(msg);
+    }
+
+    seatPlayer(update) {
+        let msg = new SeatPlayerMessage(update);
         this.publish(msg);
     }
 
@@ -375,6 +380,12 @@ export class Server {
                 this.onReset();
                 break;
             }
+            case SeatPlayerMessage.getType(): {
+                if (!fromMe) {
+                    this.callbacks.onSeatPlayer(deserialized.seats);
+                }
+                break;
+            }
         }
     }
 
@@ -384,14 +395,10 @@ export class Server {
         this.nomames = false
         this.fiverPass = false
         let active = this.playersList.getActivePlayer().isMe;
-        console.log(this.playersList.getActivePlayer());
-        console.log(active);
         if(active){
-            console.log('loading aciton menu');
             this.adminScene.onreset();
             this.diceScene.setPlayable(true);
         } else {
-            console.log('clearing menus')
             this.adminScene.setMenuState(MenuState.INACTIVE);
         }
     }

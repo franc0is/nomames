@@ -1,5 +1,5 @@
 import { Server } from '../server';
-import { TextButton } from '../text-button';
+import { SeatZone } from '../seatzone';
 import { DraggableLabel } from '../draggable-label';
 
 export class JoinScene extends Phaser.Scene {
@@ -16,6 +16,9 @@ export class JoinScene extends Phaser.Scene {
         this.server = new Server({
             onPlayersUpdate: (players) => {
                 this.onPlayersUpdate(players);
+            },
+            onSeatPlayer: (seats) => {
+                this.onSeatPlayer(seats)
             },
             onGameStart: (scene, adminscene, audioManager, playersList, isMe) => {
                 this.scene.add('',scene,false);
@@ -41,11 +44,12 @@ export class JoinScene extends Phaser.Scene {
                     this.channelText.setVisible(true);
                     this.channelText.setText('GameID: ' + inputText.value);
                     this.playersLabel.setVisible(true);
+                    text.setVisible(false)
                 }
             }
         });
 
-        this.channelText = this.add.text(200, 150, '', { color: '#0f0', fontsize: '36px' });
+        this.channelText = this.add.text(50, 150, '', { color: '#0f0', fontsize: '36px' });
         this.channelText.setVisible(false);
 
         this.nameEl = this.add.dom(360, 200).createFromCache('nameform');
@@ -60,13 +64,32 @@ export class JoinScene extends Phaser.Scene {
                     this.server.setName(inputText.value);
                     this.nameText.setText('Name: ' +inputText.value);
                     this.nameText.setVisible(true);
+                    for (let seat of this.seats) {
+                        seat.setVisible(true);
+                    }
                 }
             }
 
         });
 
+        this.seats = [
+            new SeatZone(this, 500, 100, 100, 100, 'Seat 1'),
+            new SeatZone(this, 600, 150, 100, 100, 'Seat 2'),
+            new SeatZone(this, 650, 250, 100, 100, 'Seat 3'),
+            new SeatZone(this, 600, 350, 100, 100, 'Seat 4'),
+            new SeatZone(this, 500, 400, 100, 100, 'Seat 5'),
+            new SeatZone(this, 400, 350, 100, 100, 'Seat 6'),
+            new SeatZone(this, 350, 250, 100, 100, 'Seat 7'),
+            new SeatZone(this, 400, 150, 100, 100, 'Seat 8')
+        ];
+
+        for (let seat of this.seats) {
+            this.add.existing(seat);
+            seat.setVisible(false);
+        }
+
         
-        this.nameText = this.add.text(200,200, '',{color: '#0f0', fontsize: '36px'});
+        this.nameText = this.add.text(50,200, '',{color: '#0f0', fontsize: '36px'});
         this.nameText.setVisible(false);
 
 
@@ -76,8 +99,27 @@ export class JoinScene extends Phaser.Scene {
         this.playersLabel.setVisible(false);
     }
 
+    // A bit confused about what to do here
+    onSeatPlayer(seats) {
+        this.removeInactivePlayers();
+        for (let i=0;i<8;i++) {
+            let uuid = seats[i]
+            if (uuid !== -1){
+                this.playersLabel.playerLabels.forEach((label) => {
+                    if (label.uuid === uuid){
+                        this.seats[i].add(label);
+                    }
+                });
+            }
+        }
+    }
+
     onPlayersUpdate(playersList) {
-        console.log("Players update!");
         this.playersLabel.updateWithPlayers(playersList);
+    }
+
+    // FIXME should ultimately remove
+    removeInactivePlayers() {
+        this.playersLabel.playerLabels = this.playersLabel.playerLabels.filter(label => label.active);
     }
 }

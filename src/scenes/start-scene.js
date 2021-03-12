@@ -19,6 +19,9 @@ export class StartScene extends Phaser.Scene {
             onPlayersUpdate: (players) => {
                 this.onPlayersUpdate(players);
             },
+            onSeatPlayer: (seats) => {
+                this.onSeatPlayer(seats)
+            },
             onGameStart: (scene, adminscene, audioManager, playersList, isMe) => {
                 this.scene.add('',scene,false);
                 this.scene.add('',adminscene, false);
@@ -112,6 +115,7 @@ export class StartScene extends Phaser.Scene {
 
         for (let seat of this.seats) {
             this.add.existing(seat);
+            seat.setUpdate(() => {this.updateSeating();});
             seat.setVisible(false);
         }
 
@@ -171,8 +175,32 @@ export class StartScene extends Phaser.Scene {
 
 
     onPlayersUpdate(playersList) {
-        console.log("Players update!");
         this.playersLabel.updateWithPlayers(playersList);
+    }
+
+    // A bit confused about what to do here
+    onSeatPlayer(seats) {
+        let i = 0;
+        this.seats.forEach((seat) => {
+            seat = seats[i];
+            i++;
+        });
+    }
+
+    updateSeating() {
+        let seatChart = []
+        this.seats.forEach((seat) => {
+            let name = seat.getUuid();
+            if (name[0] !== undefined){
+                seatChart.push(name[0].uuid)
+            } else {
+                seatChart.push(-1);
+            }
+        });
+        let update = {
+            'seats': seatChart
+        };
+        this.server.seatPlayer(update);
     }
 
     // FIXME should ultimately remove
@@ -193,8 +221,6 @@ export class StartScene extends Phaser.Scene {
     getUnseated(){
         this.removeInactivePlayers();
         let names = this.getSeated();
-        console.log(this.playersLabel.playerLabels)
-        console.log({names})
         return (this.playersLabel.playerLabels.length !== names.length);
     }
 }
